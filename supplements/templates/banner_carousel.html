@@ -1,0 +1,387 @@
+<section class="banner-carousel" id="bannerCarousel" aria-label="Carrossel de banners principais">
+
+  <div class="banner-carousel__track" id="bannerTrack">
+
+    {% for b in banners %}
+      <a
+        class="banner-carousel__slide"
+        href="{% if b.link %}{{ b.link }}{% else %}#{% endif %}"
+        aria-label="Banner {{ forloop.counter }}"
+      >
+
+        <img
+          src="{{ b.image.url }}"
+          alt="{% if b.title %}{{ b.title }}{% else %}Banner promocional{% endif %}"
+          loading="lazy"
+        />
+
+        <div class="banner-carousel__overlay"></div>
+
+        {% if b.title %}
+          <div class="banner-carousel__text">{{ b.title }}</div>
+        {% endif %}
+
+      </a>
+    {% endfor %}
+  </div>
+
+ 
+  <button
+    class="banner-carousel__arrow banner-carousel__arrow--prev"
+    id="prevBtn"
+    aria-label="Banner anterior"
+    type="button"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+    </svg>
+  </button>
+
+  
+  <button
+    class="banner-carousel__arrow banner-carousel__arrow--next"
+    id="nextBtn"
+    aria-label="Próximo banner"
+    type="button"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"></path>
+    </svg>
+  </button>
+
+  
+  <div class="banner-carousel__dots" id="bannerDots" aria-label="Indicadores do carrossel"></div>
+
+</section>
+
+
+<style>
+  :root {
+  --banner-radius: 18px;
+  --banner-shadow: 0 18px 50px rgba(0,0,0,0.35);
+
+ 
+  --banner-height-desktop: 460px;
+  --banner-height-mobile: 240px;
+
+  --dot-size: 10px;
+  --dot-gap: 10px;
+
+  --arrow-size-desktop: 46px;
+  --arrow-size-mobile: 40px;
+
+  --arrow-bg: rgba(0,0,0,0.45);
+  --arrow-bg-hover: rgba(0,0,0,0.70);
+
+  --accent: #f37107;
+  --white: #ffffff;
+}
+
+.banner-carousel {
+    position: relative;
+
+   
+    width: calc(100% + 60px);
+    margin-left: -30px;
+    margin-right: -30px;
+
+    border-radius: var(--banner-radius);
+    overflow: hidden;
+    box-shadow: var(--banner-shadow);
+    background: #12121a;
+
+    margin-top: 0px;
+    margin-bottom: 30px;
+}
+
+  
+
+  .banner-carousel__track {
+    display: flex;
+    transition: transform 0.55s ease;
+    will-change: transform;
+  }
+
+  .banner-carousel__slide {
+    min-width: 100%;
+    height: var(--banner-height-desktop);
+    position: relative;
+    display: block;
+    text-decoration: none;
+  }
+
+ 
+  .banner-carousel__slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .banner-carousel__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0,0,0,0.55),
+      rgba(0,0,0,0.08)
+    );
+    pointer-events: none;
+  }
+
+  .banner-carousel__text {
+    position: absolute;
+    left: 18px;
+    bottom: 18px;
+    max-width: 85%;
+    z-index: 5;
+
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+
+    color: var(--white);
+    text-shadow: 0 10px 25px rgba(0,0,0,0.65);
+  }
+
+  .banner-carousel__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+
+    width: var(--arrow-size-desktop);
+    height: var(--arrow-size-desktop);
+    border-radius: 50%;
+
+    border: 0;
+    background: var(--arrow-bg);
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 10;
+    transition: background 0.2s ease, transform 0.2s ease;
+
+    backdrop-filter: blur(8px);
+  }
+
+  .banner-carousel__arrow:hover {
+    background: var(--arrow-bg-hover);
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  .banner-carousel__arrow:active {
+    transform: translateY(-50%) scale(0.97);
+  }
+
+  .banner-carousel__arrow--prev {
+    left: 12px;
+  }
+
+  .banner-carousel__arrow--next {
+    right: 12px;
+  }
+
+  .banner-carousel__arrow svg {
+    width: 22px;
+    height: 22px;
+    fill: var(--white);
+  }
+
+  .banner-carousel__dots {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+
+    display: flex;
+    gap: var(--dot-gap);
+    z-index: 12;
+
+    padding: 8px 12px;
+    border-radius: 999px;
+
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(10px);
+  }
+
+  .banner-carousel__dot {
+    width: var(--dot-size);
+    height: var(--dot-size);
+    border-radius: 50%;
+    border: 0;
+    cursor: pointer;
+
+    background: rgba(255,255,255,0.35);
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+
+  .banner-carousel__dot:hover {
+    transform: scale(1.15);
+    background: rgba(255,255,255,0.55);
+  }
+
+  .banner-carousel__dot.is-active {
+    background: var(--accent);
+    transform: scale(1.25);
+  }
+
+  @media (max-width: 768px) {
+    .banner-carousel__slide {
+      height: var(--banner-height-mobile);
+    }
+
+    .banner-carousel__arrow {
+      width: var(--arrow-size-mobile);
+      height: var(--arrow-size-mobile);
+    }
+
+    .banner-carousel__text {
+      font-size: 15px;
+      left: 14px;
+      bottom: 14px;
+    }
+  }
+</style>
+
+
+<script>
+  (function () {
+    const carousel = document.getElementById("bannerCarousel");
+    if (!carousel) return;
+
+    const track = document.getElementById("bannerTrack");
+    if (!track) return;
+
+    const slides = Array.from(track.querySelectorAll(".banner-carousel__slide"));
+
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    const dotsContainer = document.getElementById("bannerDots");
+
+    let currentIndex = 0;
+
+    const AUTOPLAY_DELAY = 4500;
+    let autoplayTimer = null;
+
+    const dots = slides.map((_, index) => {
+      const dot = document.createElement("button");
+      dot.classList.add("banner-carousel__dot");
+      dot.setAttribute("type", "button");
+      dot.setAttribute("aria-label", `Ir para banner ${index + 1}`);
+
+      dot.addEventListener("click", () => {
+        goToSlide(index);
+        restartAutoplay();
+      });
+
+      dotsContainer.appendChild(dot);
+      return dot;
+    });
+
+    function goToSlide(index) {
+      if (slides.length === 0) return;
+
+      if (index < 0) index = slides.length - 1;
+      if (index >= slides.length) index = 0;
+
+      currentIndex = index;
+
+      track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+      dots.forEach(d => d.classList.remove("is-active"));
+      if (dots[currentIndex]) dots[currentIndex].classList.add("is-active");
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        goToSlide(currentIndex - 1);
+        restartAutoplay();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        goToSlide(currentIndex + 1);
+        restartAutoplay();
+      });
+    }
+
+    function startAutoplay() {
+      if (slides.length <= 1) return;
+
+      autoplayTimer = setInterval(() => {
+        goToSlide(currentIndex + 1);
+      }, AUTOPLAY_DELAY);
+    }
+
+    function stopAutoplay() {
+      if (autoplayTimer) clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
+
+    function restartAutoplay() {
+      stopAutoplay();
+      startAutoplay();
+    }
+
+    carousel.addEventListener("mouseenter", stopAutoplay);
+    carousel.addEventListener("mouseleave", startAutoplay);
+
+    let startX = 0;
+    let endX = 0;
+    let isDragging = false;
+
+    carousel.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+      stopAutoplay();
+    }, { passive: true });
+
+    carousel.addEventListener("touchmove", (e) => {
+      if (!isDragging) return;
+      endX = e.touches[0].clientX;
+    }, { passive: true });
+
+    carousel.addEventListener("touchend", () => {
+      if (!isDragging) return;
+      isDragging = false;
+
+      const diff = startX - endX;
+
+      if (diff > 45) {
+        goToSlide(currentIndex + 1);
+      } else if (diff < -45) {
+        goToSlide(currentIndex - 1);
+      }
+
+      startAutoplay();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") {
+        goToSlide(currentIndex - 1);
+        restartAutoplay();
+      }
+
+      if (e.key === "ArrowRight") {
+        goToSlide(currentIndex + 1);
+        restartAutoplay();
+      }
+    });
+
+    goToSlide(0);
+    startAutoplay();
+
+    if (slides.length <= 1) {
+      if (prevBtn) prevBtn.style.display = "none";
+      if (nextBtn) nextBtn.style.display = "none";
+      if (dotsContainer) dotsContainer.style.display = "none";
+    }
+  })();
+</script>
+

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    
+
+    .register-container {
+        max-width: 400px;             
+        margin: 50px auto;            
+        padding: 30px;
+        background-color: #ffffff;     
+        border-radius: 10px;            
+        box-shadow: 0 0 15px rgba(0,0,0,0.15); 
+        border-top: 6px solid #ff7a00;  
+        font-family: Arial, sans-serif;
+    }
+
+    .register-container h2 {
+        text-align: center;
+        color: #000000;                 
+        margin-bottom: 25px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        color: #000000;                 
+        font-weight: bold;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #ff7a00;         
+        box-shadow: 0 0 5px rgba(255,122,0,0.4);
+    }
+
+    .errorlist {
+        color: red;
+        font-size: 13px;
+        margin-bottom: 5px;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 12px;
+        background-color: #ff7a00;     
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-submit:hover {
+        background-color: #e66d00;     
+    }
+</style>
+
+<div class="register-container">
+
+    <h2>Criar Conta</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            {{ user_form.username.errors }}
+            <label>Usuário</label>
+            {{ user_form.username }}
+        </div>
+
+        <div class="form-group">
+            {{ user_form.password1.errors }}
+            <label>Senha</label>
+            {{ user_form.password1 }}
+        </div>
+
+        <div class="form-group">
+            {{ user_form.password2.errors }}
+            <label>Confirmação de Senha</label>
+            {{ user_form.password2 }}
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Cadastrar" class="btn-submit">
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

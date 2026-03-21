@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    /* =========================
+       CONTAINER DO LOGIN
+       ========================= */
+
+    .login-container {
+        max-width: 350px;
+        margin: 60px auto;
+        padding: 25px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 0 12px rgba(0,0,0,0.15);
+        border-top: 5px solid #ff7a00; /* Laranja */
+        font-family: Arial, sans-serif;
+    }
+
+    .login-container h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #000000;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    td {
+        padding: 8px 0;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #ff7a00;
+        box-shadow: 0 0 4px rgba(255,122,0,0.4);
+    }
+
+    .btn-login {
+        margin-top: 15px;
+        width: 100%;
+        padding: 12px;
+        background-color: #ff7a00;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-login:hover {
+        background-color: #e66d00;
+    }
+</style>
+
+<div class="login-container">
+
+    <h2>Entrar</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <table>
+            {{ login_form.as_table }}
+        </table>
+
+        <input type="submit" value="Entrar" class="btn-login">
+    </form>
+
+</div>
+
+{% endblock %}

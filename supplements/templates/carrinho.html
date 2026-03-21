@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://unpkg.com/scrollreveal"></script>
+
+<style>
+:root {
+--primary: #2563eb;
+--primary-soft: #eff6ff;
+--dark: #0f172a;
+--text-main: #1e293b;
+--text-sub: #64748b;
+--bg-body: #f1f5f9;
+--white: #ffffff;
+--radius-lg: 30px;
+--radius-md: 20px;
+--shadow: 0 20px 25px -5px rgba(0,0,0,0.05),0 10px 10px -5px rgba(0,0,0,0.02);
+}
+
+body{
+background:var(--bg-body);
+font-family:'Plus Jakarta Sans',sans-serif;
+color:var(--text-main);
+}
+
+.container-carrinho{
+max-width:1200px;
+margin:auto;
+padding:60px 20px;
+}
+
+.titulo-carrinho{
+font-size:36px;
+font-weight:800;
+margin-bottom:40px;
+color:var(--dark);
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.titulo-carrinho i{color:var(--primary);}
+
+.cart-grid{
+display:grid;
+grid-template-columns:1fr 380px;
+gap:30px;
+align-items:start;
+}
+
+.cart-items-list{
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
+.item-carrinho{
+background:var(--white);
+padding:25px;
+border-radius:var(--radius-md);
+display:flex;
+align-items:center;
+gap:20px;
+box-shadow:var(--shadow);
+transition:.4s cubic-bezier(.4,0,.2,1);
+border:1px solid rgba(255,255,255,.8);
+position:relative;
+}
+
+.item-carrinho:hover{
+transform:translateY(-5px);
+box-shadow:0 25px 35px -10px rgba(0,0,0,.08);
+}
+
+.img-produto-cart{
+width:100px;
+height:100px;
+object-fit:contain;
+background:#f8fafc;
+border-radius:15px;
+padding:10px;
+}
+
+.produto-info{flex:1;}
+
+.produto-nome{
+font-size:18px;
+font-weight:800;
+color:var(--dark);
+margin-bottom:5px;
+}
+
+.produto-meta{
+font-size:13px;
+color:var(--text-sub);
+font-weight:600;
+display:flex;
+gap:15px;
+}
+
+.produto-preco-unit{
+font-weight:800;
+color:var(--primary);
+font-size:20px;
+margin-top:8px;
+}
+
+.remover-btn{
+background:#fff1f0;
+color:#ff4d4f;
+width:40px;
+height:40px;
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+text-decoration:none;
+transition:.3s;
+}
+
+.remover-btn:hover{
+background:#ff4d4f;
+color:white;
+transform:rotate(90deg);
+}
+
+.resumo-fixed{
+background:var(--white);
+padding:35px;
+border-radius:var(--radius-lg);
+box-shadow:var(--shadow);
+border:1px solid var(--primary-soft);
+position:sticky;
+top:30px;
+}
+
+.resumo-titulo{
+font-size:20px;
+font-weight:800;
+margin-bottom:25px;
+padding-bottom:15px;
+border-bottom:2px solid #f1f5f9;
+}
+
+.resumo-linha{
+display:flex;
+justify-content:space-between;
+margin-bottom:15px;
+font-weight:600;
+color:var(--text-sub);
+}
+
+.resumo-total{
+margin-top:20px;
+padding-top:20px;
+border-top:2px solid #f1f5f9;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.total-valor{
+font-size:28px;
+font-weight:900;
+color:var(--primary);
+}
+
+.finalizar-btn{
+background:#25D366;
+color:white;
+padding:20px;
+border-radius:18px;
+text-decoration:none;
+font-weight:800;
+font-size:18px;
+display:flex;
+align-items:center;
+justify-content:center;
+gap:12px;
+margin-top:30px;
+box-shadow:0 10px 20px rgba(37,211,102,.2);
+transition:.4s;
+border:none;
+width:100%;
+}
+
+.finalizar-btn:hover{
+transform:translateY(-5px);
+box-shadow:0 15px 30px rgba(37,211,102,.3);
+}
+
+.btn-continuar{
+display:block;
+text-align:center;
+margin-top:20px;
+color:var(--text-sub);
+text-decoration:none;
+font-weight:700;
+font-size:14px;
+transition:.3s;
+}
+
+.btn-continuar:hover{color:var(--primary);}
+
+.carrinho-vazio{
+background:var(--white);
+padding:80px 40px;
+border-radius:var(--radius-lg);
+text-align:center;
+box-shadow:var(--shadow);
+}
+
+.carrinho-vazio i{
+font-size:80px;
+color:#e2e8f0;
+margin-bottom:25px;
+}
+
+.vazio-titulo{
+font-size:28px;
+font-weight:800;
+margin-bottom:10px;
+}
+
+@media(max-width:968px){
+.cart-grid{grid-template-columns:1fr;}
+.resumo-fixed{position:static;margin-top:20px;}
+.titulo-carrinho{font-size:28px;}
+.item-carrinho{flex-direction:column;text-align:center;}
+.remover-btn{position:absolute;top:15px;right:15px;}
+}
+</style>
+
+<div class="container-carrinho">
+
+<h1 class="titulo-carrinho reveal-left">
+<i class="fas fa-shopping-bag"></i> Meu Carrinho
+</h1>
+
+{% if products %}
+
+<div class="cart-grid">
+
+<div class="cart-items-list reveal-left">
+
+{% for item in products %}
+
+<div class="item-carrinho">
+
+<img src="{{ item.product.images.first.photo.url }}" class="img-produto-cart" alt="{{ item.product.model }}">
+
+<div class="produto-info">
+
+<div class="produto-nome">
+{{ item.product.model }}
+</div>
+
+<div class="produto-meta">
+
+<span>
+<i class="fas fa-layer-group"></i>
+Qtd: {{ item.quantity }}
+</span>
+
+{% if item.product.flavor %}
+<span>
+<i class="fas fa-utensils"></i>
+{{ item.product.flavor }}
+</span>
+{% endif %}
+
+</div>
+
+<div class="produto-preco-unit">
+R$ {{ item.subtotal|floatformat:2 }}
+</div>
+
+{% if item.installments %}
+<div style="font-size:13px;color:var(--text-sub);margin-top:4px;font-weight:600;">
+{{ item.installments }}x de R$ {{ item.installment_value|floatformat:2 }}
+</div>
+{% endif %}
+
+</div>
+
+<a class="remover-btn"
+href="{% url 'remover_item' item.product.id %}"
+title="Remover item">
+
+<i class="fas fa-times"></i>
+
+</a>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<aside class="resumo-fixed reveal-right">
+
+<h2 class="resumo-titulo">
+Resumo do Pedido
+</h2>
+
+<div class="resumo-linha">
+<span>Produtos ({{ products|length }})</span>
+<span>R$ {{ total }}</span>
+</div>
+
+<div class="resumo-linha">
+<span>Frete</span>
+<span style="color:green;">Grátis</span>
+</div>
+
+<div class="resumo-total">
+<span style="font-weight:800;font-size:18px;">Total</span>
+<div class="total-valor">R$ {{ total }}</div>
+</div>
+
+
+<form method="POST" action="{% url 'checkout' %}" class="checkout-box">
+{% csrf_token %}
+
+<div class="parcelamento-area">
+
+<label class="parcelamento-label">
+<i class="fas fa-credit-card"></i>
+Dividir pedido
+</label>
+
+<select name="cart_installments" class="parcelamento-select">
+
+<option value="">À vista</option>
+<option value="2">2x sem juros</option>
+<option value="3">3x sem juros</option>
+<option value="4">4x sem juros</option>
+<option value="5">5x sem juros</option>
+<option value="6">6x sem juros</option>
+<option value="7">7x</option>
+<option value="8">8x</option>
+<option value="9">9x</option>
+<option value="10">10x</option>
+<option value="11">11x</option>
+<option value="12">12x</option>
+
+</select>
+
+</div>
+
+<button type="submit" class="finalizar-btn">
+
+<i class="fab fa-whatsapp"></i>
+PAGAR AGORA
+
+</button>
+
+</form>
+
+<a href="{% url 'supplements' %}" class="btn-continuar">
+<i class="fas fa-arrow-left"></i>
+Continuar comprando
+</a>
+
+</aside>
+
+</div>
+
+{% else %}
+
+<div class="carrinho-vazio reveal-bottom">
+
+<i class="fas fa-shopping-cart"></i>
+
+<h2 class="vazio-titulo">
+Sua cesta está vazia
+</h2>
+
+<p style="color:var(--text-sub);margin-bottom:30px;">
+Parece que você ainda não escolheu seus suplementos hoje.
+</p>
+
+<a href="{% url 'supplements' %}"
+class="finalizar-btn"
+style="display:inline-flex;width:auto;padding:18px 40px;background:var(--primary);">
+
+VOLTAR PARA A LOJA
+
+</a>
+
+</div>
+
+{% endif %}
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+
+ScrollReveal().reveal('.reveal-left',{
+origin:'left',
+distance:'30px',
+duration:1000
+});
+
+ScrollReveal().reveal('.reveal-right',{
+origin:'right',
+distance:'30px',
+duration:1000
+});
+
+ScrollReveal().reveal('.reveal-bottom',{
+origin:'bottom',
+distance:'30px',
+duration:1000
+});
+
+});
+</script>
+
+{% endblock %}
+

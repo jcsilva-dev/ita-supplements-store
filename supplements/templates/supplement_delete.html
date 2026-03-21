@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    .delete-scope {
+        --danger-color: #ff4757;
+        --danger-glow: rgba(255, 71, 87, 0.4);
+        --bg-glass: rgba(15, 15, 15, 0.98);
+        --border-glass: rgba(255, 255, 255, 0.1);
+        --text-white: #ffffff;
+        --text-gray: #a4b0be;
+        --brand-orange: #f37107; /
+        
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 70vh; 
+        width: 100%;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        padding: 20px;
+    }
+
+    /* CARD COM DESIGN "DARK " */
+    .delete-modal {
+        background: var(--bg-glass);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        width: 100%;
+        max-width: 500px;
+        padding: 50px 40px;
+        border-radius: 24px;
+        border: 1px solid var(--border-glass);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+        text-align: center;
+        position: relative;
+        animation: modalEntrance 0.5s ease-out;
+    }
+
+    @keyframes modalEntrance {
+        0% { opacity: 0; transform: scale(0.9); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+
+    
+    .warning-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 71, 87, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        color: var(--danger-color);
+        border: 1px solid rgba(255, 71, 87, 0.3);
+        font-size: 35px;
+        filter: drop-shadow(0 0 10px var(--danger-glow));
+        animation: pulse-danger 2s infinite;
+    }
+
+    @keyframes pulse-danger {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); }
+        70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255, 71, 87, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+    }
+
+    
+    .delete-modal h2 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--text-white);
+        margin-bottom: 15px;
+        letter-spacing: -1px;
+    }
+
+    .delete-modal p {
+        color: var(--text-gray);
+        font-size: 16px;
+        line-height: 1.5;
+        margin-bottom: 30px;
+    }
+
+    
+    .item-highlight {
+        display: block;
+        margin-top: 15px;
+        padding: 15px;
+        background: rgba(243, 113, 7, 0.05); 
+        border-radius: 12px;
+        color: var(--brand-orange);
+        font-weight: 700;
+        font-size: 18px;
+        border: 1px solid rgba(243, 113, 7, 0.2);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    
+    .button-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .confirm-btn {
+        background: var(--danger-color);
+        color: white;
+        border: none;
+        padding: 20px;
+        border-radius: 15px;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .confirm-btn:hover {
+        background: #ff364a;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px var(--danger-glow);
+    }
+
+    .cancel-btn {
+        background: transparent;
+        color: #888;
+        padding: 15px;
+        border-radius: 15px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.3s;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .cancel-btn:hover {
+        color: white;
+        background: rgba(255,255,255,0.05);
+    }
+
+</style>
+
+<div class="delete-scope">
+    <div class="delete-modal">
+        
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+
+        <h2>Atenção, Guerreiro!</h2>
+        <p>
+            Você está prestes a remover este item do estoque de forma definitiva.
+            <span class="item-highlight">
+                <i class="fas fa-box-open" style="margin-right: 8px; opacity: 0.7;"></i>
+                {{ object.name|default:"Produto Selecionado" }}
+            </span>
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="button-stack">
+                <button type="submit" class="confirm-btn">
+                    <i class="fas fa-trash-alt"></i> Confirmar Exclusão
+                </button>
+                <a href="javascript:history.back()" class="cancel-btn">
+                    <i class="fas fa-arrow-left"></i> Voltar e manter produto
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const deleteBtn = document.querySelector('.confirm-btn');
+    deleteBtn.addEventListener('click', function() {
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Excluindo...';
+        this.style.opacity = "0.8";
+        this.style.pointerEvents = "none";
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,320 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111">
+
+<title>
+{% block title %}Ita Suplementos {% endblock %}
+</title>
+
+ {% block meta %}{% endblock %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+
+/* ================= ROOT ================= */
+
+:root{
+--brand-dark:#111;
+--brand-primary:#f37107;
+--success:#08db47;
+}
+
+/* ================= RESET ================= */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI, Arial, sans-serif;
+}
+
+
+body{
+background:linear-gradient(135deg,#f4f6f8,#e9edf1);
+min-height:100vh;
+display:flex;
+flex-direction:column;
+color:#222;
+}
+
+/* ================= HEADER ================= */
+
+header{
+background:linear-gradient(135deg,#111,#1f1f1f);
+padding:15px 40px;
+box-shadow:0 10px 25px rgba(0,0,0,.25);
+}
+
+.header-container{
+max-width:1300px;
+margin:auto;
+display:flex;
+align-items:center;
+justify-content:space-between;
+flex-wrap:wrap;
+gap:20px;
+}
+
+/* ================= LOGO COM BRILHO ================= */
+
+.logo{
+font-size: 24px;
+font-weight: 800;
+color: var(--brand-primary);
+letter-spacing: 1px;
+display: flex;
+align-items: center;
+gap: 12px;
+text-shadow: 0 0 12px rgba(243, 113, 7, 0.5); 
+}
+
+.logo i, .footer-logo i {
+    color: var(--brand-primary);
+    filter: drop-shadow(0 0 5px var(--brand-primary));
+    animation: pulse-bolt 2s infinite ease-in-out;
+}
+
+@keyframes pulse-bolt {
+    0% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 5px var(--brand-primary)); }
+    50% { transform: scale(1.15); filter: brightness(1.5) drop-shadow(0 0 15px var(--brand-primary)); }
+    100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 5px var(--brand-primary)); }
+}
+
+/* ================= NAV ================= */
+
+nav ul{
+list-style:none;
+display:flex;
+align-items:center;
+gap:25px;
+flex-wrap:wrap;
+}
+
+nav a{
+text-decoration:none;
+color:#ddd;
+font-size:15px;
+transition:.3s;
+position: relative;
+}
+
+nav a:hover{ color: var(--brand-primary); }
+
+nav a::after{
+content:"";
+position:absolute;
+bottom:-6px;
+left:0;
+width:0%;
+height:2px;
+background:var(--brand-primary);
+transition:.3s;
+}
+
+nav a:hover::after{ width:100%; }
+
+/* ================= ACTIONS & ANIMATIONS ================= */
+
+.header-actions{
+display:flex;
+align-items:center;
+gap:20px;
+}
+
+
+.cart{
+position:relative;
+display:flex;
+align-items:center;
+transition: .3s;
+}
+
+.cart:hover{
+transform: scale(1.2) rotate(-5deg);
+filter: drop-shadow(0 0 8px var(--brand-primary));
+}
+
+.cart-link{
+color:white;
+font-size:22px;
+text-decoration:none;
+}
+
+
+.btn-header{     
+background: var(--success);
+color:white;
+padding:10px 18px;
+border-radius:25px;
+font-size:14px;
+text-decoration:none;
+transition:.3s;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 8px;
+box-shadow: 0 4px 10px rgba(8, 219, 71, 0.2);
+}
+
+.btn-header:hover{
+background: #06c43f;
+transform: translateY(-3px);
+box-shadow: 0 8px 20px rgba(8, 219, 71, 0.4);
+animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+  0% { transform: translateY(-3px) rotate(0); }
+  25% { transform: translateY(-3px) rotate(2deg); }
+  50% { transform: translateY(-3px) rotate(0); }
+  75% { transform: translateY(-3px) rotate(-2deg); }
+  100% { transform: translateY(-3px) rotate(0); }
+}
+
+
+/* ================= FOOTER AJUSTADO ================= */
+
+.main-footer{
+background: #0f0f0f;
+color:white;
+padding:20px 15px;
+text-align:center;
+border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.footer-logo{
+font-size:22px;
+font-weight:800;
+color:var(--brand-primary);
+margin-bottom:12px;
+display: inline-flex;
+align-items: center;
+gap: 10px;
+text-shadow: 0 0 10px rgba(243, 113, 7, 0.4);
+}
+
+.footer-socials{
+display:flex;
+justify-content:center;
+gap:25px;
+margin-bottom:15px;
+}
+
+.footer-socials a{
+color:#888;
+font-size:22px;
+transition:.3s;
+}
+
+.footer-socials a:hover{
+color:var(--brand-primary);
+transform: scale(1.3);
+filter: drop-shadow(0 0 8px var(--brand-primary));
+}
+
+.footer-message{ font-size:12px; opacity:.5; margin-bottom: 5px; }
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:900px){
+.header-container{ flex-direction:column; align-items:center; }
+nav ul{ justify-content:center; gap:15px; }
+}
+
+</style>
+
+{% block extra_css %}{% endblock %}
+
+</head>
+
+<body>
+
+<header>
+<div class="header-container">
+    <div class="logo">
+        <i class="fas fa-bolt"></i> Ita Suplementos
+    </div>
+
+    <nav>
+        <ul>
+            {% if user.is_authenticated %}
+                <li style="color:#d6d6d6; font-size:14px; font-weight:600;">
+                    Olá, <span style="color:var(--brand-primary); font-weight:800;">{{ user.username }}</span>
+                </li>
+                <li><a href="/">Início</a></li>
+                <li><a href="{% url 'new_supplement' %}">Cadastrar</a></li>
+            {% else %}
+                <li><a href="/">Início</a></li>
+            {% endif %}
+            
+            <li><a href="{% url 'supplements' %}">Suplementos</a></li>
+            <li><a href="{% url 'category_supplement' %}">Categoria</a></li>
+            
+            {% if not user.is_authenticated %}
+                <li><a href="{% url 'register' %}">Registre-se</a></li>
+                <li><a href="{% url 'login' %}">Login</a></li>
+            {% endif %}
+
+            <li><a href="#">Sobre</a></li>
+            <li><a href="#">Contato</a></li>
+
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'logout' %}">Sair</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="header-actions">
+        <div class="cart">
+            <a href="{% url 'cart' %}" class="cart-link">
+                <i class="fas fa-shopping-cart"></i>
+            </a>
+            <div style="position:absolute; top:-10px; right:-12px; background:var(--brand-primary); color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:50px; box-shadow:0 2px 5px rgba(0,0,0,0.5);">
+                {% if cart_count %}{{ cart_count }}{% else %}0{% endif %}
+            </div>
+        </div>
+            <a href="https://wa.me/5583991771531" class="btn-header" target="_blank">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+            </a>
+    </div>
+</div>
+</header>
+
+<main>
+        {% block content %}
+        {% endblock %}
+    
+</main>
+
+<footer class="main-footer">
+    <div class="footer-logo">
+        <i class="fas fa-bolt"></i> Ita Suplementos
+    </div>
+
+    <div class="footer-socials">
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-whatsapp"></i></a>
+    </div>
+
+    <p class="footer-message">Foco e Performance em cada treino.</p>
+    <p style="font-size:10px; opacity:.3;">© 2026 Ita Suplementos. Todos os direitos reservados.</p>
+</footer>
+
+<script>
+    console.log("Ita Suplementos: Versão Animada Ativada! ⚡");
+</script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

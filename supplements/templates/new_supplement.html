@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    
+    :root {
+        --accent-color: #8b5cf6; 
+        --accent-hover: #7c3aed;
+        --bg-main: #0f1115; 
+        --card-bg: #1a1d23;  
+        --input-bg: #252932;
+        --text-bright: #f8fafc;
+        --text-dim: #94a3b8;
+        --border-ui: rgba(255, 255, 255, 0.08);
+    }
+
+    .page-wrapper {
+        background-color: var(--bg-main);
+        background-image: 
+            radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    
+    .form-container {
+        background: var(--card-bg);
+        width: 100%;
+        max-width: 750px;
+        border-radius: 24px;
+        padding: 48px;
+        border: 1px solid var(--border-ui);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .form-container h1 {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--text-bright);
+        margin-bottom: 8px;
+        text-align: left;
+    }
+
+    .subtitle {
+        color: var(--text-dim);
+        margin-bottom: 32px;
+        font-size: 14px;
+    }
+
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 32px 0 20px;
+    }
+
+    .section-header span {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--accent-color);
+    }
+
+    .section-line {
+        flex: 1;
+        height: 1px;
+        background: var(--border-ui);
+    }
+
+    
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 500;
+        color: var(--text-bright);
+        font-size: 14px;
+    }
+
+    .form-group input, 
+    .form-group select, 
+    .form-group textarea {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--border-ui);
+        border-radius: 12px;
+        padding: 14px 16px;
+        color: white;
+        font-size: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+        background: #2d323d;
+    }
+
+    /* ===== GRID DE IMAGENS (DROPZONE STYLE) ===== */
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+    }
+
+    .image-form-card {
+        background: var(--input-bg);
+        border: 2px dashed var(--border-ui);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .image-form-card:hover {
+        border-color: var(--accent-color);
+    }
+
+    .image-form-card small {
+        color: var(--text-dim);
+        display: block;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+
+    
+    .image-form-card input[type="file"] {
+        font-size: 12px;
+        color: var(--text-dim);
+    }
+
+    /* ===== PREVIEW E DELETE ===== */
+    .image-preview {
+        margin-top: 15px;
+        display: none;
+        aspect-ratio: 1;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid var(--border-ui);
+    }
+
+    .image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .delete-row {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #ef4444;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 10px;
+        color: white;
+        cursor: pointer;
+    }
+
+    
+    .form-actions {
+        display: flex;
+        gap: 16px;
+        margin-top: 48px;
+    }
+
+    .btn-save {
+        flex: 2;
+        background: var(--accent-color);
+        color: white;
+        padding: 16px;
+        border-radius: 14px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-save:hover {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 20px -8px rgba(139, 92, 246, 0.5);
+    }
+
+    .btn-cancel {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-bright);
+        padding: 16px;
+        border-radius: 14px;
+        text-align: center;
+        text-decoration: none;
+        font-weight: 600;
+        border: 1px solid var(--border-ui);
+        transition: 0.3s;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+</style>
+
+<div class="page-wrapper">
+    <div class="form-container">
+        <h1>Novo Suplemento</h1>
+        <p class="subtitle">Preencha as informações para adicionar à vitrine.</p>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="section-header">
+                <span>Geral</span>
+                <div class="section-line"></div>
+            </div>
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endfor %}
+
+            <div class="section-header">
+                <span>Fotos do Produto</span>
+                <div class="section-line"></div>
+            </div>
+
+            {{ formset.management_form }}
+            <div class="image-grid">
+                {% for f in formset %}
+                    <div class="image-form-card">
+                        <small>Slot {{ forloop.counter }}</small>
+                        
+                        <div class="form-group" style="margin-bottom: 0;">
+                            {{ f.photo }}
+                        </div>
+
+                        {% if f.DELETE %}
+                            <div class="delete-row">
+                                {{ f.DELETE }} Apagar
+                            </div>
+                        {% endif %}
+
+                        <div class="image-preview">
+                            <img src="">
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-save">Salvar Produto</button>
+                <a href="{% url 'supplements' %}" class="btn-cancel">Voltar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.image-form-card input[type="file"]').forEach(input => {
+        input.addEventListener('change', function() {
+            const card = this.closest('.image-form-card');
+            const preview = card.querySelector('.image-preview');
+            const img = card.querySelector('img');
+            const file = this.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                    card.style.borderStyle = 'solid';
+                    card.style.borderColor = 'var(--accent-color)';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+</script>
+
+{% endblock %}

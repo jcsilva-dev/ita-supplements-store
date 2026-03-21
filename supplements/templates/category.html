@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+:root {
+    --brand-primary: #f26522; 
+    --brand-dark: #0f172a;
+    --brand-success: #10b981;
+    --bg-light: #f1f5f9;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    --card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+    background: var(--bg-light);
+    color: var(--brand-dark);
+    -webkit-font-smoothing: antialiased;
+}
+
+
+.page-title {
+    text-align: center;
+    padding: 60px 20px 40px;
+    animation: fadeInDown 0.8s ease-out;
+}
+
+.page-title h1 {
+    font-size: 48px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+}
+
+.page-title p {
+    color: #64748b;
+    margin-top: 12px;
+    font-size: 18px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.category-menu {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0 20px 50px;
+    animation: fadeIn 1s ease-out 0.2s both;
+}
+
+.category-menu a {
+    padding: 12px 24px;
+    background: white;
+    border-radius: 50px;
+    text-decoration: none;
+    color: #475569;
+    font-size: 15px;
+    font-weight: 700;
+    transition: var(--transition-smooth);
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.category-menu a:hover {
+    background: var(--brand-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(242, 101, 34, 0.3);
+    border-color: transparent;
+}
+
+/* ================= GRID DE PRODUTOS ================= */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 32px;
+    padding: 0 25px 80px;
+    max-width: 1300px;
+    margin: auto;
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+/* ================= CARD DESIGN ================= */
+.supplement-card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition-smooth);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: var(--card-shadow);
+    height: 100%;
+    position: relative;
+}
+
+.supplement-card:hover {
+    transform: translateY(-12px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+
+.image-container {
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+    background: #f8fafc;
+    position: relative;
+}
+
+.supplement-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 20px;
+    transition: transform 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.supplement-card:hover img {
+    transform: scale(1.1);
+}
+
+
+.card-content {
+    padding: 24px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.brand-badge {
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--brand-primary);
+    margin-bottom: 8px;
+}
+
+.supplement-card h3 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--brand-dark);
+    line-height: 1.2;
+    margin-bottom: 8px;
+}
+
+.specs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.specs p {
+    font-size: 13px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+}
+
+.specs p strong {
+    color: #334155;
+    margin-right: 4px;
+}
+
+
+.card-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.price-tag {
+    display: flex;
+    flex-direction: column;
+}
+
+.price-label {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.price-value {
+    color: var(--brand-dark);
+    font-weight: 800;
+    font-size: 24px;
+}
+
+.buy-btn {
+    background: #f1f5f9;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-primary);
+    transition: var(--transition-smooth);
+}
+
+.supplement-card:hover .buy-btn {
+    background: var(--brand-primary);
+    color: white;
+}
+
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+
+@media(max-width: 768px) {
+    .page-title h1 { font-size: 36px; }
+    .page-title p { font-size: 16px; }
+    .card-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 0 15px 40px; }
+}
+</style>
+
+<!-- HEADER SECTION -->
+<div class="page-title">
+    <h1>Nossos Suplementos</h1>
+    <p>Performance, saúde e resultados com os melhores suplementos do mercado.</p>
+</div>
+
+<!-- CATEGORY NAVIGATION -->
+{% if categories %}
+<nav class="category-menu" aria-label="Categorias de produtos">
+    <a href="{% url 'category_supplement' %}">Ver Todos</a>
+    {% for cat in categories %}
+    <a href="?category={{ cat.id }}">{{ cat.name }}</a>
+    {% endfor %}
+</nav>
+{% endif %}
+
+<!-- PRODUCTS GRID -->
+<div class="card-grid">
+    {% for s in supplements %}
+    <a href="{% url 'supplement_detail' s.pk %}" style="text-decoration: none;">
+        <article class="supplement-card">
+            
+            <div class="image-container">
+                {% with s.images.first as first_image %}
+                {% if first_image %}
+                <img src="{{ first_image.photo.url }}" alt="{{ s.brand.name }} - {{ s.model }}">
+                {% else %}
+                <img src="https://via.placeholder.com/400x300?text=Produto" alt="Sem imagem">
+                {% endif %}
+                {% endwith %}
+            </div>
+
+            <div class="card-content">
+                <span class="brand-badge">{{ s.brand.name }}</span>
+                <h3>{{ s.model }}</h3>
+
+                <div class="specs">
+                    {% if s.flavor %}
+                    <p><strong>Sabor:</strong> {{ s.flavor.name }}</p>
+                    {% endif %}
+                    {% if s.product_content_size %}
+                    <p><strong>Conteúdo:</strong> {{ s.product_content_size }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="card-footer">
+                    <div class="price-tag">
+                        <span class="price-label">Valor total</span>
+                        <span class="price-value">R$ {{ s.price }}</span>
+                    </div>
+                    <div class="buy-btn">
+                        <!-- Ícone de seta simples ou Plus -->
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+                    </div>
+                </div>
+            </div>
+
+        </article>
+    </a>
+    {% endfor %}
+</div>
+
+{% endblock %}
