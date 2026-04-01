@@ -52,8 +52,8 @@ class FeedbackAdmin(admin.ModelAdmin):
 admin.site.register(FeedbackImage)
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name",)
+    list_display = ("name", "image",)
+    search_fields = ("name", "image",)
     ordering = ("name",)
  
 class HomeBannerAdmin(admin.ModelAdmin):

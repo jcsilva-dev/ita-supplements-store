@@ -1,28 +1,31 @@
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
-from supplements.models import ImageSupplement, HomeBanner, FeedbackImage
-
-
+from supplements.models import ImageSupplement, HomeBanner, FeedbackImage, Category
 
 def handle_image_cleanup(instance, model_class, field_name, action):
-    if action == "delete":
-        file_field = getattr(instance, field_name, None)
+    file_field = getattr(instance, field_name, None)
 
+    if action == "delete":
         if file_field:
             file_field.delete(save=False)
-
 
     elif action == "update":
         if not instance.pk:
             return
+
         try:
             old_instance = model_class.objects.get(pk=instance.pk)
         except model_class.DoesNotExist:
             return
-        old_file = getattr(old_instance, field_name, None)
-        new_file = getattr(instance, field_name,None)
 
-        if old_file and old_file != new_file:
+        old_file = getattr(old_instance, field_name, None)
+        new_file = getattr(instance, field_name, None)
+
+        if old_file and new_file and old_file != new_file:
+            old_file.delete(save=False)
+
+        
+        elif old_file and not new_file:
             old_file.delete(save=False)
 
            
@@ -47,5 +50,16 @@ def image_homebanner_pre_save(sender, instance, **kwargs):
     handle_image_cleanup(instance, sender, "image", action="update")
 
 @receiver(post_delete, sender=FeedbackImage)
-def image_homebanner_pre_save(sender, instance, **kwargs):
+def image_feedback_pre_delete(sender, instance, **kwargs):
     handle_image_cleanup(instance, sender, "image", action="delete")
+
+
+@receiver(post_delete, sender=Category)
+def image_category_post_delete(sender, instance, **kwargs):
+    handle_image_cleanup(instance, sender, "image", action="delete")
+
+from django.db.models.signals import pre_save
+
+@receiver(pre_save, sender=Category)
+def image_category_pre_save(sender, instance, **kwargs):
+    handle_image_cleanup(instance, sender, "image", action="update")
