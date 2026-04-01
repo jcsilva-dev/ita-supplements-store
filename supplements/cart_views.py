@@ -1,210 +1,189 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from decimal import Decimal
-from .models import Supplements, Order, OrderItem
+from .models import ProductVariant
 from .utils import build_whatsapp_message
 import urllib.parse
+from django.contrib import messages
 
 
-def add_to_cart(request, product_id):
+def add_to_cart(request, variant_id):
 
     if request.method != "POST":
         return redirect("supplements")
 
-    product = get_object_or_404(Supplements, id=product_id)
+    variant = get_object_or_404(
+        ProductVariant.objects.select_related("product"),
+        id=variant_id
+    )
+
+    if not variant.is_available():
+        messages.error(request, "Produto esgotado")
+        return redirect(request.META.get("HTTP_REFERER", "supplements"))
 
     action = request.POST.get("action")
 
-    try:
-        quantity = int(request.POST.get("quantity", 1))
-    except ValueError:
-        quantity = 1
+    quantity = int(request.POST.get("quantity", 1) or 1)
+    quantity = max(quantity, 1)
 
-    try:
-        installments = int(request.POST.get("installments", 1))
-    except ValueError:
-        installments = 1
-
-    product_key = str(product_id)
-
-    print("ACTION:", action)
+    installments = int(request.POST.get("installments", 1) or 1)
+    installments = max(installments, 1)
 
     
     if action == "buy":
 
-        subtotal = product.price * quantity
+        items = [{"variant": variant, "quantity": quantity}]
 
-        message = "🛒 *Novo Pedido*\n\n"
-
-        message = build_whatsapp_message(product, quantity)
-
-
-        if installments > 1:
-
-            installment_value = round(subtotal / installments, 2)
-
-            message += (
-                f"💳 Parcelamento: {installments}x de R$ {installment_value:.2f}\n"
-            )
-
-        message += "\nGostaria de finalizar esse pedido."
-
-        message = urllib.parse.quote(message, safe="")
+        message = build_whatsapp_message(
+            items=items,
+            installments=installments,
+            request=request
+        )
 
         return redirect(
-            f"https://wa.me/5583991771531?text={message}"
+            f"https://wa.me/5583991771531?text={urllib.parse.quote_plus(message)}"
         )
 
     
-    elif action == "cart":
+    if action == "cart":
 
         cart = request.session.get("cart", {})
+        key = str(variant.id)
 
-        if product_key in cart:
-
-            cart[product_key]["quantity"] += quantity
-            cart[product_key]["installments"] = installments
-
+        if key in cart:
+            cart[key]["quantity"] += quantity
         else:
-
-            cart[product_key] = {
+            cart[key] = {
+                "variant_id": variant.id,
+                "name": str(variant),
                 "quantity": quantity,
-                "installments": installments
             }
 
         request.session["cart"] = cart
+        request.session.modified = True
+
+        messages.success(request, "Produto adicionado ao carrinho")
 
         return redirect("cart")
 
-    return redirect("cart")
+    return redirect("supplements")
+
+
 
 
 def cart_view(request):
 
     cart = request.session.get("cart", {})
-
-    products = []
-
+    items = []
     total = Decimal("0.00")
 
-    for product_id, item in cart.items():
+    if not cart:
+        return render(request, "carrinho.html", {
+            "items": [],
+            "total": total
+        })
 
-        product = get_object_or_404(Supplements, id=product_id)
+    variant_ids = list(set(item["variant_id"] for item in cart.values()))
+
+    variants = (
+        ProductVariant.objects
+        .select_related("product")
+        .prefetch_related("product__images")  
+        .filter(id__in=variant_ids)
+    )
+
+    variant_map = {v.id: v for v in variants}
+
+    for key, item in cart.items():
+
+        variant = variant_map.get(item["variant_id"])
+
+        if not variant:
+            continue
+
+        price = variant.price
         quantity = item["quantity"]
+        subtotal = price * quantity
 
-        subtotal = product.price * quantity
+        
+        image = variant.product.get_main_image()
 
-        installments = item.get("installments", 1)
-
-        installment_value = subtotal / installments
-
-        products.append({
-            "product": product,
+        items.append({
+            "key": key,
+            "name": item["name"],
             "quantity": quantity,
+            "price": price,
             "subtotal": subtotal,
-            "installments": installments,
-            "installment_value": installment_value
+            "image": image
         })
 
         total += subtotal
 
-    context = {
-        "products": products,
+    return render(request, "carrinho.html", {
+        "items": items,
         "total": total
-    }
-
-    return render(request, "carrinho.html", context)
+    })
 
 
-def remove_item(request, product_id):
+def remove_item(request, key):
 
     cart = request.session.get("cart", {})
 
-    product_id = str(product_id)
-
-    if product_id in cart:
-        del cart[product_id]
-
-    request.session["cart"] = cart
+    if key in cart:
+        del cart[key]
+        request.session.modified = True
+        messages.info(request, "Item removido")
 
     return redirect("cart")
 
 
 def finalize_order(request):
 
-    cart = request.session.get("cart", {})
-
-    print("CARRINHO:", cart)
-
-    if not cart:
+    if request.method != "POST":
         return redirect("cart")
 
-    order = Order.objects.create(status="pending")
+    cart = request.session.get("cart", {})
 
-    total = Decimal("0.00")
+    if not cart:
+        messages.warning(request, "Carrinho vazio")
+        return redirect("cart")
 
-    
-    cart_installments = request.POST.get("cart_installments")
+    installments = int(request.POST.get("cart_installments") or 1)
+    installments = max(installments, 1)
 
-    message = f"🛒 *Novo Pedido #{order.code}*\n\n"
+    items = []
 
-    for product_id, item in cart.items():
+    variants = ProductVariant.objects.filter(
+        id__in=[item["variant_id"] for item in cart.values()]
+    )
 
-        product = get_object_or_404(Supplements, id=product_id)
+    variant_map = {v.id: v for v in variants}
 
-        quantity = item["quantity"]
+    for item in cart.values():
+        variant = variant_map.get(item["variant_id"])
 
-        installments = item.get("installments", 1)
+        if not variant:
+            continue
 
-        subtotal = product.price * quantity
+        items.append({
+            "variant": variant,
+            "quantity": item["quantity"]
+        })
 
-        OrderItem.objects.create(
-            order=order,
-            product=product,
-            quantity=quantity,
-            unit_price=product.price,
-            installments=installments if not cart_installments else cart_installments
-        )
+    if not items:
+        return redirect("cart")
 
-        message += build_whatsapp_message(product, quantity)
-
-       
-        if not cart_installments:
-
-           installments = item.get("installments")
-        
-           if installments and installments >1:
-                installment_value = subtotal / installments
-
-                message += (
-                  f"💳 Parcelamento: {installments}x de R$ {installment_value:.2f}\n"
-                )
-
-        message += "\n"
-
-        total += subtotal
-
-    order.total = total
-    order.save()
-
-    
-    if cart_installments:
-
-        cart_installments = int(cart_installments)
-
-        installment_value = total / cart_installments
-
-        message += (
-            f"💳 *Parcelamento do Pedido:* {cart_installments}x de R$ {installment_value:.2f}\n\n"
-        )
-
-    message += f"🚚 Frete: Grátis\n"
-    message += f"💵 *Total do Pedido: R$ {total}*\n\n"
-    message += "Gostaria de finalizar esse pedido."
-
-    message = urllib.parse.quote(message, safe="")
+    message = build_whatsapp_message(
+        items=items,
+        installments=installments,
+        request=request
+    )
 
     request.session["cart"] = {}
+    request.session.modified = True
 
     return redirect(
-        f"https://wa.me/5583991771531?text={message}"
+        f"https://wa.me/5583991771531?text={urllib.parse.quote_plus(message)}"
     )
+
+
+

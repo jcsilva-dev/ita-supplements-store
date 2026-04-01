@@ -4,6 +4,96 @@ from django.db.utils import NotSupportedError
 from decimal import Decimal
 import uuid
 
+class ProductVariant(models.Model):
+    product = models.ForeignKey(
+        'Supplements',
+        on_delete=models.CASCADE,
+        related_name='variants'
+    )
+
+    brand = models.ForeignKey(
+        'Brand',
+        on_delete=models.PROTECT,
+        related_name='variants',
+        verbose_name="Marca"
+    )
+
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Preço"
+    )
+
+    size = models.ForeignKey(
+        'Size',
+        on_delete=models.PROTECT,
+        related_name='variants',
+        blank=True,
+        null=True,
+        verbose_name="Tamanho"
+    )
+
+    flavor = models.ForeignKey(
+        'Flavor',
+        on_delete=models.SET_NULL,
+        related_name='variants',
+        blank=True,
+        null=True,
+        verbose_name="Sabor"
+    )
+
+    product_content_size = models.ForeignKey(
+        'Product_content_size',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='variants',
+        verbose_name="Conteúdo"
+    )
+
+    # 🔥 NEVER NULL
+    quantity_stock = models.PositiveIntegerField(default=0)
+
+    sku = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return f"{self.product.model} - {self.sku}"
+
+    
+    def is_available(self):
+        return self.quantity_stock > 0
+
+    
+    def get_installment_options(
+        self,
+        max_installments=12,
+        min_value=None,
+        interest_rate=0
+    ):
+        options = []
+
+        price = Decimal(str(self.price))
+        interest_rate = Decimal(str(interest_rate))
+
+        total_price = price
+
+        if interest_rate > 0:
+            total_price = price * (Decimal("1") + interest_rate)
+
+        for i in range(1, max_installments + 1):
+
+            installment_value = (total_price / Decimal(i)).quantize(Decimal("0.01"))
+
+            if min_value and installment_value < Decimal(str(min_value)):
+                continue
+
+            options.append({
+                "times": i,
+                "value": installment_value
+            })
+
+        return options  
+
 class Order(models.Model):
 
     STATUS_CHOICES = [
@@ -40,9 +130,11 @@ class OrderItem(models.Model):
         related_name="items"
     )
 
-    product = models.ForeignKey(
-        "supplements.Supplements",
-        on_delete=models.PROTECT
+    variant = models.ForeignKey(
+        ProductVariant,
+        on_delete=models.CASCADE,
+        null=True,   
+        blank=True,
     )
 
     quantity = models.PositiveIntegerField()
@@ -56,10 +148,6 @@ class OrderItem(models.Model):
 
     def subtotal(self):
         return self.quantity * self.unit_price
-
-
-
-
 
 
 
@@ -93,37 +181,51 @@ class FeedbackImage(models.Model):
 
 class SupplementQuerySet(models.QuerySet):
 
-    def recomendados(self, produto):
-        mesma_categoria = self.filter(
-            category=produto.category
-        ).exclude(id=produto.id)
+    def get_recommended(self, product):
+        same_category = (
+            self.filter(category=product.category)
+            .exclude(id=product.id)
+            .order_by('-total_visualizacoes')[:4]
+        )
 
-        if mesma_categoria.count() >= 4:
-            return mesma_categoria.order_by('-total_visualizacoes')
+        if len(same_category) >= 4:
+            return same_category 
 
         return (
-            self.exclude(id=produto.id)
-            .order_by('-total_visualizacoes')
+            self.exclude(id=product.id)
+            .order_by('-total_visualizacoes')[:4]
         )
+
 
 class SupplementManager(models.Manager):
 
     def get_queryset(self):
         return SupplementQuerySet(self.model, using=self._db)
 
-    def recomendados(self, produto):
-        return self.get_queryset().recomendados(produto)
+    def get_recommended(self, product):
+        return self.get_queryset().get_recommended(product)
     
-
 
 class Category(models.Model):
     name = models.CharField(max_length=200, unique=True)
+
+    image = models.ImageField(
+        upload_to="categories/",
+        blank=True,
+        null=True
+    )
 
     class Meta:
         ordering = ["name"]
 
     def __str__(self):
         return self.name
+
+    def get_image_url(self):
+        if self.image:
+            return self.image.url
+        return "/static/images/default-category.png"
+
     
 
 
@@ -157,56 +259,88 @@ class Flavor(models.Model):
 
 
 
+
 class Supplements(models.Model):
     id = models.AutoField(primary_key=True)
-    model = models.CharField(max_length=200,   verbose_name="Modelo")
-    brand = models.ForeignKey('Brand', on_delete=models.PROTECT, related_name='supplements',  verbose_name="Marca")
-    price = models.DecimalField(max_digits=10, decimal_places=2,   verbose_name="Preço")
-    size = models.ForeignKey('Size', on_delete=models.PROTECT, related_name='supplements',  max_length=20, blank=True, null=True, verbose_name="Tamanho")
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='supplements', null=True,  blank=True, verbose_name= "categoria")
-    quantity_stock = models.PositiveIntegerField(blank=True, null=True,   verbose_name="quantidade disponivel")
-    flavor = models.ForeignKey('Flavor', on_delete=models.SET_NULL,  related_name='supplements', blank=True, null=True, verbose_name="sabor", )
-    product_content_size = models.ForeignKey('Product_content_size', on_delete=models.SET_NULL, blank=True, null=True, related_name='supplements',  verbose_name="tamanho do conteudo")
-    description = models.TextField(blank=True, null=True,   verbose_name="descricao")
+    model = models.CharField(max_length=200, verbose_name="Modelo")
+
+    category = models.ForeignKey(
+        'Category',
+        on_delete=models.SET_NULL,
+        related_name='supplements',
+        null=True,
+        blank=True,
+        verbose_name="Categoria"
+    )
+
+    description = models.TextField(blank=True, null=True)
     total_visualizacoes = models.PositiveIntegerField(default=0)
+
     objects = SupplementManager()
 
-      
+    def get_main_image(self):
+      image = self.images.first()
+      return image.photo.url if image and image.photo else None
+
     def __str__(self):
         return self.model
-    
 
-    def get_installment_options(
-          self,
-        max_installments=12,
-        min_value=None,
-        interest_rate=0
-    ):
+    # 🔥 QUERY OTIMIZADA
+    def get_variants(self):
+        return self.variants.select_related(
+            'brand',
+            'size',
+            'flavor',
+            'product_content_size'
+        )
 
-        options = []
+    # 🔥 REGRA DE NEGÓCIO: variante padrão
+    def get_default_variant(self):
+        variants = self.get_variants()
 
-        price = Decimal(str(self.price))
-        interest_rate = Decimal(str(interest_rate))
+        variant = variants.filter(quantity_stock__gt=0).order_by('price').first()
 
-        total_price = price
+        return variant or variants.order_by('price').first()
 
-        if interest_rate > 0:
-          total_price = price * (Decimal("1") + interest_rate)
+    # 🔥 ATRIBUTOS PARA UI
+    def get_available_attributes(self):
+        variants = self.get_variants()
 
-        for i in range(1, max_installments + 1):
+        return {
+            "sizes": list(
+                variants.exclude(size__isnull=True)
+                .values_list('size__name', flat=True)
+                .distinct()
+            ),
+            "flavors": list(
+                variants.exclude(flavor__isnull=True)
+                .values_list('flavor__name', flat=True)
+                .distinct()
+            ),
+        }
 
-           installment_value = (total_price / Decimal(i)).quantize(Decimal("0.01"))
+    # 🔥 PREÇO BASE (usado em listagem)
+    def get_price(self):
+        variant = self.variants.only('price').order_by('price').first()
+        return variant.price if variant else 0
 
-           if min_value and installment_value < Decimal(str(min_value)):
-             continue
+    # 🔥 MAPA PARA FRONTEND (CRÍTICO)
+    def get_variant_map(self):
+        variants = self.get_variants()
 
-           options.append({
-            "times": i,
-            "value": installment_value
-        })
+        data = {}
 
-        return options   
-   
+        for v in variants:
+            key = f"{v.flavor_id}_{v.size_id}"
+
+            data[key] = {
+                "id": v.id,
+                "price": float(v.price),
+                "stock": v.quantity_stock,
+            }
+
+        return data
+
     
 class ImageSupplement(models.Model):
     supplement = models.ForeignKey(Supplements, on_delete=models.CASCADE, related_name='images')

@@ -1,6 +1,10 @@
 from django.contrib import admin
-from supplements.models import Supplements, Brand, Flavor, Product_content_size, Size, ImageSupplement, HomeBanner, Category, Feedback, FeedbackImage
+from supplements.models import Supplements, Brand, Flavor, Product_content_size, Size, ImageSupplement, HomeBanner, Category, Feedback, FeedbackImage, ProductVariant
 
+
+class ProductVariantInline(admin.TabularInline):
+    model = ProductVariant
+    extra = 1
 
 class FeedbackImageInline(admin.TabularInline):
 
@@ -86,11 +90,20 @@ class BrandAdmin(admin.ModelAdmin):
 
 
 class SupplementAdmin(admin.ModelAdmin):
-    list_display = ('model', 'brand', 'price', 'flavor',)
-    search_fields = ('model', 'brand',)
+    list_display = ('model', 'get_first_price',)
+    search_fields = ('model', 'variants__brand__name',)
     inlines = [ImageSupplementInline]
+    inlines = [ProductVariantInline]
 
-    
+    def get_first_price(self, obj):
+        variant = obj.variants.first()
+        return variant.price if variant else "Sem variante"
+
+    get_first_price.short_description = "Preço inicial"
+
+
+
+admin.site.register(ProductVariant)   
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(HomeBanner, HomeBannerAdmin)
 admin.site.register(Size, SizeAdmin)

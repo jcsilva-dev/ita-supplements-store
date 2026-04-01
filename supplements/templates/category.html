@@ -30,7 +30,6 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-
 .page-title {
     text-align: center;
     padding: 60px 20px 40px;
@@ -54,7 +53,6 @@ body {
     margin-left: auto;
     margin-right: auto;
 }
-
 
 .category-menu {
     display: flex;
@@ -86,7 +84,6 @@ body {
     border-color: transparent;
 }
 
-/* ================= GRID DE PRODUTOS ================= */
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -97,7 +94,6 @@ body {
     animation: fadeInUp 0.8s ease-out 0.4s both;
 }
 
-/* ================= CARD DESIGN ================= */
 .supplement-card {
     background: white;
     border-radius: 24px;
@@ -115,7 +111,6 @@ body {
     transform: translateY(-12px);
     box-shadow: var(--card-shadow-hover);
 }
-
 
 .image-container {
     width: 100%;
@@ -136,7 +131,6 @@ body {
 .supplement-card:hover img {
     transform: scale(1.1);
 }
-
 
 .card-content {
     padding: 24px;
@@ -182,7 +176,6 @@ body {
     margin-right: 4px;
 }
 
-
 .card-footer {
     margin-top: auto;
     display: flex;
@@ -227,90 +220,163 @@ body {
     color: white;
 }
 
-
-@keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-30px); }
-    to { opacity: 1; transform: translateY(0); }
+.category-circles {
+    display: flex;
+    justify-content: center; /* 🔥 isso resolve */
+    gap: 18px;
+    padding: 20px;
+    flex-wrap: wrap; /* quebra linha se precisar */
 }
 
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
+.category-item {
+    min-width: 90px;
+    text-align: center;
+    text-decoration: none;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.category-image {
+    width: 70px;
+    height: 70px;
+    border-radius: 18px;
+    overflow: hidden;
+    margin: auto;
+    background: white;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition-smooth);
 }
 
+.category-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.category-item span {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.category-item:hover .category-image {
+    transform: translateY(-5px) scale(1.05);
+}
+
+/* animações mantidas */
+@keyframes fadeInDown { from { opacity:0; transform:translateY(-30px);} to{opacity:1; transform:translateY(0);} }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(40px);} to{opacity:1; transform:translateY(0);} }
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
 
 @media(max-width: 768px) {
     .page-title h1 { font-size: 36px; }
     .page-title p { font-size: 16px; }
     .card-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 0 15px 40px; }
 }
+
 </style>
 
-<!-- HEADER SECTION -->
 <div class="page-title">
     <h1>Nossos Suplementos</h1>
     <p>Performance, saúde e resultados com os melhores suplementos do mercado.</p>
 </div>
 
-<!-- CATEGORY NAVIGATION -->
 {% if categories %}
-<nav class="category-menu" aria-label="Categorias de produtos">
-    <a href="{% url 'category_supplement' %}">Ver Todos</a>
+<div class="category-circles">
+
+    <a href="{% url 'category_supplement' %}" class="category-item">
+        <div class="category-image">
+            <img src="/static/images/default-category.png">
+        </div>
+        <span>Todos</span>
+    </a>
+
     {% for cat in categories %}
-    <a href="?category={{ cat.id }}">{{ cat.name }}</a>
+    <a href="?category={{ cat.id }}" class="category-item">
+
+        <div class="category-image">
+            <img src="{{ cat.get_image_url }}" alt="{{ cat.name }}">
+        </div>
+
+        <span>{{ cat.name }}</span>
+
+    </a>
     {% endfor %}
-</nav>
+
+</div>
 {% endif %}
 
-<!-- PRODUCTS GRID -->
 <div class="card-grid">
+
+{% if supplements %}
+    
     {% for s in supplements %}
+    {% with variant=s.get_default_variant %}
     <a href="{% url 'supplement_detail' s.pk %}" style="text-decoration: none;">
         <article class="supplement-card">
             
             <div class="image-container">
                 {% with s.images.first as first_image %}
                 {% if first_image %}
-                <img src="{{ first_image.photo.url }}" alt="{{ s.brand.name }} - {{ s.model }}">
+                <img src="{{ first_image.photo.url }}" alt="{{ s.model }}">
                 {% else %}
-                <img src="https://via.placeholder.com/400x300?text=Produto" alt="Sem imagem">
+                <img src="https://via.placeholder.com/400x300?text=Produto">
                 {% endif %}
                 {% endwith %}
             </div>
 
             <div class="card-content">
-                <span class="brand-badge">{{ s.brand.name }}</span>
+
+                <span class="brand-badge">
+                    {% if variant %}{{ variant.brand.name }}{% else %}Sem marca{% endif %}
+                </span>
+
                 <h3>{{ s.model }}</h3>
 
                 <div class="specs">
-                    {% if s.flavor %}
-                    <p><strong>Sabor:</strong> {{ s.flavor.name }}</p>
+                    {% if variant and variant.flavor %}
+                    <p><strong>Sabor:</strong> {{ variant.flavor.name }}</p>
                     {% endif %}
-                    {% if s.product_content_size %}
-                    <p><strong>Conteúdo:</strong> {{ s.product_content_size }}</p>
+
+                    {% if variant and variant.product_content_size %}
+                    <p><strong>Conteúdo:</strong> {{ variant.product_content_size }}</p>
                     {% endif %}
                 </div>
 
                 <div class="card-footer">
                     <div class="price-tag">
                         <span class="price-label">Valor total</span>
-                        <span class="price-value">R$ {{ s.price }}</span>
+                        <span class="price-value">
+                            R$ {{ s.get_price }}
+                        </span>
                     </div>
+
                     <div class="buy-btn">
-                        <!-- Ícone de seta simples ou Plus -->
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <path d="M5 12h14m-7-7l7 7-7 7"/>
+                        </svg>
                     </div>
                 </div>
+
             </div>
 
         </article>
     </a>
+    {% endwith %}
     {% endfor %}
+
+{% else %}
+
+<div style="grid-column: 1 / -1; text-align: center; padding: 80px 20px; background: white; border-radius: 20px; box-shadow: var(--card-shadow);">
+    <h2 style="font-size:28px; font-weight:800;">Categoria não encontrada</h2>
+    <p style="color:#64748b;">Ainda não temos produtos nessa categoria.</p>
+    <a href="{% url 'category_supplement' %}" style="display:inline-block;margin-top:20px;background:var(--brand-primary);color:white;padding:12px 25px;border-radius:12px;text-decoration:none;font-weight:700;">
+        Ver todos os produtos
+    </a>
+</div>
+
+{% endif %}
+
 </div>
 
 {% endblock %}

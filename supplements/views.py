@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
-from supplements.models import Supplements, HomeBanner, Category, Feedback, FeedbackImage
+from supplements.models import Supplements, HomeBanner, Category, Feedback, FeedbackImage, ProductVariant
 from supplements.forms import SupplementModelForm, ImageFormSet, FeedbackForm
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.db import transaction
@@ -94,17 +94,14 @@ class NewSuplementView(CreateView):
         )
      
      
-
-
 class SupplementDetailView(DetailView):
     model = Supplements
     template_name = 'supplement_detail.html'
     context_object_name = 'supplement'
-    
+
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
 
-       
         obj.total_visualizacoes = F('total_visualizacoes') + 1
         obj.save(update_fields=['total_visualizacoes'])
         obj.refresh_from_db()
@@ -114,27 +111,29 @@ class SupplementDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        produto = self.object
-
-        context["recomendacoes"] = (
-            Supplements.objects
-            .recomendados(produto)[:4]
-        )
+        product = self.object
 
        
-        context["feedbacks"] = Feedback.objects.filter(
-            is_approved=True
-        )
+        variants = product.get_variants()
+        default_variant = product.get_default_variant()
+        attributes = product.get_available_attributes()
 
-        
+        context.update({
+            "variants": variants,
+            "default_variant": default_variant,
+            "sizes": attributes["sizes"],
+            "flavors": attributes["flavors"],
+            "installments": (
+                default_variant.get_installment_options()
+                if default_variant else []
+            ),
+        })
+
+        context["recommended_products"] = Supplements.objects.get_recommended(product)
+        context["feedbacks"] = Feedback.objects.filter(is_approved=True)
         context["feedback_form"] = FeedbackForm()
-         
-        
-        context["installments"] = produto.get_installment_options()
 
         return context
-
-
     
 
     def post(self, request, *args, **kwargs):

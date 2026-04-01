@@ -240,22 +240,25 @@ margin-bottom:10px;
 <i class="fas fa-shopping-bag"></i> Meu Carrinho
 </h1>
 
-{% if products %}
+{% if items %}
 
 <div class="cart-grid">
 
 <div class="cart-items-list reveal-left">
 
-{% for item in products %}
+{% for item in items %}
 
 <div class="item-carrinho">
-
-<img src="{{ item.product.images.first.photo.url }}" class="img-produto-cart" alt="{{ item.product.model }}">
+{% if item.image %}
+    <img src="{{ item.image }}" class="img-produto-cart" alt="{{ item.name }}">
+{% else %}
+    <img src="{% static 'img/no-image.png' %}" class="img-produto-cart" alt="Sem imagem">
+{% endif %}
 
 <div class="produto-info">
 
 <div class="produto-nome">
-{{ item.product.model }}
+{{ item.name }}
 </div>
 
 <div class="produto-meta">
@@ -265,33 +268,22 @@ margin-bottom:10px;
 Qtd: {{ item.quantity }}
 </span>
 
-{% if item.product.flavor %}
-<span>
-<i class="fas fa-utensils"></i>
-{{ item.product.flavor }}
-</span>
-{% endif %}
-
 </div>
 
 <div class="produto-preco-unit">
-R$ {{ item.subtotal|floatformat:2 }}
+R$ {{ item.price }}
 </div>
 
-{% if item.installments %}
 <div style="font-size:13px;color:var(--text-sub);margin-top:4px;font-weight:600;">
-{{ item.installments }}x de R$ {{ item.installment_value|floatformat:2 }}
+Subtotal: R$ {{ item.subtotal|floatformat:2 }}
 </div>
-{% endif %}
 
 </div>
 
 <a class="remover-btn"
-href="{% url 'remover_item' item.product.id %}"
-title="Remover item">
-
-<i class="fas fa-times"></i>
-
+   href="{% url 'remove_item' item.key %}"
+   title="Remover item">
+    <i class="fas fa-times"></i>
 </a>
 
 </div>
@@ -307,8 +299,8 @@ Resumo do Pedido
 </h2>
 
 <div class="resumo-linha">
-<span>Produtos ({{ products|length }})</span>
-<span>R$ {{ total }}</span>
+<span>Produtos ({{ items|length }})</span>
+ <span>R$ {{ total|floatformat:2 }}</span>
 </div>
 
 <div class="resumo-linha">
@@ -318,7 +310,7 @@ Resumo do Pedido
 
 <div class="resumo-total">
 <span style="font-weight:800;font-size:18px;">Total</span>
-<div class="total-valor">R$ {{ total }}</div>
+<div class="total-valor">R$ {{ total|floatformat:2 }}</div>
 </div>
 
 
@@ -327,14 +319,21 @@ Resumo do Pedido
 
 <div class="parcelamento-area">
 
+
+
+
+<p style="font-size:13px;color:#64748b;margin-bottom:10px;">
+Escolha como deseja pagar seu pedido antes de finalizar.
+</p>
+
+
 <label class="parcelamento-label">
-<i class="fas fa-credit-card"></i>
-Dividir pedido
+    <i class="fas fa-credit-card"></i>
+    Forma de pagamento
 </label>
 
 <select name="cart_installments" class="parcelamento-select">
-
-<option value="">À vista</option>
+<option value="1">À vista</option>
 <option value="2">2x sem juros</option>
 <option value="3">3x sem juros</option>
 <option value="4">4x sem juros</option>
@@ -346,16 +345,14 @@ Dividir pedido
 <option value="10">10x</option>
 <option value="11">11x</option>
 <option value="12">12x</option>
-
 </select>
 
 </div>
 
-<button type="submit" class="finalizar-btn">
 
+<button type="submit" class="finalizar-btn">
 <i class="fab fa-whatsapp"></i>
 PAGAR AGORA
-
 </button>
 
 </form>
@@ -400,26 +397,11 @@ VOLTAR PARA A LOJA
 <script>
 document.addEventListener("DOMContentLoaded",function(){
 
-ScrollReveal().reveal('.reveal-left',{
-origin:'left',
-distance:'30px',
-duration:1000
-});
-
-ScrollReveal().reveal('.reveal-right',{
-origin:'right',
-distance:'30px',
-duration:1000
-});
-
-ScrollReveal().reveal('.reveal-bottom',{
-origin:'bottom',
-distance:'30px',
-duration:1000
-});
+ScrollReveal().reveal('.reveal-left',{origin:'left',distance:'30px',duration:1000});
+ScrollReveal().reveal('.reveal-right',{origin:'right',distance:'30px',duration:1000});
+ScrollReveal().reveal('.reveal-bottom',{origin:'bottom',distance:'30px',duration:1000});
 
 });
 </script>
 
 {% endblock %}
-
