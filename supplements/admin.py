@@ -49,7 +49,7 @@ class FeedbackAdmin(admin.ModelAdmin):
     ]
 
 
-admin.site.register(FeedbackImage)
+
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ("name", "image",)
@@ -102,7 +102,7 @@ class SupplementAdmin(admin.ModelAdmin):
     get_first_price.short_description = "Preço inicial"
 
 
-
+admin.site.register(FeedbackImage)
 admin.site.register(ProductVariant)   
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(HomeBanner, HomeBannerAdmin)

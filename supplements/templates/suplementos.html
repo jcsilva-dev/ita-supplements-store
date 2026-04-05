@@ -1,5 +1,3 @@
-
-
 {% extends "base.html" %}
 {% load static %}
 
@@ -12,7 +10,7 @@
 {% block content %}
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://unpkg.com/scrollreveal"></script>
+<script src="https://unpkg.com/scrollreveal@4.0.9/dist/scrollreveal.min.js"></script>
 
 <style>
 :root {
@@ -41,8 +39,6 @@ body { background: var(--bg-light); font-family: 'Plus Jakarta Sans', sans-serif
 .search-box button:hover { background: var(--brand-primary); transform: scale(1.05); }
 
 .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; max-width: 1400px; margin: 0 auto 100px; padding: 20px; }
-.product-card { background: var(--white); border-radius: var(--radius-lg); padding: 18px; display: flex; flex-direction: column; cursor: pointer; transition: var(--transition); border: 1px solid transparent; position: relative; }
-.product-card:hover { transform: translateY(-12px); border-color: rgba(242, 101, 34, 0.2); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.15); }
 
 .card-image-area { width: 100%; aspect-ratio: 1/1; border-radius: var(--radius-md); overflow: hidden; background: #f8fafc; margin-bottom: 18px; position: relative; display: flex; align-items: center; justify-content: center; }
 .image-track { display: flex; height: 100%; transition: transform .6s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -51,7 +47,7 @@ body { background: var(--bg-light); font-family: 'Plus Jakarta Sans', sans-serif
 .stock-status { position: absolute; top: 15px; left: 15px; padding: 6px 12px; border-radius: 100px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: white; z-index: 10; backdrop-filter: blur(4px); }
 .stock-green { background: rgba(16, 185, 129, 0.9); }
 .stock-red { background: rgba(239, 68, 68, 0.9); }
-.stock-orange { background: rgba(247, 36, 36, 0.9); }
+.stock-orange { background: rgba(249, 115, 22, 0.9); }
 
 .carousel-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; opacity: 0; transition: .3s; z-index: 15; }
 .card-image-area:hover .carousel-arrow { opacity: 1; }
@@ -63,7 +59,155 @@ body { background: var(--bg-light); font-family: 'Plus Jakarta Sans', sans-serif
 .price-main { font-size: 22px; font-weight: 900; color: var(--brand-dark); }
 .price-main span { font-size: 14px; color: var(--brand-primary); margin-right: 2px; }
 .btn-buy { display: block; background: #f1f5f9; color: var(--brand-dark); text-align: center; padding: 12px; border-radius: 14px; font-weight: 700; text-decoration: none; font-size: 12px; margin-top: 15px; transition: var(--transition); }
-.product-card:hover .btn-buy { background: var(--brand-dark); color: white; }
+
+
+.product-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    border: 1px solid transparent;
+    position: relative;
+
+    transition: transform .35s cubic-bezier(.4,0,.2,1), box-shadow .35s;
+    will-change: transform;
+}
+
+.product-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: rgba(242, 101, 34, 0.3);
+    box-shadow: 0 25px 60px -15px rgba(0,0,0,0.2);
+}
+
+
+/* 🔥 EFEITO NA IMAGEM */
+.product-card:hover .image-track img {
+    transform: scale(1.08);
+}
+
+/* 🔥 BOTÃO RESPONDE JUNTO */
+.product-card:hover .btn-buy {
+    background: var(--brand-dark);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* 🔥 LOOP INFINITO */
+@keyframes scrollCategories {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.categories-slider {
+    overflow: hidden;
+    position: relative;
+}
+
+.categories-track {
+    display: flex;
+    gap: 18px;
+    width: max-content;
+    animation: scrollCategories 25s linear infinite;
+    pointer-events: auto;
+}
+/* 🔥 PAUSA AO PASSAR O MOUSE */
+.categories-slider:hover .categories-track {
+    animation-play-state: paused;
+}
+
+
+.categories-slider:active {
+    cursor: grabbing;
+}
+
+/* REMOVE SCROLLBAR */
+.categories-slider::-webkit-scrollbar {
+    display: none;
+}
+.categories-section {
+    max-width: 1400px;
+    margin: 0 auto 60px;
+    padding: 0 20px;
+}
+
+/* 🔥 CENTRALIZA O TÍTULO */
+.categories-header {
+    text-align: center;
+}
+
+.categories-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 25px;
+}
+
+
+/* CARD */
+.category-card {
+    flex: 0 0 auto;
+    min-width: 110px;
+    width: 110px;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    color: var(--brand-dark);
+    transition: var(--transition);
+}
+
+.category-card:hover {
+    transform: translateY(-6px) scale(1.05);
+}
+
+/* IMAGE */
+.category-image {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 8px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: white;
+    box-shadow: var(--shadow-premium);
+    display: flex;
+
+}
+
+.category-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* TEXTO */
+.category-card span {
+    font-size: 12px;
+    font-weight: 700;
+}
+.categories-slider.dragging {
+    cursor: grabbing;
+}
+
+.btn-back {
+    display: inline-block;
+    background: var(--brand-dark);
+    color: white;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all .3s ease;
+}
+
+.btn-back:hover {
+    background: var(--brand-primary);
+    transform: scale(1.05);
+}
 
 @media(max-width: 768px) { .banner-container { height: 260px; } .products-grid { grid-template-columns: 1fr; } }
 </style>
@@ -72,7 +216,7 @@ body { background: var(--bg-light); font-family: 'Plus Jakarta Sans', sans-serif
     <div class="banner-container">
         {% if banners %}
             {% for banner in banners %}
-                <img src="{{ banner.image.url }}" class="banner-slide">
+                <img src="{{ banner.image.url }}" class="banner-slide"  loading="lazy">
             {% endfor %}
         {% else %}
             <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#0f172a; color:white;">Nenhum banner cadastrado</div>
@@ -87,69 +231,153 @@ body { background: var(--bg-light); font-family: 'Plus Jakarta Sans', sans-serif
     </form>
 </div>
 
+<section class="categories-section reveal-bottom">
+
+    <div class="categories-header">
+        <h2 class="categories-title">Explore por categorias</h2>
+    </div>
+
+    <div class="categories-slider">
+
+        <div class="categories-track">
+
+            <!-- LOOP ORIGINAL -->
+            {% for category in categories %}
+            <a href="{% url 'category_supplement' category.slug %}" class="category-card">  
+
+                    <div class="category-image">
+                        {% if category.image %}
+                            <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                        {% else %}
+                            <img src="{% static 'images/no-image.png' %}" alt="Sem imagem">
+                        {% endif %}
+                    </div>
+
+                    <span>{{ category.name }}</span>
+
+                </a>
+            {% endfor %}
+
+            <!-- 🔥 DUPLICAÇÃO (SEGREDO DO INFINITO) -->
+            {% for category in categories %}
+              <a href="{% url 'category_supplement' category.slug %}" class="category-card"> 
+                    <div class="category-image">
+                        {% if category.image %}
+                            <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                        {% else %}
+                            <img src="{% static 'images/no-image.png' %}" alt="Sem imagem">
+                        {% endif %}
+                    </div>
+
+                    <span>{{ category.name }}</span>
+
+                </a>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
 <main class="products-grid">
-    {% for supplement in supplements %}
-    {% with variant=supplement.get_default_variant %}
-    <article class="product-card reveal-bottom" onclick="window.location.href='{% url 'supplement_detail' supplement.id %}'">
-        
-        <div class="card-image-area carousel-container">
 
-            <!-- 🔥 STOCK SEGURO -->
-            {% if variant %}
-                <div class="stock-status 
-                    {% if variant.quantity_stock > 5 %} stock-green
-                    {% elif variant.quantity_stock <= 0 %} stock-red
-                    {% else %} stock-orange {% endif %}">
-                    
-                    {% if variant.quantity_stock <= 0 %} Esgotado
-                    {% elif variant.quantity_stock <= 3 %} Últimas unidades
-                    {% else %} Disponível {% endif %}
+    {% if supplements %}
+
+        {% for supplement in supplements %}
+            {% with variant=supplement.get_default_variant %}
+             <article 
+             class="product-card reveal-bottom" 
+             onclick="window.location.href='{% url 'supplement_detail' supplement.id %}'"
+             style="cursor:pointer;"
+             >
+                
+                <div class="card-image-area carousel-container">
+
+                    {% if variant %}
+                        <div class="stock-status 
+                            {% if variant.quantity_stock > 5 %} stock-green
+                            {% elif variant.quantity_stock <= 0 %} stock-red
+                            {% else %} stock-orange {% endif %}">
+                            
+                            {% if variant.quantity_stock <= 0 %} Esgotado
+                            {% elif variant.quantity_stock <= 3 %} Últimas unidades
+                            {% else %} Disponível {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="stock-status stock-red">Indisponível</div>
+                    {% endif %}
+
+                    <button class="carousel-arrow arrow-left"><i class="fas fa-chevron-left"></i></button>
+                    <button class="carousel-arrow arrow-right"><i class="fas fa-chevron-right"></i></button>
+
+                    <div class="image-track">
+                        {% if supplement.images.exists %}
+                            {% for img in supplement.images.all %}
+                                <img src="{{ img.photo.url }}" loading="lazy"  alt="{{ supplement.model }}">
+                            {% endfor %}
+                        {% else %}
+                            <img src="{% static 'images/no-image.png' %}" alt="Sem imagem">
+                        {% endif %}
+                    </div>
                 </div>
-            {% else %}
-                <div class="stock-status stock-red">Indisponível</div>
-            {% endif %}
 
-            <button class="carousel-arrow arrow-left"><i class="fas fa-chevron-left"></i></button>
-            <button class="carousel-arrow arrow-right"><i class="fas fa-chevron-right"></i></button>
+                <span class="product-brand">
+                    {{ variant.brand|default:"Sem marca" }}
+                </span>
 
-            <div class="image-track">
-                {% if supplement.images.exists %}
-                    {% for img in supplement.images.all %}
-                        <img src="{{ img.photo.url }}" alt="{{ supplement.model }}">
-                    {% endfor %}
-                {% else %}
-                    <img src="{% static 'images/no-image.png' %}" alt="Sem imagem">
-                {% endif %}
-            </div>
-        </div>
+                <h3>{{ supplement.model }}</h3>
 
-        <!-- 🔥 BRAND SEGURO -->
-        <span class="product-brand">
-            {{ variant.brand|default:"Sem marca" }}
-        </span>
+                <div class="price-area">
+                    <div class="price-main">
+                        <span>R$</span>{{ supplement.get_price }}
+                    </div>
 
-        <h3>{{ supplement.model }}</h3>
+                      <a href="{% url 'supplement_detail' supplement.id %}" 
+                      class="btn-buy"
+                      onclick="event.stopPropagation();">
+                        VER DETALHES
+                    </a>
+                </div>
 
-        <div class="price-area">
-            <!-- 🔥 PREÇO CORRETO -->
-            <div class="price-main">
-                <span>R$</span>{{ supplement.get_price }}
-            </div>
+            </article>
+            {% endwith %}
+        {% endfor %}
 
-            <a href="{% url 'supplement_detail' supplement.id %}" class="btn-buy">
-                VER DETALHES
-            </a>
-        </div>
+    {% else %}
 
-    </article>
-    {% endwith %}
-    {% endfor %}
+       <div style="
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+">
+
+    <h2 style="font-size: 22px; margin-bottom: 10px;">
+        Produto não encontrado
+    </h2>
+
+    <p style="color: #64748b; margin-bottom: 25px;">
+        Tente buscar por outro nome ou categoria.
+    </p>
+
+      <a href="{% url 'supplements' %}" class="btn-back">
+    ← Voltar
+      </a>
+
+</div>
+
+    {% endif %}
+
 </main>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     ScrollReveal().reveal('.reveal-top', { origin: 'top', duration: 1000, distance: '40px' });
     ScrollReveal().reveal('.reveal-bottom', { origin: 'bottom', duration: 1000, distance: '40px', interval: 80 });
+
 
     const slides = document.querySelectorAll(".banner-slide");
     let current = 0;

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+{% load static %}
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -262,6 +263,13 @@ body {
 .category-item:hover .category-image {
     transform: translateY(-5px) scale(1.05);
 }
+.category-item.active .category-image {
+    border: 2px solid var(--brand-primary);
+    transform: scale(1.08);
+}
+.category-item.active span {
+    color: var(--brand-primary);
+}
 
 /* animações mantidas */
 @keyframes fadeInDown { from { opacity:0; transform:translateY(-30px);} to{opacity:1; transform:translateY(0);} }
@@ -284,22 +292,30 @@ body {
 {% if categories %}
 <div class="category-circles">
 
-    <a href="{% url 'category_supplement' %}" class="category-item">
-        <div class="category-image">
-            <img src="/static/images/default-category.png">
-        </div>
-        <span>Todos</span>
+    <!-- TODOS -->
+    <a href="{% url 'category_supplement' 'all' %}" 
+   class="category-item {% if not category %}active{% endif %}">
+    
+    <div class="category-image" style="display:flex;align-items:center;justify-content:center;">
+        <span style="font-size:26px;">🗂️</span>
+    </div>
+
+    <span>Todos</span>
     </a>
 
     {% for cat in categories %}
-    <a href="?category={{ cat.id }}" class="category-item">
-
-        <div class="category-image">
-            <img src="{{ cat.get_image_url }}" alt="{{ cat.name }}">
-        </div>
+    <a href="{% url 'category_supplement' cat.slug %}" 
+       class="category-item {% if category and category.slug == cat.slug %}active{% endif %}">
+        
+    <div class="category-image">
+    {% if cat.image %}
+        <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+    {% else %}
+        <img src="{% static 'images/default-category.png' %}" alt="Sem imagem">
+    {% endif %}
+    </div>
 
         <span>{{ cat.name }}</span>
-
     </a>
     {% endfor %}
 
@@ -370,7 +386,7 @@ body {
 <div style="grid-column: 1 / -1; text-align: center; padding: 80px 20px; background: white; border-radius: 20px; box-shadow: var(--card-shadow);">
     <h2 style="font-size:28px; font-weight:800;">Categoria não encontrada</h2>
     <p style="color:#64748b;">Ainda não temos produtos nessa categoria.</p>
-    <a href="{% url 'category_supplement' %}" style="display:inline-block;margin-top:20px;background:var(--brand-primary);color:white;padding:12px 25px;border-radius:12px;text-decoration:none;font-weight:700;">
+    <a href="{% url 'category_supplement' 'all' %}" style="display:inline-block;margin-top:20px;background:var(--brand-primary);color:white;padding:12px 25px;border-radius:12px;text-decoration:none;font-weight:700;">
         Ver todos os produtos
     </a>
 </div>

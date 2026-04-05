@@ -261,7 +261,7 @@ main {
             {% endif %}
             
             <li><a href="{% url 'supplements' %}">Suplementos</a></li>
-            <li><a href="{% url 'category_supplement' %}">Categoria</a></li>
+            <li><a href="{% url 'category_supplement' 'all' %}">Categoria</a></li>
             
             {% if not user.is_authenticated %}
                 <li><a href="{% url 'register' %}">Registre-se</a></li>

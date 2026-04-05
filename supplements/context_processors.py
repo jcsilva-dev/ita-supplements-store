@@ -2,5 +2,5 @@ def categories_global(request):
     from .models import Category  
 
     return {
-        "categories": Category.objects.only("id", "name", "image")
+        "categories": Category.objects.all()
     }

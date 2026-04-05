@@ -3,6 +3,9 @@ from django.core.exceptions import ValidationError
 from django.db.utils import NotSupportedError
 from decimal import Decimal
 import uuid
+from django.utils.text import slugify
+
+
 
 class ProductVariant(models.Model):
     product = models.ForeignKey(
@@ -214,9 +217,18 @@ class Category(models.Model):
         blank=True,
         null=True
     )
+    slug = models.SlugField(unique=True, blank=True)
 
     class Meta:
         ordering = ["name"]
+
+    
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+           self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+       
 
     def __str__(self):
         return self.name
@@ -225,8 +237,6 @@ class Category(models.Model):
         if self.image:
             return self.image.url
         return "/static/images/default-category.png"
-
-    
 
 
 class Size(models.Model):
