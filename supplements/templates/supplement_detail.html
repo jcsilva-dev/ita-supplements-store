@@ -180,7 +180,7 @@ body { background: var(--bg-body); font-family: 'Plus Jakarta Sans', sans-serif;
            
             <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
                 <span style="background:white;padding:8px 15px;border-radius:12px;font-size:14px;border:1px solid #e2e8f0;font-weight:600;">
-                    Marca: <span id="brand-value">{{ variant.brand }}</span>
+                    Marca: <span id="brand-value">{{ object.brand }}</span>
                 </span>
                 <span style="background:white;padding:8px 15px;border-radius:12px;font-size:14px;border:1px solid #e2e8f0;font-weight:600;">
                     Disponível: <span id="stock-value">{{ variant.quantity_stock }}</span>
@@ -196,7 +196,7 @@ body { background: var(--bg-body); font-family: 'Plus Jakarta Sans', sans-serif;
             <div class="price-card">
                 <label style="font-weight: 800; font-size: 13px; margin-bottom: 5px; display: block;">SELECIONE UMA OPÇÃO:</label>
                 <select id="variant-select" class="premium-input">
-                    {% for v in object.get_variants %}
+                    {% for v in variants %}
                     <option value="{{ v.id }}" 
                         data-price="{{ v.price }}" 
                         data-stock="{{ v.quantity_stock }}"

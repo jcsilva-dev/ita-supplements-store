@@ -299,7 +299,6 @@ class Supplements(models.Model):
     # 🔥 QUERY OTIMIZADA
     def get_variants(self):
         return self.variants.select_related(
-            'brand',
             'size',
             'flavor',
             'product_content_size'

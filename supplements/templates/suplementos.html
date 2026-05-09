@@ -321,9 +321,13 @@ body { background: var(--bg-light); font-family: 'Plus Jakarta Sans', sans-serif
                     </div>
                 </div>
 
-                <span class="product-brand">
-                    {{ variant.brand|default:"Sem marca" }}
-                </span>
+                           <span class="product-brand">
+                              {% if supplement.brand %}
+                               {{ supplement.brand.name }}
+                              {% else %}
+                               Sem marca
+                              {% endif %}
+                            </span>
 
                 <h3>{{ supplement.model }}</h3>
 

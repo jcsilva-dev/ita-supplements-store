@@ -100,8 +100,8 @@ class NewSuplementView(CreateView):
         return self.render_to_response(
             self.get_context_data(form=form, formset=formset)
         )
-     
-     
+
+
 class SupplementDetailView(DetailView):
     model = Supplements
     template_name = 'supplement_detail.html'
@@ -110,55 +110,56 @@ class SupplementDetailView(DetailView):
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
 
-        obj.total_visualizacoes = F('total_visualizacoes') + 1
-        obj.save(update_fields=['total_visualizacoes'])
-        obj.refresh_from_db()
+        Supplements.objects.filter(pk=obj.pk).update(
+            total_visualizacoes=F('total_visualizacoes') + 1
+        )
 
+        obj.refresh_from_db()
         return obj
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        product = self.object
+        product = self.object  
 
-       
         variants = product.get_variants()
+
         default_variant = product.get_default_variant()
+
         attributes = product.get_available_attributes()
+
 
         context.update({
             "variants": variants,
             "default_variant": default_variant,
             "sizes": attributes["sizes"],
             "flavors": attributes["flavors"],
+
             "installments": (
                 default_variant.get_installment_options()
                 if default_variant else []
             ),
         })
 
+        
         context["recommended_products"] = Supplements.objects.get_recommended(product)
+
+    
         context["feedbacks"] = Feedback.objects.filter(is_approved=True)
+
         context["feedback_form"] = FeedbackForm()
 
         return context
-    
 
     def post(self, request, *args, **kwargs):
-
         form = FeedbackForm(request.POST)
 
         if form.is_valid():
-
-           
             feedback = form.save()
 
-            
             images = request.FILES.getlist("images")
 
-           
             for img in images:
-
                 FeedbackImage.objects.create(
                     feedback=feedback,
                     image=img
