@@ -14,12 +14,6 @@ class ProductVariant(models.Model):
         related_name='variants'
     )
 
-    brand = models.ForeignKey(
-        'Brand',
-        on_delete=models.PROTECT,
-        related_name='variants',
-        verbose_name="Marca"
-    )
 
     price = models.DecimalField(
         max_digits=10,
@@ -217,7 +211,7 @@ class Category(models.Model):
         blank=True,
         null=True
     )
-    slug = models.SlugField(unique=True, blank=True)
+    slug = models.SlugField(unique=True, blank=True, null=True)
 
     class Meta:
         ordering = ["name"]
@@ -273,7 +267,14 @@ class Flavor(models.Model):
 class Supplements(models.Model):
     id = models.AutoField(primary_key=True)
     model = models.CharField(max_length=200, verbose_name="Modelo")
-
+    
+    brand = models.ForeignKey(
+        'Brand',
+        on_delete=models.PROTECT,
+        related_name='supplements',
+        null=True,
+        blank=True
+    )
     category = models.ForeignKey(
         'Category',
         on_delete=models.SET_NULL,
@@ -341,10 +342,7 @@ class Supplements(models.Model):
         data = {}
 
         for v in variants:
-            key = f"{v.flavor_id}_{v.size_id}"
-
-            data[key] = {
-                "id": v.id,
+            data[v.id] = {
                 "price": float(v.price),
                 "stock": v.quantity_stock,
             }
