@@ -92,8 +92,11 @@ class BrandAdmin(admin.ModelAdmin):
 class SupplementAdmin(admin.ModelAdmin):
     list_display = ('model', 'get_first_price',)
     search_fields = ('model', 'variants__brand__name',)
-    inlines = [ImageSupplementInline]
-    inlines = [ProductVariantInline]
+
+    inlines = [
+        ImageSupplementInline,
+        ProductVariantInline
+    ]
 
     def get_first_price(self, obj):
         variant = obj.variants.first()
