@@ -215,37 +215,55 @@ body { background: var(--bg-body); font-family: 'Plus Jakarta Sans', sans-serif;
                 </div>
                 <div class="new-price" id="product-price">R$ {{ variant.price }}</div>
 
-                
-                 <form method="POST" action="{% url 'add_to_cart' variant.id %}">
-                            {% csrf_token %}
+                {% if variant %}
 
-    
-                 <form method="POST" action="{% url 'add_to_cart' variant.id %}">
-                    {% csrf_token %}
+<form method="POST" action="{% url 'add_to_cart' variant.id %}">
+    {% csrf_token %}
 
+    <div class="installments-area">
+        <label style="font-weight: 700; font-size: 13px;">
+            OPÇÕES DE PARCELAMENTO:
+        </label>
 
-                    <div class="installments-area">
-                        <label style="font-weight: 700; font-size: 13px;">OPÇÕES DE PARCELAMENTO:</label>
-                        <select name="installments" id="installPicker" class="premium-input">
-                            {% for option in variant.get_installment_options %}
-                            <option value="{{ option.times }}">
-                                {{ option.times }}x de R$ {{ option.value|floatformat:2 }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+        <select name="installments" id="installPicker" class="premium-input">
+            {% for option in variant.get_installment_options %}
+            <option value="{{ option.times }}">
+                {{ option.times }}x de R$ {{ option.value|floatformat:2 }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
 
-                    <div class="quantity-area">
-                        <input type="number" name="quantity" value="1" min="1" class="premium-input" style="width: 100px;">
-                    </div>
+    <div class="quantity-area">
+        <input
+            type="number"
+            name="quantity"
+            value="1"
+            min="1"
+            class="premium-input"
+            style="width: 100px;"
+        >
+    </div>
 
-                    <button type="submit" name="action" value="cart" class="btn-cta btn-add-cart">
-                        <i class="fas fa-cart-plus"></i> ADICIONAR AO CARRINHO
-                    </button>
-                    <button type="submit" name="action" value="buy" class="btn-cta">
-                        <i class="fab fa-whatsapp"></i> QUERO COMPRAR AGORA
-                    </button>
-                </form>
+    <button type="submit" name="action" value="cart" class="btn-cta btn-add-cart">
+        <i class="fas fa-cart-plus"></i>
+        ADICIONAR AO CARRINHO
+    </button>
+
+    <button type="submit" name="action" value="buy" class="btn-cta">
+        <i class="fab fa-whatsapp"></i>
+        QUERO COMPRAR AGORA
+    </button>
+
+</form>
+
+{% else %}
+
+<div class="stock-warning">
+    Produto sem variante cadastrada.
+</div>
+
+{% endif %}
 
                 {% if object.description %}
                 <div style="margin-top:25px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
