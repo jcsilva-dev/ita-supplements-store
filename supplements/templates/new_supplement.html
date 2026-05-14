@@ -4,12 +4,12 @@
 {% block content %}
 
 <style>
-    
+
     :root {
-        --accent-color: #8b5cf6; 
+        --accent-color: #8b5cf6;
         --accent-hover: #7c3aed;
-        --bg-main: #0f1115; 
-        --card-bg: #1a1d23;  
+        --bg-main: #0f1115;
+        --card-bg: #1a1d23;
         --input-bg: #252932;
         --text-bright: #f8fafc;
         --text-dim: #94a3b8;
@@ -18,7 +18,7 @@
 
     .page-wrapper {
         background-color: var(--bg-main);
-        background-image: 
+        background-image:
             radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
             radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
         min-height: 100vh;
@@ -29,11 +29,10 @@
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
-    
     .form-container {
         background: var(--card-bg);
         width: 100%;
-        max-width: 750px;
+        max-width: 850px;
         border-radius: 24px;
         padding: 48px;
         border: 1px solid var(--border-ui);
@@ -45,7 +44,6 @@
         font-weight: 800;
         color: var(--text-bright);
         margin-bottom: 8px;
-        text-align: left;
     }
 
     .subtitle {
@@ -54,12 +52,11 @@
         font-size: 14px;
     }
 
-    
     .section-header {
         display: flex;
         align-items: center;
         gap: 12px;
-        margin: 32px 0 20px;
+        margin: 40px 0 20px;
     }
 
     .section-header span {
@@ -76,7 +73,6 @@
         background: var(--border-ui);
     }
 
-    
     .form-group {
         margin-bottom: 24px;
     }
@@ -89,8 +85,8 @@
         font-size: 14px;
     }
 
-    .form-group input, 
-    .form-group select, 
+    .form-group input,
+    .form-group select,
     .form-group textarea {
         width: 100%;
         background: var(--input-bg);
@@ -102,14 +98,62 @@
         transition: all 0.3s ease;
     }
 
-    .form-group input:focus {
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
         outline: none;
         border-color: var(--accent-color);
         box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
         background: #2d323d;
     }
 
-    /* ===== GRID DE IMAGENS (DROPZONE STYLE) ===== */
+    /* =========================
+       VARIANTES
+    ========================== */
+
+    .variant-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .variant-card {
+        background: var(--input-bg);
+        border: 1px solid var(--border-ui);
+        border-radius: 18px;
+        padding: 24px;
+    }
+
+    .variant-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .variant-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--accent-color);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .variant-fields {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+    }
+
+    /* =========================
+       IMAGENS
+    ========================== */
+
     .image-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -137,13 +181,11 @@
         font-weight: 600;
     }
 
-    
     .image-form-card input[type="file"] {
         font-size: 12px;
         color: var(--text-dim);
     }
 
-    /* ===== PREVIEW E DELETE ===== */
     .image-preview {
         margin-top: 15px;
         display: none;
@@ -160,18 +202,15 @@
     }
 
     .delete-row {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: #ef4444;
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 10px;
-        color: white;
-        cursor: pointer;
+        margin-top: 12px;
+        color: #ef4444;
+        font-size: 13px;
     }
 
-    
+    /* =========================
+       ACTIONS
+    ========================== */
+
     .form-actions {
         display: flex;
         gap: 16px;
@@ -216,24 +255,106 @@
 </style>
 
 <div class="page-wrapper">
+
     <div class="form-container">
+
         <h1>Novo Suplemento</h1>
-        <p class="subtitle">Preencha as informações para adicionar à vitrine.</p>
+
+        <p class="subtitle">
+            Preencha as informações para adicionar à vitrine.
+        </p>
 
         <form method="POST" enctype="multipart/form-data">
+
             {% csrf_token %}
+
+            <!-- =========================
+                 DADOS GERAIS
+            ========================== -->
 
             <div class="section-header">
                 <span>Geral</span>
                 <div class="section-line"></div>
             </div>
-            
+
             {% for field in form %}
+
                 <div class="form-group">
+
                     <label>{{ field.label }}</label>
+
                     {{ field }}
+
+                    {% if field.errors %}
+                        <small style="color:#ef4444;">
+                            {{ field.errors }}
+                        </small>
+                    {% endif %}
+
                 </div>
+
             {% endfor %}
+
+            <!-- =========================
+                 VARIANTES
+            ========================== -->
+
+            <div class="section-header">
+                <span>Variantes</span>
+                <div class="section-line"></div>
+            </div>
+
+            {{ variant_formset.management_form }}
+
+            <div class="variant-grid">
+
+                {% for variant_form in variant_formset %}
+
+                    <div class="variant-card">
+
+                        <div class="variant-header">
+
+                            <div class="variant-title">
+                                Variante {{ forloop.counter }}
+                            </div>
+
+                        </div>
+
+                        <div class="variant-fields">
+
+                            {% for field in variant_form %}
+
+                                {% if field.name != "DELETE" and field.name != "id" and field.name != "product" %}
+
+                                    <div class="form-group">
+
+                                        <label>{{ field.label }}</label>
+
+                                        {{ field }}
+
+                                        {% if field.errors %}
+                                            <small style="color:#ef4444;">
+                                                {{ field.errors }}
+                                            </small>
+                                        {% endif %}
+
+                                    </div>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <!-- =========================
+                 IMAGENS
+            ========================== -->
 
             <div class="section-header">
                 <span>Fotos do Produto</span>
@@ -241,56 +362,97 @@
             </div>
 
             {{ formset.management_form }}
+
             <div class="image-grid">
+
                 {% for f in formset %}
+
                     <div class="image-form-card">
-                        <small>Slot {{ forloop.counter }}</small>
-                        
-                        <div class="form-group" style="margin-bottom: 0;">
+
+                        <small>
+                            Slot {{ forloop.counter }}
+                        </small>
+
+                        <div class="form-group" style="margin-bottom:0;">
+
                             {{ f.photo }}
+
                         </div>
 
                         {% if f.DELETE %}
+
                             <div class="delete-row">
                                 {{ f.DELETE }} Apagar
                             </div>
+
                         {% endif %}
 
                         <div class="image-preview">
                             <img src="">
                         </div>
+
                     </div>
+
                 {% endfor %}
+
             </div>
 
+            <!-- =========================
+                 BOTÕES
+            ========================== -->
+
             <div class="form-actions">
-                <button type="submit" class="btn-save">Salvar Produto</button>
-                <a href="{% url 'supplements' %}" class="btn-cancel">Voltar</a>
+
+                <button type="submit" class="btn-save">
+                    Salvar Produto
+                </button>
+
+                <a href="{% url 'supplements' %}" class="btn-cancel">
+                    Voltar
+                </a>
+
             </div>
+
         </form>
+
     </div>
+
 </div>
 
 <script>
+
     document.querySelectorAll('.image-form-card input[type="file"]').forEach(input => {
+
         input.addEventListener('change', function() {
+
             const card = this.closest('.image-form-card');
             const preview = card.querySelector('.image-preview');
             const img = card.querySelector('img');
             const file = this.files[0];
 
             if (file) {
+
                 const reader = new FileReader();
+
                 reader.onload = e => {
+
                     img.src = e.target.result;
+
                     preview.style.display = 'block';
+
                     card.style.borderStyle = 'solid';
                     card.style.borderColor = 'var(--accent-color)';
+
                 }
+
                 reader.readAsDataURL(file);
+
             }
+
         });
+
     });
+
 </script>
 
 {% endblock %}

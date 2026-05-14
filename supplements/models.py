@@ -48,11 +48,19 @@ class ProductVariant(models.Model):
         verbose_name="Conteúdo"
     )
 
-    # 🔥 NEVER NULL
+    
     quantity_stock = models.PositiveIntegerField(default=0)
 
-    sku = models.CharField(max_length=100, unique=True)
+    sku = models.CharField(max_length=100, unique=True, blank=True,)
+    
+    def save(self, *args, **kwargs):
 
+        if not self.sku:
+
+            self.sku = uuid.uuid4().hex[:10].upper()
+
+        super().save(*args, **kwargs)
+        
     def __str__(self):
         return f"{self.product.model} - {self.sku}"
 
@@ -296,7 +304,7 @@ class Supplements(models.Model):
     def __str__(self):
         return self.model
 
-    # 🔥 QUERY OTIMIZADA
+    
     def get_variants(self):
         return self.variants.select_related(
             'size',
@@ -304,7 +312,7 @@ class Supplements(models.Model):
             'product_content_size'
         )
 
-    # 🔥 REGRA DE NEGÓCIO: variante padrão
+    
     def get_default_variant(self):
         variants = self.get_variants()
 
@@ -312,7 +320,7 @@ class Supplements(models.Model):
 
         return variant or variants.order_by('price').first()
 
-    # 🔥 ATRIBUTOS PARA UI
+    
     def get_available_attributes(self):
         variants = self.get_variants()
 
@@ -329,12 +337,12 @@ class Supplements(models.Model):
             ),
         }
 
-    # 🔥 PREÇO BASE (usado em listagem)
+    
     def get_price(self):
         variant = self.variants.only('price').order_by('price').first()
         return variant.price if variant else 0
 
-    # 🔥 MAPA PARA FRONTEND (CRÍTICO)
+    
     def get_variant_map(self):
         variants = self.get_variants()
 

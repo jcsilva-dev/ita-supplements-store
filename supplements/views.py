@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
 from supplements.models import Supplements, HomeBanner, Category, Feedback, FeedbackImage, ProductVariant
-from supplements.forms import SupplementModelForm, ImageFormSet, FeedbackForm
+from supplements.forms import SupplementModelForm, ImageFormSet, FeedbackForm, VariantFormSet
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.db import transaction
 from django.db.models import F
@@ -60,45 +60,87 @@ class SupplementsView(ListView):
        
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class NewSuplementView(CreateView):
-     model = Supplements
-     form_class = SupplementModelForm
-     template_name = 'new_supplement.html'
-     success_url = '/supplements/'
+    model = Supplements
+    form_class = SupplementModelForm
+    template_name = 'new_supplement.html'
+    success_url = '/supplements/'
 
-     def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         if "formset" in kwargs:
             context["formset"] = kwargs["formset"]
-
         else:
             context["formset"] = ImageFormSet()
 
+        if "variant_formset" in kwargs:
+            context["variant_formset"] = kwargs["variant_formset"]
+        else:
+            context["variant_formset"] = VariantFormSet()
+
         return context
 
-  
-     def post(self, request, *args, **kwargs):
-        self.object = None  
+    def post(self, request, *args, **kwargs):
+        self.object = None
 
         form = self.get_form()
-        formset = ImageFormSet(self.request.POST, self.request.FILES)
 
-        if form.is_valid() and formset.is_valid():
-            return self.forms_valid(form, formset)
+        formset = ImageFormSet(
+            self.request.POST,
+            self.request.FILES
+        )
 
-        return self.forms_invalid(form, formset)
+        variant_formset = VariantFormSet(
+            self.request.POST
+        )
 
-     def forms_valid(self, form, formset):
+        if (
+            form.is_valid()
+            and formset.is_valid()
+            and variant_formset.is_valid()
+        ):
+            return self.forms_valid(
+                form,
+                formset,
+                variant_formset
+            )
+
+        return self.forms_invalid(
+            form,
+            formset,
+            variant_formset
+        )
+
+    def forms_valid(
+        self,
+        form,
+        formset,
+        variant_formset
+    ):
         with transaction.atomic():
+
             self.object = form.save()
+
             formset.instance = self.object
             formset.save()
 
+            variant_formset.instance = self.object
+            variant_formset.save()
+
         return super().form_valid(form)
 
-     def forms_invalid(self, form, formset):
+    def forms_invalid(
+        self,
+        form,
+        formset,
+        variant_formset
+    ):
         return self.render_to_response(
-            self.get_context_data(form=form, formset=formset)
+            self.get_context_data(
+                form=form,
+                formset=formset,
+                variant_formset=variant_formset
+            )
         )
 
 

@@ -1,4 +1,4 @@
-from supplements.models import Supplements, ImageSupplement, Feedback
+from supplements.models import Supplements, ImageSupplement, Feedback, ProductVariant
 from django import forms 
 from django.forms import inlineformset_factory
 
@@ -8,6 +8,22 @@ class SupplementModelForm(forms.ModelForm):
      model = Supplements
      fields = '__all__'
 
+
+
+VariantFormSet = inlineformset_factory(
+    Supplements,
+    ProductVariant,
+    fields=[
+        "price",
+        "size",
+        "flavor",
+        "product_content_size",
+        "quantity_stock",
+    ],
+    extra=3,
+    can_delete=True
+)
+
 ImageFormSet = inlineformset_factory(
    Supplements,
    ImageSupplement,
@@ -16,6 +32,9 @@ ImageFormSet = inlineformset_factory(
    max_num=4,
    can_delete=True
 )
+
+
+
 
 class FeedbackForm(forms.ModelForm):
 
