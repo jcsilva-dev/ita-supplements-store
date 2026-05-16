@@ -232,21 +232,33 @@ class SupplementUpdateView(UpdateView):
                 self.request.FILES,
                 instance=self.object
             )
+
+            context["variant_formset"] = VariantFormSet(
+                self.request.POST,
+                instance=self.object
+)
         else:
             context["formset"] = ImageFormSet(instance=self.object)
+            context["variant_formset"] = VariantFormSet(instance=self.object)
 
         return context
 
     def form_valid(self, form):
         context = self.get_context_data()
         formset = context["formset"]
+        variant_formset = context["variant_formset"]
 
-        if not formset.is_valid():
+        if (
+            not formset.is_valid()
+            or not variant_formset.is_valid()
+        ):
             return self.form_invalid(form)
-
+        
         with transaction.atomic():
             self.object = form.save()
             formset.instance = self.object
+            variant_formset.instance = self.object
+            variant_formset.save()
             formset.save()
 
         return super().form_valid(form)

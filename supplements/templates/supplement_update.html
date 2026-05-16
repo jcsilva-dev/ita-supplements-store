@@ -148,6 +148,20 @@
         transition: 0.3s ease;
     }
 
+    .variant-card{
+        background: #16191d;
+        border: 1px solid var(--border-ui);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .variants-wrapper{
+            display:flex;
+            flex-direction:column;
+            gap:20px;
+    }
+
     .image-card:hover {
         border-color: rgba(255, 122, 0, 0.4);
     }
@@ -306,6 +320,51 @@
                         {% endif %}
                     </div>
                 {% endfor %}
+            </div>
+
+              {{ variant_formset.management_form }}
+            <div class="section-divider">
+                <span>Variantes do Produto</span>
+                <div></div>
+            </div>
+
+            <div class="variants-wrapper">
+
+                {% for variant_form in variant_formset %}
+                    <div class="variant-card">
+
+                        {{ variant_form.id }}
+
+                        <div class="main-form-grid">
+
+                            {% for field in variant_form.visible_fields %}
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}">
+                                        {{ field.label }}
+                                    </label>
+
+                                    {{ field }}
+
+                                    {% if field.errors %}
+                                        <small style="color:#f87171;">
+                                            {{ field.errors.0 }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        {% if variant_form.DELETE %}
+                            <div class="delete-action">
+                                {{ variant_form.DELETE }}
+                                <span>Remover Variante</span>
+                            </div>
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+
             </div>
 
             <div class="form-actions">
