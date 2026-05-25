@@ -1,407 +1,594 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block meta %}
+<meta property="og:title" content="Meu Carrinho | Ita Suplementos">
+{% endblock %}
+
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://unpkg.com/scrollreveal"></script>
 
+<!-- ================================================================
+     FONTS
+     ================================================================ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- ================================================================
+     STYLES
+     ================================================================ -->
 <style>
+
+/* ----------------------------------------------------------------
+   § 1  DESIGN TOKENS
+   ---------------------------------------------------------------- */
 :root {
---primary: #2563eb;
---primary-soft: #eff6ff;
---dark: #0f172a;
---text-main: #1e293b;
---text-sub: #64748b;
---bg-body: #f1f5f9;
---white: #ffffff;
---radius-lg: 30px;
---radius-md: 20px;
---shadow: 0 20px 25px -5px rgba(0,0,0,0.05),0 10px 10px -5px rgba(0,0,0,0.02);
+  --fire:       #ff5c00;
+  --fire-dim:   rgba(255,92,0,.14);
+  --fire-glow:  0 8px 28px rgba(255,92,0,.4);
+
+  --wpp:        #25D366;
+  --wpp-glow:   0 8px 28px rgba(37,211,102,.38);
+
+  --bg:         #0d0e11;
+  --surface-1:  #141519;
+  --surface-2:  #1c1d23;
+  --surface-3:  #23252d;
+
+  --text-1:     #f0f1f4;
+  --text-2:     #9499a8;
+  --text-3:     #555966;
+
+  --border:       rgba(255,255,255,.07);
+  --border-hover: rgba(255,92,0,.4);
+
+  --red:        #f87171;
+  --red-dim:    rgba(248,113,113,.12);
+
+  --r-2xl:  26px;
+  --r-xl:   18px;
+  --r-lg:   12px;
+  --r-md:    8px;
+  --r-pill: 999px;
+
+  --shadow-lift: 0 20px 54px rgba(0,0,0,.65);
+
+  --spring:   cubic-bezier(.22,1,.36,1);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+
+  --f-display: 'Barlow Condensed', sans-serif;
+  --f-body:    'Barlow', sans-serif;
 }
 
-body{
-background:var(--bg-body);
-font-family:'Plus Jakarta Sans',sans-serif;
-color:var(--text-main);
+/* ----------------------------------------------------------------
+   § 2  RESET & BASE
+   ---------------------------------------------------------------- */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  font-family: var(--f-body);
+  color: var(--text-1);
+  -webkit-font-smoothing: antialiased;
+}
+img { display:block; max-width:100%; }
+a   { text-decoration:none; color:inherit; }
+button { cursor:pointer; font-family:inherit; border:none; background:none; }
+
+/* ----------------------------------------------------------------
+   § 3  LAYOUT
+   ---------------------------------------------------------------- */
+.pg {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
-.container-carrinho{
-max-width:1200px;
-margin:auto;
-padding:60px 20px;
+/* ----------------------------------------------------------------
+   § 4  PAGE HEADER
+   ---------------------------------------------------------------- */
+.cart-header {
+  padding: 52px 0 36px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.cart-header__icon {
+  width: 48px; height: 48px;
+  border-radius: var(--r-lg);
+  background: var(--fire-dim);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fire);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.cart-header__title {
+  font-family: var(--f-display);
+  font-size: 40px; font-weight: 900;
+  letter-spacing: .03em;
+  line-height: 1;
+}
+.cart-header__count {
+  font-size: 14px; font-weight: 500;
+  color: var(--text-3);
+  margin-top: 4px;
 }
 
-.titulo-carrinho{
-font-size:36px;
-font-weight:800;
-margin-bottom:40px;
-color:var(--dark);
-display:flex;
-align-items:center;
-gap:15px;
+/* ----------------------------------------------------------------
+   § 5  CART GRID
+   ---------------------------------------------------------------- */
+.cart-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+  padding-bottom: 100px;
 }
 
-.titulo-carrinho i{color:var(--primary);}
-
-.cart-grid{
-display:grid;
-grid-template-columns:1fr 380px;
-gap:30px;
-align-items:start;
+/* ----------------------------------------------------------------
+   § 6  CART ITEMS
+   ---------------------------------------------------------------- */
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.cart-items-list{
-display:flex;
-flex-direction:column;
-gap:20px;
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: var(--surface-1);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 18px;
+  position: relative;
+  transition: border-color .3s, transform .4s var(--spring);
+}
+.cart-item:hover {
+  border-color: rgba(255,255,255,.12);
+  transform: translateY(-3px);
 }
 
-.item-carrinho{
-background:var(--white);
-padding:25px;
-border-radius:var(--radius-md);
-display:flex;
-align-items:center;
-gap:20px;
-box-shadow:var(--shadow);
-transition:.4s cubic-bezier(.4,0,.2,1);
-border:1px solid rgba(255,255,255,.8);
-position:relative;
+/* product image */
+.cart-item__img {
+  width: 90px; height: 90px;
+  flex-shrink: 0;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.cart-item__img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
 }
 
-.item-carrinho:hover{
-transform:translateY(-5px);
-box-shadow:0 25px 35px -10px rgba(0,0,0,.08);
+/* info */
+.cart-item__info { flex: 1; min-width: 0; }
+
+.cart-item__name {
+  font-family: var(--f-display);
+  font-size: 19px; font-weight: 700;
+  letter-spacing: .03em; line-height: 1.2;
+  color: var(--text-1);
+  margin-bottom: 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.img-produto-cart{
-width:100px;
-height:100px;
-object-fit:contain;
-background:#f8fafc;
-border-radius:15px;
-padding:10px;
+.cart-item__meta {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 10px;
+}
+.cart-item__tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  font-size: 11px; font-weight: 600;
+  color: var(--text-2);
+  letter-spacing: .03em;
 }
 
-.produto-info{flex:1;}
-
-.produto-nome{
-font-size:18px;
-font-weight:800;
-color:var(--dark);
-margin-bottom:5px;
+.cart-item__price {
+  font-family: var(--f-display);
+  font-size: 22px; font-weight: 900;
+  letter-spacing: .02em;
+  color: var(--fire);
+}
+.cart-item__subtotal {
+  font-size: 12px; font-weight: 500;
+  color: var(--text-3);
+  margin-top: 2px;
 }
 
-.produto-meta{
-font-size:13px;
-color:var(--text-sub);
-font-weight:600;
-display:flex;
-gap:15px;
+/* remove button */
+.cart-item__remove {
+  width: 36px; height: 36px;
+  border-radius: var(--r-md);
+  background: var(--red-dim);
+  border: 1px solid rgba(248,113,113,.2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--red);
+  flex-shrink: 0;
+  transition: background .2s, transform .25s var(--spring);
+  font-size: 14px;
+}
+.cart-item__remove:hover {
+  background: var(--red);
+  color: #fff;
+  transform: scale(1.1) rotate(90deg);
 }
 
-.produto-preco-unit{
-font-weight:800;
-color:var(--primary);
-font-size:20px;
-margin-top:8px;
+/* ----------------------------------------------------------------
+   § 7  ORDER SUMMARY (sticky sidebar)
+   ---------------------------------------------------------------- */
+.order-summary {
+  background: var(--surface-1);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-2xl);
+  padding: 28px;
+  position: sticky;
+  top: 28px;
 }
 
-.remover-btn{
-background:#fff1f0;
-color:#ff4d4f;
-width:40px;
-height:40px;
-border-radius:12px;
-display:flex;
-align-items:center;
-justify-content:center;
-text-decoration:none;
-transition:.3s;
+.order-summary__title {
+  font-family: var(--f-display);
+  font-size: 20px; font-weight: 900;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-1);
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border);
 }
 
-.remover-btn:hover{
-background:#ff4d4f;
-color:white;
-transform:rotate(90deg);
+.order-summary__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 14px; font-weight: 500;
+  color: var(--text-2);
+}
+.order-summary__row--free { color: #4ade80; font-weight: 600; }
+
+.order-summary__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 18px 0;
 }
 
-.resumo-fixed{
-background:var(--white);
-padding:35px;
-border-radius:var(--radius-lg);
-box-shadow:var(--shadow);
-border:1px solid var(--primary-soft);
-position:sticky;
-top:30px;
+.order-summary__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.order-summary__total-label {
+  font-size: 15px; font-weight: 700;
+  color: var(--text-1);
+}
+.order-summary__total-value {
+  font-family: var(--f-display);
+  font-size: 36px; font-weight: 900;
+  letter-spacing: .02em;
+  color: var(--fire);
+  line-height: 1;
 }
 
-.resumo-titulo{
-font-size:20px;
-font-weight:800;
-margin-bottom:25px;
-padding-bottom:15px;
-border-bottom:2px solid #f1f5f9;
+/* payment select area */
+.payment-section { margin: 22px 0; }
+
+.payment-section__label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 8px;
+  display: block;
 }
 
-.resumo-linha{
-display:flex;
-justify-content:space-between;
-margin-bottom:15px;
-font-weight:600;
-color:var(--text-sub);
+.select-field {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  color: var(--text-1);
+  font-family: var(--f-body);
+  font-size: 14px; font-weight: 500;
+  padding: 13px 16px;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239499a8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  cursor: pointer;
+  transition: border-color .25s;
+}
+.select-field:focus  { border-color: var(--fire); }
+.select-field option { background: var(--surface-2); }
+
+/* CTA */
+.btn-checkout {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%;
+  background: var(--wpp);
+  color: #fff;
+  padding: 18px;
+  border-radius: var(--r-xl);
+  font-family: var(--f-display);
+  font-size: 20px; font-weight: 900;
+  letter-spacing: .08em; text-transform: uppercase;
+  border: none;
+  margin-top: 20px;
+  transition: box-shadow .3s, transform .3s var(--spring), filter .3s;
+}
+.btn-checkout:hover {
+  box-shadow: var(--wpp-glow);
+  transform: translateY(-3px);
+  filter: brightness(1.07);
 }
 
-.resumo-total{
-margin-top:20px;
-padding-top:20px;
-border-top:2px solid #f1f5f9;
-display:flex;
-justify-content:space-between;
-align-items:center;
+.link-continue {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 16px;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-3);
+  transition: color .2s;
+}
+.link-continue:hover { color: var(--fire); }
+
+/* ----------------------------------------------------------------
+   § 8  EMPTY STATE
+   ---------------------------------------------------------------- */
+.cart-empty {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center;
+  padding: 90px 24px;
+  background: var(--surface-1);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-2xl);
+  margin-bottom: 100px;
+}
+.cart-empty__icon {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  background: var(--fire-dim);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fire); font-size: 30px;
+  margin-bottom: 22px;
+}
+.cart-empty__title {
+  font-family: var(--f-display);
+  font-size: 30px; font-weight: 900;
+  letter-spacing: .04em;
+  margin-bottom: 10px;
+}
+.cart-empty__sub {
+  font-size: 15px; font-weight: 400;
+  color: var(--text-2); line-height: 1.65;
+  max-width: 320px; margin-bottom: 30px;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px;
+  background: var(--fire);
+  color: #fff;
+  border-radius: var(--r-pill);
+  font-family: var(--f-display);
+  font-size: 16px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  transition: box-shadow .3s, transform .3s var(--spring);
+}
+.btn-primary:hover {
+  box-shadow: var(--fire-glow);
+  transform: translateY(-2px);
 }
 
-.total-valor{
-font-size:28px;
-font-weight:900;
-color:var(--primary);
+/* ----------------------------------------------------------------
+   § 9  SCROLL REVEAL
+   ---------------------------------------------------------------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .6s var(--ease-out), transform .6s var(--ease-out);
+}
+.reveal.in { opacity:1; transform:translateY(0); }
+
+/* ----------------------------------------------------------------
+   § 10  RESPONSIVE
+   ---------------------------------------------------------------- */
+@media (max-width: 860px) {
+  .cart-grid {
+    grid-template-columns: 1fr;
+  }
+  .order-summary {
+    position: static;
+  }
 }
 
-.finalizar-btn{
-background:#25D366;
-color:white;
-padding:20px;
-border-radius:18px;
-text-decoration:none;
-font-weight:800;
-font-size:18px;
-display:flex;
-align-items:center;
-justify-content:center;
-gap:12px;
-margin-top:30px;
-box-shadow:0 10px 20px rgba(37,211,102,.2);
-transition:.4s;
-border:none;
-width:100%;
+@media (max-width: 600px) {
+  .pg { padding: 0 14px; }
+  .cart-header { padding: 36px 0 24px; }
+  .cart-header__title { font-size: 30px; }
+  .cart-item { flex-wrap: wrap; }
+  .cart-item__img { width: 70px; height: 70px; }
+  .cart-item__name { font-size: 16px; }
 }
 
-.finalizar-btn:hover{
-transform:translateY(-5px);
-box-shadow:0 15px 30px rgba(37,211,102,.3);
-}
-
-.btn-continuar{
-display:block;
-text-align:center;
-margin-top:20px;
-color:var(--text-sub);
-text-decoration:none;
-font-weight:700;
-font-size:14px;
-transition:.3s;
-}
-
-.btn-continuar:hover{color:var(--primary);}
-
-.carrinho-vazio{
-background:var(--white);
-padding:80px 40px;
-border-radius:var(--radius-lg);
-text-align:center;
-box-shadow:var(--shadow);
-}
-
-.carrinho-vazio i{
-font-size:80px;
-color:#e2e8f0;
-margin-bottom:25px;
-}
-
-.vazio-titulo{
-font-size:28px;
-font-weight:800;
-margin-bottom:10px;
-}
-
-@media(max-width:968px){
-.cart-grid{grid-template-columns:1fr;}
-.resumo-fixed{position:static;margin-top:20px;}
-.titulo-carrinho{font-size:28px;}
-.item-carrinho{flex-direction:column;text-align:center;}
-.remover-btn{position:absolute;top:15px;right:15px;}
-}
 </style>
 
-<div class="container-carrinho">
 
-<h1 class="titulo-carrinho reveal-left">
-<i class="fas fa-shopping-bag"></i> Meu Carrinho
-</h1>
+<!-- ================================================================
+     PAGE HEADER
+     ================================================================ -->
+<div class="pg">
+  <header class="cart-header reveal">
+    <div class="cart-header__icon" aria-hidden="true">🛒</div>
+    <div>
+      <h1 class="cart-header__title">Meu Carrinho</h1>
+      {% if items %}
+      <p class="cart-header__count">{{ items|length }} ite{% if items|length == 1 %}m{% else %}ns{% endif %} no pedido</p>
+      {% endif %}
+    </div>
+  </header>
+</div>
 
+
+<!-- ================================================================
+     CART — populated state
+     ================================================================ -->
 {% if items %}
 
-<div class="cart-grid">
+<div class="pg">
+  <div class="cart-grid">
 
-<div class="cart-items-list reveal-left">
+    <!-- ── ITEMS ── -->
+    <section aria-label="Itens do carrinho">
+      <div class="cart-items">
+        {% for item in items %}
+        <div class="cart-item reveal" style="transition-delay:{{ forloop.counter0 }}0ms">
 
-{% for item in items %}
+          <div class="cart-item__img">
+            {% if item.image %}
+              <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
+            {% else %}
+              <img src="{% static 'images/no-image.png' %}" alt="{{ item.name }}" loading="lazy">
+            {% endif %}
+          </div>
 
-<div class="item-carrinho">
-{% if item.image %}
-    <img src="{{ item.image }}" class="img-produto-cart" alt="{{ item.name }}">
-{% else %}
-    <img src="{% static 'img/no-image.png' %}" class="img-produto-cart" alt="Sem imagem">
-{% endif %}
+          <div class="cart-item__info">
+            <p class="cart-item__name">{{ item.name }}</p>
 
-<div class="produto-info">
+            <div class="cart-item__meta">
+              <span class="cart-item__tag">Qtd: {{ item.quantity }}</span>
+              {% if item.flavor %}
+              <span class="cart-item__tag">{{ item.flavor }}</span>
+              {% endif %}
+              {% if item.size %}
+              <span class="cart-item__tag">{{ item.size }}</span>
+              {% endif %}
+            </div>
 
-<div class="produto-nome">
-{{ item.name }}
+            <p class="cart-item__price">R$ {{ item.price }}</p>
+            <p class="cart-item__subtotal">Subtotal: R$ {{ item.subtotal|floatformat:2 }}</p>
+          </div>
+
+          <a
+            href="{% url 'remove_item' item.key %}"
+            class="cart-item__remove"
+            aria-label="Remover {{ item.name }}"
+            title="Remover item"
+          >✕</a>
+
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- ── ORDER SUMMARY ── -->
+    <aside class="order-summary reveal" style="transition-delay:.1s" aria-label="Resumo do pedido">
+
+      <h2 class="order-summary__title">Resumo</h2>
+
+      <div class="order-summary__row">
+        <span>Produtos ({{ items|length }})</span>
+        <span>R$ {{ total|floatformat:2 }}</span>
+      </div>
+      <div class="order-summary__row">
+        <span>Frete</span>
+        <span class="order-summary__row--free">Grátis</span>
+      </div>
+
+      <div class="order-summary__divider"></div>
+
+      <div class="order-summary__total">
+        <span class="order-summary__total-label">Total</span>
+        <span class="order-summary__total-value">R$ {{ total|floatformat:2 }}</span>
+      </div>
+
+      <form method="POST" action="{% url 'checkout' %}">
+        {% csrf_token %}
+
+        <div class="payment-section">
+          <label class="payment-section__label" for="cart-installments">Forma de pagamento</label>
+          <select name="cart_installments" id="cart-installments" class="select-field">
+            <option value="1">À vista</option>
+            <option value="2">2x sem juros</option>
+            <option value="3">3x sem juros</option>
+            <option value="4">4x sem juros</option>
+            <option value="5">5x sem juros</option>
+            <option value="6">6x sem juros</option>
+            <option value="7">7x</option>
+            <option value="8">8x</option>
+            <option value="9">9x</option>
+            <option value="10">10x</option>
+            <option value="11">11x</option>
+            <option value="12">12x</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-checkout">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.122 1.528 5.855L.057 23.077a.75.75 0 00.915.921l5.42-1.424A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.92 0-3.72-.5-5.28-1.374l-.38-.216-3.938 1.033 1.055-3.826-.235-.389A9.937 9.937 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+          </svg>
+          Pagar Agora
+        </button>
+
+      </form>
+
+      <a href="{% url 'supplements' %}" class="link-continue">
+        ← Continuar comprando
+      </a>
+
+    </aside>
+
+  </div>
 </div>
 
-<div class="produto-meta">
 
-<span>
-<i class="fas fa-layer-group"></i>
-Qtd: {{ item.quantity }}
-</span>
-
-</div>
-
-<div class="produto-preco-unit">
-R$ {{ item.price }}
-</div>
-
-<div style="font-size:13px;color:var(--text-sub);margin-top:4px;font-weight:600;">
-Subtotal: R$ {{ item.subtotal|floatformat:2 }}
-</div>
-
-</div>
-
-<a class="remover-btn"
-   href="{% url 'remove_item' item.key %}"
-   title="Remover item">
-    <i class="fas fa-times"></i>
-</a>
-
-</div>
-
-{% endfor %}
-
-</div>
-
-<aside class="resumo-fixed reveal-right">
-
-<h2 class="resumo-titulo">
-Resumo do Pedido
-</h2>
-
-<div class="resumo-linha">
-<span>Produtos ({{ items|length }})</span>
- <span>R$ {{ total|floatformat:2 }}</span>
-</div>
-
-<div class="resumo-linha">
-<span>Frete</span>
-<span style="color:green;">Grátis</span>
-</div>
-
-<div class="resumo-total">
-<span style="font-weight:800;font-size:18px;">Total</span>
-<div class="total-valor">R$ {{ total|floatformat:2 }}</div>
-</div>
-
-
-<form method="POST" action="{% url 'checkout' %}" class="checkout-box">
-{% csrf_token %}
-
-<div class="parcelamento-area">
-
-
-
-
-<p style="font-size:13px;color:#64748b;margin-bottom:10px;">
-Escolha como deseja pagar seu pedido antes de finalizar.
-</p>
-
-
-<label class="parcelamento-label">
-    <i class="fas fa-credit-card"></i>
-    Forma de pagamento
-</label>
-
-<select name="cart_installments" class="parcelamento-select">
-<option value="1">À vista</option>
-<option value="2">2x sem juros</option>
-<option value="3">3x sem juros</option>
-<option value="4">4x sem juros</option>
-<option value="5">5x sem juros</option>
-<option value="6">6x sem juros</option>
-<option value="7">7x</option>
-<option value="8">8x</option>
-<option value="9">9x</option>
-<option value="10">10x</option>
-<option value="11">11x</option>
-<option value="12">12x</option>
-</select>
-
-</div>
-
-
-<button type="submit" class="finalizar-btn">
-<i class="fab fa-whatsapp"></i>
-PAGAR AGORA
-</button>
-
-</form>
-
-<a href="{% url 'supplements' %}" class="btn-continuar">
-<i class="fas fa-arrow-left"></i>
-Continuar comprando
-</a>
-
-</aside>
-
-</div>
-
+<!-- ================================================================
+     CART — empty state
+     ================================================================ -->
 {% else %}
 
-<div class="carrinho-vazio reveal-bottom">
-
-<i class="fas fa-shopping-cart"></i>
-
-<h2 class="vazio-titulo">
-Sua cesta está vazia
-</h2>
-
-<p style="color:var(--text-sub);margin-bottom:30px;">
-Parece que você ainda não escolheu seus suplementos hoje.
-</p>
-
-<a href="{% url 'supplements' %}"
-class="finalizar-btn"
-style="display:inline-flex;width:auto;padding:18px 40px;background:var(--primary);">
-
-VOLTAR PARA A LOJA
-
-</a>
-
+<div class="pg">
+  <div class="cart-empty reveal" role="status">
+    <div class="cart-empty__icon" aria-hidden="true">🛒</div>
+    <h2 class="cart-empty__title">Sua cesta está vazia</h2>
+    <p class="cart-empty__sub">
+      Você ainda não adicionou nenhum suplemento. Explore nosso catálogo e encontre o ideal para você.
+    </p>
+    <a href="{% url 'supplements' %}" class="btn-primary">
+      Explorar produtos
+    </a>
+  </div>
 </div>
 
 {% endif %}
 
-</div>
 
+<!-- ================================================================
+     SCRIPTS — scroll reveal only
+     ================================================================ -->
 <script>
-document.addEventListener("DOMContentLoaded",function(){
+(function () {
+  'use strict';
 
-ScrollReveal().reveal('.reveal-left',{origin:'left',distance:'30px',duration:1000});
-ScrollReveal().reveal('.reveal-right',{origin:'right',distance:'30px',duration:1000});
-ScrollReveal().reveal('.reveal-bottom',{origin:'bottom',distance:'30px',duration:1000});
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.06, rootMargin: '0px 0px -20px 0px' });
 
-});
+  document.querySelectorAll('.reveal').forEach(function (el, i) {
+    if (!el.style.transitionDelay) {
+      el.style.transitionDelay = (Math.min(i, 6) * 0.06) + 's';
+    }
+    io.observe(el);
+  });
+
+}());
 </script>
 
 {% endblock %}
