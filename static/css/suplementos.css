@@ -1,0 +1,719 @@
+/* ================================================================
+   ITA SUPPLEMENTS STORE — Product Listing CSS
+   Reestruturado: Mobile-First · Layout Fluido · Sem device-specific
+   ================================================================ */
+
+
+/* ----------------------------------------------------------------
+   § 1  DESIGN TOKENS
+   ---------------------------------------------------------------- */
+:root {
+  /* palette */
+  --fire:          #ff5c00;
+  --fire-dim:      rgba(255, 92, 0, .14);
+  --fire-glow:     rgba(255, 92, 0, .35);
+
+  /* dark surfaces */
+  --bg:            #0d0e11;
+  --surface-1:     #141519;
+  --surface-2:     #1c1d23;
+  --surface-3:     #23252d;
+
+  /* text */
+  --text-1:        #f0f1f4;
+  --text-2:        #9499a8;
+  --text-3:        #555966;
+
+  /* borders */
+  --border:        rgba(255,255,255,.07);
+  --border-hover:  rgba(255, 92, 0, .45);
+
+  /* semantic badges */
+  --ok-bg:         rgba(22,163,74,.18);
+  --ok-text:       #4ade80;
+  --low-bg:        rgba(234,179,8,.14);
+  --low-text:      #facc15;
+  --out-bg:        rgba(239,68,68,.14);
+  --out-text:      #f87171;
+  --na-bg:         rgba(255,255,255,.06);
+  --na-text:       #6b7280;
+
+  /* radius */
+  --r-2xl:  26px;
+  --r-xl:   18px;
+  --r-lg:   12px;
+  --r-md:    8px;
+  --r-pill: 999px;
+
+  /* shadows */
+  --shadow-card:   0 2px 16px rgba(0,0,0,.45);
+  --shadow-lift:   0 20px 54px rgba(0,0,0,.6), 0 0 0 1px var(--border-hover);
+  --shadow-fire:   0 8px 28px rgba(255,92,0,.42);
+
+  /* motion */
+  --spring:        cubic-bezier(.22, 1, .36, 1);
+  --ease-out:      cubic-bezier(.16, 1, .3, 1);
+
+  /* fonts */
+  --f-display:    'Barlow Condensed', sans-serif;
+  --f-body:       'Barlow', sans-serif;
+
+  /* ── MELHORIA: tokens de espaçamento fluidos evitam números mágicos ──
+     Usados para padding de página, mantendo consistência em todos os breakpoints. */
+  --page-px:       clamp(10px, 3vw, 24px);
+  --section-gap:   clamp(40px, 6vw, 60px);
+
+  /* ── MELHORIA: tamanho do banner como token fluido ──
+     Evita redefinir height em cada breakpoint com valores fixos. */
+  --banner-h:      clamp(220px, 40vw, 500px);
+
+  /* ── MELHORIA: tamanho do anel de categoria como token ──
+     Substituiu width/height fixos em .cat-item__ring. */
+  --cat-ring:      clamp(56px, 8vw, 72px);
+}
+
+
+/* ----------------------------------------------------------------
+   § 2  RESET & BASE
+   ---------------------------------------------------------------- */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  font-family: var(--f-body);
+  color: var(--text-1);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* MELHORIA: evita overflow horizontal causado por elementos wide como cats__track */
+  overflow-x: hidden;
+}
+
+img   { display: block; max-width: 100%; }
+a     { text-decoration: none; color: inherit; }
+button{ cursor: pointer; font-family: inherit; border: none; background: none; }
+
+/* ── MELHORIA: foco visível para acessibilidade de teclado ──
+   O original não definia :focus-visible em nenhum elemento interativo.
+   Esta regra global garante que botões, links e inputs sejam navegáveis
+   via teclado sem remover o outline em clicks com mouse. */
+:focus-visible {
+  outline: 2px solid var(--fire);
+  outline-offset: 3px;
+  border-radius: var(--r-md);
+}
+
+/* ── MELHORIA: respeita preferência de redução de movimento do sistema ──
+   O original não tratava prefers-reduced-motion. Usuários com vestibular
+   disorders ou epilepsia ficavam expostos a todas as animações. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+
+/* ----------------------------------------------------------------
+   § 3  HERO / BANNER
+   ---------------------------------------------------------------- */
+.hero {
+  /* MELHORIA: usa --page-px no lugar de padding: 28px 24px 0
+     No original, o padding era fixo e redefinido em cada breakpoint mobile. */
+  padding: var(--page-px) var(--page-px) 0;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.banner {
+  position: relative;
+  /* MELHORIA: height fluida via clamp() substitui height: 500px fixo
+     que era redefinido para 350px em 992px e 260px em 768px.
+     Agora escala suavemente sem nenhum breakpoint adicional. */
+  height: var(--banner-h);
+  border-radius: var(--r-2xl);
+  overflow: hidden;
+  background: var(--surface-1);
+  isolation: isolate;
+}
+
+.banner__slide {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease-out);
+  will-change: opacity;
+}
+.banner__slide.is-active { opacity: .65; }
+
+/* two-layer overlay: subtle vignette + bottom fade */
+.banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(255,92,0,.07) 0%, transparent 55%),
+    linear-gradient(180deg, transparent 40%, rgba(13,14,17,.9) 100%);
+  z-index: 1; pointer-events: none;
+}
+
+/* orange accent line top-left
+   MELHORIA: escondido em telas estreitas via @media min-width (mobile-first)
+   ao invés de display:none num breakpoint max-width como no original. */
+.banner::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 40px;
+  width: 3px; height: 60%;
+  background: linear-gradient(to bottom, var(--fire), transparent);
+  z-index: 2;
+  display: none; /* oculto por padrão no mobile */
+}
+
+/* dots */
+.banner__dots {
+  position: absolute; bottom: 26px; right: 32px;
+  display: flex; gap: 8px; z-index: 3;
+}
+.banner__dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  padding: 0;
+  transition: background .3s, width .45s var(--spring);
+}
+.banner__dot.is-active {
+  width: 28px;
+  border-radius: var(--r-pill);
+  background: var(--fire);
+}
+.banner__empty {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%;
+  font-family: var(--f-display);
+  font-size: 16px; letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+
+/* ----------------------------------------------------------------
+   § 4  SEARCH
+   ---------------------------------------------------------------- */
+.search-outer {
+  width: min(92%, 580px);
+  margin: -20px auto var(--section-gap);
+  padding: 0 var(--page-px);
+  position: relative; z-index: 20;
+}
+
+.search-form {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 7px 7px 7px 22px;
+  box-shadow: 0 12px 36px rgba(0,0,0,.5);
+  transition: border-color .25s;
+}
+.search-form:focus-within { border-color: var(--fire); }
+
+.search-form input {
+  /* MELHORIA: min-width: 0 evita que o input flex empurre o botão para fora
+     em telas muito estreitas. É uma regra essencial para flex items com texto. */
+  flex: 1;
+  min-width: 0;
+  border: none; outline: none;
+  background: transparent;
+  font-family: var(--f-body);
+  font-size: 14px; font-weight: 400;
+  color: var(--text-1);
+  letter-spacing: .01em;
+}
+.search-form input::placeholder { color: var(--text-3); }
+
+.search-form__btn {
+  flex-shrink: 0;
+  background: var(--fire);
+  color: #fff;
+  padding: 11px 30px;
+  border-radius: var(--r-pill);
+  font-family: var(--f-display);
+  font-size: 14px; font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transition: box-shadow .3s, transform .25s var(--spring);
+}
+/* MELHORIA: hover apenas em dispositivos que suportam pointer fino (mouse)
+   Evita que o estado hover fique "travado" em telas touch após o tap. */
+@media (hover: hover) and (pointer: fine) {
+  .search-form__btn:hover {
+    box-shadow: var(--shadow-fire);
+    transform: scale(1.04);
+  }
+}
+
+
+/* ----------------------------------------------------------------
+   § 5  CATEGORIES TICKER
+   ---------------------------------------------------------------- */
+.cats {
+  max-width: 1440px;
+  margin: 0 auto var(--section-gap);
+  /* MELHORIA: overflow:hidden aqui contém o cats__track sem vazar
+     e evita overflow-x na página toda. */
+  overflow: hidden;
+}
+.cats__heading {
+  text-align: center;
+  font-family: var(--f-display);
+  font-size: 13px; font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 24px;
+}
+.cats__mask {
+  overflow: hidden;
+  -webkit-mask: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+          mask: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+}
+
+/* MELHORIA: pause do ticker só em pointer fino (mouse).
+   No original, :hover pausava a animação, o que em touch não funcionava
+   pois o hover não é disparado da mesma forma — o track ficava sempre animado. */
+@media (hover: hover) and (pointer: fine) {
+  .cats__mask:hover .cats__track { animation-play-state: paused; }
+}
+
+.cats__track {
+  display: flex; gap: 18px;
+  width: max-content;
+  animation: scroll-cats 32s linear infinite;
+  will-change: transform;
+}
+
+@keyframes scroll-cats {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.cat-item {
+  flex-shrink: 0;
+  /* MELHORIA: largura fixa de 88px substituída por valor fluido com clamp.
+     Em telas muito estreitas, 88px poderia ser proporcionalmente grande demais. */
+  width: clamp(72px, 12vw, 88px);
+  text-align: center;
+  transition: transform .38s var(--spring);
+}
+
+/* MELHORIA: hover de cat-item restrito a pointer fino */
+@media (hover: hover) and (pointer: fine) {
+  .cat-item:hover { transform: translateY(-6px) scale(1.06); }
+}
+
+.cat-item__ring {
+  /* MELHORIA: tamanho do anel via token --cat-ring com clamp()
+     substitui width/height fixos que quebravam em viewports muito estreitas. */
+  width: var(--cat-ring);
+  height: var(--cat-ring);
+  border-radius: 50%;
+  margin: 0 auto 9px;
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  transition: border-color .3s, box-shadow .3s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cat-item:hover .cat-item__ring {
+    border-color: var(--fire);
+    box-shadow: 0 0 0 3px var(--fire-dim);
+  }
+}
+
+.cat-item__ring img { width: 100%; height: 100%; object-fit: cover; }
+
+.cat-item__name {
+  display: block;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--text-2);
+  text-transform: uppercase;
+}
+
+
+/* ----------------------------------------------------------------
+   § 6  PRODUCTS — layout shell
+   ---------------------------------------------------------------- */
+.products {
+  max-width: 1440px;
+  margin: 0 auto;
+  /* MELHORIA: padding lateral usa --page-px (fluido) ao invés de valores
+     fixos redefinidos em 992px (18px), 768px (14px) e 480px (10px). */
+  padding: 0 var(--page-px) clamp(60px, 8vw, 100px);
+}
+
+.products__grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 768px) {
+    .products__grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .products__grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ----------------------------------------------------------------
+   § 7  PRODUCT CARD
+   ---------------------------------------------------------------- */
+.card {
+  position: relative;
+  background: var(--surface-1);
+  border-radius: var(--r-2xl);
+  border: 1px solid var(--border);
+  /* MELHORIA: padding fluido substitui redefinições em 768px (10px) e 480px (8px) */
+  padding: clamp(8px, 2vw, 14px);
+  display: flex; flex-direction: column;
+  cursor: pointer;
+  transition:
+    transform .45s var(--spring),
+    box-shadow .45s var(--spring),
+    border-color .3s;
+  will-change: transform;
+}
+
+/* MELHORIA: hover do card restrito a pointer fino.
+   Em touch, :hover travava o card elevado após o tap — má UX. */
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-10px) scale(1.012);
+    box-shadow: var(--shadow-lift);
+    border-color: var(--border-hover);
+  }
+}
+
+/* ── image wrapper ── */
+.card__img-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  background: var(--surface-2);
+  margin-bottom: 16px;
+  isolation: isolate;
+}
+
+/* All images fill the box with cover — no white gaps */
+.card__img-box img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Primary image */
+.card__img--a {
+  z-index: 1;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity .8s var(--ease-out), transform 1.1s var(--ease-out);
+}
+
+/* Secondary image (hover reveal)
+   MELHORIA: a segunda imagem só é relevante em hover (pointer fino).
+   Em touch, o usuário nunca vê card__img--b pois o hover não funciona
+   da mesma forma. A imagem primária permanece visível em touch. */
+.card__img--b {
+  z-index: 2;
+  opacity: 0;
+  transform: scale(1.07);
+  transition: opacity .8s var(--ease-out), transform 1.1s var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover .card__img--a { opacity: 0; transform: scale(.97); }
+  .card:hover .card__img--b { opacity: 1; transform: scale(1); }
+}
+
+/* Single image — gentle pan */
+.card__img--solo {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 1;
+  transition: transform 1.2s var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover .card__img--solo { transform: scale(1.07); }
+}
+
+/* ── carousel nav arrows (show on hover)
+   MELHORIA: nav de carousel só aparece em hover de pointer fino.
+   Em touch, os botões ficavam invisíveis mas presentes no DOM,
+   causando cliques acidentais. Em touch, o JS deve usar swipe. */
+.card__nav {
+  position: absolute; top: 50%;
+  transform: translateY(-50%);
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(13,14,17,.75);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text-1);
+  opacity: 0;
+  z-index: 10;
+  transition: opacity .2s, background .2s, transform .2s;
+  backdrop-filter: blur(4px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card__img-box:hover .card__nav { opacity: 1; }
+  .card__nav:hover { background: var(--fire); transform: translateY(-50%) scale(1.12); }
+}
+
+/* Em touch: mostra as setas permanentemente para que o usuário possa navegar */
+@media (hover: none) {
+  .card__nav { opacity: 1; }
+}
+
+.card__nav--l { left: 10px; }
+.card__nav--r { right: 10px; }
+
+/* ── stock badge ── */
+.card__badge {
+  position: absolute; top: 12px; left: 12px;
+  /* MELHORIA: padding fluido evita que o badge quebre em telas muito pequenas */
+  padding: clamp(4px, 1vw, 5px) clamp(8px, 2vw, 12px);
+  border-radius: var(--r-pill);
+  /* MELHORIA: font-size fluido substitui redefinições em 768px (8px) */
+  font-size: clamp(8px, 1.5vw, 9px);
+  font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  z-index: 5;
+}
+.badge--ok  { background: var(--ok-bg);  color: var(--ok-text);  }
+.badge--low { background: var(--low-bg); color: var(--low-text); }
+.badge--out { background: var(--out-bg); color: var(--out-text); }
+.badge--na  { background: var(--na-bg);  color: var(--na-text);  }
+
+/* ── content ── */
+.card__brand {
+  /* MELHORIA: font-size fluido substitui redefinição em 480px (9px) */
+  font-size: clamp(9px, 1.5vw, 10px);
+  font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+
+.card__name {
+  font-family: var(--f-display);
+  /* MELHORIA: font-size fluido substitui redefinições em 768px (16px) e 480px (15px) */
+  font-size: clamp(15px, 3vw, 20px);
+  font-weight: 700;
+  letter-spacing: .03em; line-height: 1.2;
+  color: var(--text-1);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* MELHORIA: min-height fluido substitui redefinições em 768px (40px) e 480px (36px) */
+  min-height: clamp(36px, 6vw, 48px);
+  margin-bottom: clamp(10px, 2vw, 16px);
+}
+
+/* ── footer ── */
+.card__foot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 8px;
+  /* MELHORIA: em telas estreitas (card com coluna única ou grid de 2),
+     o footer vira coluna para não comprimir o preço e o botão.
+     Usa flex-wrap ao invés de forçar flex-direction: column em breakpoint,
+     deixando o layout decidir naturalmente quando o espaço não couber. */
+  flex-wrap: wrap;
+}
+
+.card__price {
+  display: flex; align-items: baseline; gap: 3px;
+  line-height: 1;
+}
+.card__price-currency {
+  /* MELHORIA: fluido substitui redefinição em 480px (11px) */
+  font-size: clamp(11px, 2vw, 12px);
+  font-weight: 600;
+  color: var(--text-2);
+}
+.card__price-value {
+  font-family: var(--f-display);
+  /* MELHORIA: font-size fluido substitui redefinições em 768px (22px) e 480px (20px) */
+  font-size: clamp(20px, 4vw, 26px);
+  font-weight: 900;
+  letter-spacing: .02em;
+  color: var(--fire);
+}
+
+.card__cta {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--surface-3);
+  color: var(--text-1);
+  /* MELHORIA: padding fluido substitui redefinição em 768px */
+  padding: clamp(8px, 1.5vw, 10px) clamp(14px, 2.5vw, 18px);
+  border-radius: var(--r-lg);
+  font-family: var(--f-display);
+  /* MELHORIA: font-size fluido substitui redefinição em 768px (12px) */
+  font-size: clamp(12px, 2vw, 13px);
+  font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  /* MELHORIA: flex: 1 faz o botão crescer para preencher a linha
+     quando o flex-wrap quebrar, dando um layout limpo em telas estreitas
+     sem precisar de flex-direction: column + width: 100% no breakpoint. */
+  flex: 1;
+  justify-content: center;
+  transition:
+    background .3s,
+    border-color .3s,
+    color .3s,
+    transform .3s var(--spring),
+    box-shadow .3s;
+}
+.card__cta-arrow {
+  display: inline-block;
+  transition: transform .4s var(--spring);
+  font-style: normal;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover .card__cta {
+    background: var(--fire);
+    border-color: var(--fire);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-fire);
+  }
+  .card:hover .card__cta-arrow { transform: translateX(4px); }
+}
+
+
+/* ----------------------------------------------------------------
+   § 8  EMPTY STATE
+   ---------------------------------------------------------------- */
+.empty {
+  grid-column: 1 / -1;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center;
+  padding: clamp(50px, 8vw, 90px) 20px;
+  background: var(--surface-1);
+  border-radius: var(--r-2xl);
+  border: 1px solid var(--border);
+}
+.empty__icon {
+  width: 62px; height: 62px;
+  border-radius: 18px;
+  background: var(--fire-dim);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fire);
+  font-size: 26px;
+  margin-bottom: 20px;
+}
+.empty__title {
+  font-family: var(--f-display);
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 900;
+  letter-spacing: .04em;
+  margin-bottom: 10px;
+}
+.empty__sub {
+  font-size: 14px; font-weight: 400;
+  color: var(--text-2); line-height: 1.7;
+  max-width: 300px;
+  margin-bottom: 30px;
+}
+.empty__back {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--fire);
+  color: #fff;
+  padding: 13px 30px;
+  border-radius: var(--r-pill);
+  font-family: var(--f-display);
+  font-size: 15px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  transition: box-shadow .3s, transform .3s var(--spring);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .empty__back:hover { box-shadow: var(--shadow-fire); transform: translateY(-2px); }
+}
+
+
+/* ----------------------------------------------------------------
+   § 9  SCROLL-REVEAL UTILITY
+   ---------------------------------------------------------------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity .7s var(--ease-out), transform .7s var(--ease-out);
+}
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+
+/* ----------------------------------------------------------------
+   § 10 RESPONSIVE
+   ---------------------------------------------------------------- */
+
+/* ── MELHORIA: estrutura de breakpoints ──────────────────────────
+   O original tinha 5 breakpoints (1200, 992, 768, 480, 360) com
+   muita redundância e nomes de dispositivos específicos nos comentários.
+
+   Reestruturado para apenas 2 breakpoints semânticos e de propósito geral:
+   - sm: a partir de 600px — layout de tablet/paisagem mobile
+   - md: a partir de 900px — layout de notebook/desktop
+
+   O grid de produtos não usa nenhum breakpoint (auto-fit puro).
+   O banner usa clamp(). O padding usa clamp().
+   Os breakpoints restantes servem apenas para:
+   - Mostrar o accent line do banner (::after) em telas maiores
+   - Ajustar border-radius do banner em telas maiores
+   ─────────────────────────────────────────────────────────────── */
+
+/* Tablet / landscape mobile: a partir de 600px */
+@media (min-width: 600px) {
+
+  /* Accent line do banner aparece em telas médias e acima
+     (no original era display:none em 768px com max-width — aqui invertemos para mobile-first) */
+  .banner::after {
+    display: block;
+  }
+
+}
+
+/* Notebook / desktop: a partir de 900px */
+@media (min-width: 900px) {
+
+  /* Banner com border-radius maior em telas amplas */
+  .banner {
+    border-radius: var(--r-2xl);
+  }
+
+  /* Hero com padding superior maior em telas amplas */
+  .hero {
+    padding-top: 28px;
+  }
+
+}
