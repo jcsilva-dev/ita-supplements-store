@@ -4,8 +4,57 @@ from django.db.utils import NotSupportedError
 from decimal import Decimal
 import uuid
 from django.utils.text import slugify
+from django.core.validators import MinValueValidator, MaxValueValidator
 
+class Campaign(models.Model):
 
+    title = models.CharField(
+        max_length=120,
+        verbose_name="Nome da campanha",
+        help_text="Ex.: Black Friday, Dia das Mães..."
+    )
+
+    discount_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        validators=[
+        MinValueValidator(0),
+        MaxValueValidator(100)
+       ],
+        verbose_name="Desconto (%)",
+        help_text="Informe apenas o número. Ex.: 15 para 15%."
+    )
+
+    banner_text = models.CharField(
+        max_length=255,
+        verbose_name="Texto do banner",
+    )
+
+    badge_text = models.CharField(
+        max_length=50,
+        default="OFF",
+        verbose_name="Texto da etiqueta"
+    )
+
+    start_date = models.DateTimeField()
+
+    end_date = models.DateTimeField()
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.title
+    
+    
 
 class ProductVariant(models.Model):
     product = models.ForeignKey(
@@ -71,13 +120,18 @@ class ProductVariant(models.Model):
     
     def get_installment_options(
         self,
+        price=None,
         max_installments=12,
         min_value=None,
         interest_rate=0
     ):
         options = []
 
-        price = Decimal(str(self.price))
+        if price is None:
+            price = self.price
+            
+        price = Decimal(str(price))
+
         interest_rate = Decimal(str(interest_rate))
 
         total_price = price

@@ -4,16 +4,14 @@ from .models import ProductVariant
 from .utils import build_whatsapp_message
 import urllib.parse
 from django.contrib import messages
-
+from supplements.services import DiscountService
 
 
 
 def add_to_cart(request):
 
-
    if request.method != "POST":
        return redirect("supplements")
-
 
    variant_id = request.POST.get("variant_id")
 
@@ -23,7 +21,6 @@ def add_to_cart(request):
        return redirect("supplements")
 
 
-  
    variant = get_object_or_404(
        ProductVariant.objects.select_related(
            "product",
@@ -150,8 +147,12 @@ def cart_view(request):
            continue
 
 
-       price = variant.price
+       price_info = DiscountService.get_product_price(variant)
+
+       price = price_info.discount_price
+
        quantity = item["quantity"]
+       
        subtotal = price * quantity
 
 

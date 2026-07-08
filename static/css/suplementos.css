@@ -535,23 +535,17 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 }
 
 /* ── footer ── */
-.card__foot {
-  margin-top: auto;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-  display: flex; align-items: center;
-  justify-content: space-between; gap: 8px;
-  /* MELHORIA: em telas estreitas (card com coluna única ou grid de 2),
-     o footer vira coluna para não comprimir o preço e o botão.
-     Usa flex-wrap ao invés de forçar flex-direction: column em breakpoint,
-     deixando o layout decidir naturalmente quando o espaço não couber. */
-  flex-wrap: wrap;
+.card__foot{
+    margin-top:auto;
+    padding-top:14px;
+    border-top:1px solid var(--border);
+
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:14px;
 }
 
-.card__price {
-  display: flex; align-items: baseline; gap: 3px;
-  line-height: 1;
-}
 .card__price-currency {
   /* MELHORIA: fluido substitui redefinição em 480px (11px) */
   font-size: clamp(11px, 2vw, 12px);
@@ -716,4 +710,83 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
     padding-top: 28px;
   }
 
+}
+
+/* ================================================================
+   § 11 PROMOTION PRICE
+   ================================================================ */
+.card__price{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+    width:100%;
+}
+
+.card__price-old{
+    display:flex;
+    align-items:center;
+    gap:4px;
+
+    text-decoration:line-through;
+    opacity:.6;
+}
+
+.card__price-old .card__price-currency,
+.card__price-old .card__price-value{
+    color:var(--text-2);
+    text-decoration:line-through;
+}
+
+.card__discount-badge{
+
+    align-self:flex-start;
+
+}
+
+.card__price-new{
+    display:flex;
+    align-items:baseline;
+    gap:4px;
+}
+
+.card__price-new .card__price-currency{
+    font-size:11px;
+    color:var(--text-2);
+}
+
+.card__price-new .card__price-value{
+    font-size:22px;
+    color:var(--fire);
+    font-weight:800;
+}
+
+
+
+.card__price{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:flex-start !important;
+    width:100%;
+    gap:8px;
+}
+
+.card__price-old{
+    display:flex;
+    gap:4px;
+}
+
+.card__discount-badge{
+    display:inline-flex;
+    align-self:flex-start;
+}
+
+.card__price-new{
+    display:flex;
+    gap:4px;
+}
+
+.card__price-normal{
+    display:flex;
+    gap:4px;
 }

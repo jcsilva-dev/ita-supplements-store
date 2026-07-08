@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-
+{% load l10n %}
 {% block meta %}
 <meta property="og:title"       content="{{ object.model }}">
 <meta property="og:description" content="{{ object.description|truncatechars:150 }}">
@@ -12,6 +12,7 @@
 {% endblock %}
 
 {% block content %}
+
 
 <!-- ================================================================
      FONTS
@@ -104,7 +105,7 @@
       <h1 class="info__title">{{ object.model }}</h1>
 
       <!-- Meta chips -->
-      {% with variant=object.get_default_variant %}
+      {% with variant=default_variant %}
       <div class="info__chips">
         <span class="chip">Marca <strong id="js-brand">{{ object.brand }}</strong></span>
         <span class="chip">Estoque <strong id="js-stock">{{ variant.quantity_stock }}</strong></span>
@@ -150,28 +151,60 @@
         <select id="js-variant-select" class="select-field" aria-label="Selecionar variante">
           {% for v in variants %}
           <option
+            data-original-price="{{ v.price_info.original_price|floatformat:2 }}"
+            data-discount-price="{{ v.price_info.discount_price|floatformat:2 }}"
+            data-percent="{{ v.price_info.percentage }}"
             value="{{ v.id }}"
-            data-price="{{ v.price }}"
             data-stock="{{ v.quantity_stock }}"
             data-brand="{{ object.brand }}"
             data-flavor="{{ v.flavor|default:'' }}"
             data-size="{{ v.size|default:'' }}"
-            data-installments='[{% for opt in v.get_installment_options %}{"times":{{ opt.times }},"value":{{ opt.value }}}{% if not forloop.last %},{% endif %}{% endfor %}]'
+            {% localize off %}
+            data-installments='[
+            {% for opt in v.installments %}
+            {"times":{{ opt.times }},"value":{{ opt.value }}}
+            {% if not forloop.last %},{% endif %}
+            {% endfor %}
+            ]'
+            {% endlocalize %}
             {% if v.id == variant.id %}selected{% endif %}
           >
-            {% if v.flavor %}{{ v.flavor }}{% endif %}{% if v.size %} {{ v.size }}{% endif %} — R$ {{ v.price }}
+            {% if v.flavor %}{{ v.flavor }}{% endif %}{% if v.size %} {{ v.size }}{% endif %} — R$ {{ v.price_info.discount_price |floatformat:2 }}
           </option>
           {% endfor %}
         </select>
 
-        <!-- Price -->
-        <p class="price-old">De R$ <span id="js-price-old">{{ variant.price|add:"85" }}</span></p>
-        <div class="price-row">
-          <div class="price-main" aria-label="Preço atual">
-            <span class="price-main__cur">R$</span>
-            <span class="price-main__val" id="js-price">{{ variant.price }}</span>
-          </div>
+         {% if price_info.has_discount  %}
+        <p class="price-old">
+            De R$
+            <span id="js-price-old">
+                {{ price_info.original_price |floatformat:2 }}
+            </span>
+        </p>
+
+         <div
+            class="price-discount"
+            id="js-discount">
+            {{ price_info.percentage }}% OFF
         </div>
+
+        {% endif %}
+         <div class="price-row">
+          <div class="price-main">
+
+              <span class="price-main__cur">
+                  R$
+              </span>
+
+              <span
+                  class="price-main__val"
+                  id="js-price"
+              >
+                  {{ price_info.discount_price |floatformat:2 }}
+              </span>
+
+          </div>
+      </div>
 
         {% if variant %}
         <form method="POST" action="{% url 'add_to_cart' %}" id="js-buy-form">
@@ -181,7 +214,7 @@
           <!-- Installments -->
           <p class="buy-box__label" style="margin-top:18px;">Parcelamento</p>
           <select name="installments" id="js-installments" class="select-field" aria-label="Opções de parcelamento">
-            {% for option in variant.get_installment_options %}
+            {% for option in installments %} 
             <option value="{{ option.times }}">{{ option.times }}x de R$ {{ option.value|floatformat:2 }}</option>
             {% endfor %}
           </select>

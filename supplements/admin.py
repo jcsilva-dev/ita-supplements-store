@@ -1,6 +1,37 @@
 from django.contrib import admin
-from supplements.models import Supplements, Brand, Flavor, Product_content_size, Size, ImageSupplement, HomeBanner, Category, Feedback, FeedbackImage, ProductVariant
+from supplements.models import Supplements, Brand, Flavor, Product_content_size, Size, ImageSupplement, HomeBanner, Category, Feedback, FeedbackImage, ProductVariant, Campaign
 
+
+@admin.register(Campaign)
+class CampaignAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "title",
+        "discount_percentage",
+        "is_active",
+        "start_date",
+        "end_date",
+        "created_at",
+    )
+
+    list_filter = (
+        "is_active",
+        "start_date",
+        "end_date",
+    )
+    search_fields = (
+        "title",
+        "banner_text",
+    )
+    ordering = (
+        "-created_at",
+    )
+    list_editable = (
+        "is_active",
+    )
+    readonly_fields = (
+        "created_at",
+    )
 
 class ProductVariantInline(admin.TabularInline):
     model = ProductVariant
@@ -47,8 +78,6 @@ class FeedbackAdmin(admin.ModelAdmin):
     inlines = [
         FeedbackImageInline
     ]
-
-
 
 
 class CategoryAdmin(admin.ModelAdmin):

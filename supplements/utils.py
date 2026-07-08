@@ -1,6 +1,6 @@
 from decimal import Decimal, ROUND_HALF_UP
 from django.urls import reverse
-
+from supplements.services import DiscountService
 def build_whatsapp_message(items, installments=None, request=None):
 
     if not isinstance(items, list):
@@ -16,8 +16,8 @@ def build_whatsapp_message(items, installments=None, request=None):
 
         variant = item["variant"]
         quantity = item["quantity"]
-
-        price = variant.price
+        price_info = DiscountService.get_product_price(variant)
+        price = price_info.discount_price
         subtotal = price * quantity
         total += subtotal
 

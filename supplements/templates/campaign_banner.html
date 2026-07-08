@@ -1,0 +1,38 @@
+{% if campaign_banner %}
+
+<div class="campaign-card">
+
+    <div class="campaign-card__icon">
+        🔥
+    </div>
+
+    <div class="campaign-card__content">
+
+        <span class="campaign-card__title">
+            {{ campaign_banner.title }}
+        </span>
+
+        <span class="campaign-card__discount">
+            {{ campaign_banner.discount_percentage }}% OFF
+        </span>
+
+        <span class="campaign-card__text">
+            {{ campaign_banner.banner_text }}
+        </span>
+
+    </div>
+
+    <div class="campaign-card__countdown">
+
+        <small>Termina em</small>
+
+        <span id="campaign-countdown"
+              data-end="{{ campaign_banner.end_date|date:'c' }}">
+            --
+        </span>
+
+    </div>
+
+</div>
+
+{% endif %}

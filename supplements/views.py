@@ -1,13 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
-from supplements.models import Supplements, HomeBanner, Category, Feedback, FeedbackImage, ProductVariant
+from supplements.models import Supplements, HomeBanner, Category, Feedback, FeedbackImage
 from supplements.forms import SupplementModelForm, ImageFormSet, FeedbackForm, VariantFormSet
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.db import transaction
 from django.db.models import F
 from django.shortcuts import redirect 
-
+from supplements.services import DiscountService
 
 
 class CategorySupplementView(ListView):
@@ -55,6 +55,18 @@ class SupplementsView(ListView):
       context = super().get_context_data(**kwargs)
 
       context["banners"] = HomeBanner.objects.filter(is_active=True).order_by("order")[:5]
+      context["campaign_banner"] = DiscountService.get_banner()
+
+      for supplement in context["supplements"]:
+
+          variant = supplement.get_default_variant()
+
+          if variant:
+              supplement.discount = (
+                  DiscountService.get_product_price(variant)
+              )
+          else:
+               supplement.discount = None
 
       return context
        
@@ -168,25 +180,39 @@ class SupplementDetailView(DetailView):
 
         default_variant = product.get_default_variant()
 
+        default_price_info = DiscountService.get_product_price(default_variant)
+
         attributes = product.get_available_attributes()
 
+        installments = default_variant.get_installment_options(price=default_price_info.discount_price)
+
+        
+        for variant in variants:
+
+            variant.price_info = DiscountService.get_product_price(variant)
+
+            variant.installments = variant.get_installment_options(
+                price=variant.price_info.discount_price
+            )
+            print(
+                "VARIANTE:", variant.id,
+                "| PREÇO:", variant.price_info.discount_price,
+                "| PRIMEIRA PARCELA:",
+                variant.installments[0]["value"] if variant.installments else "SEM PARCELAS"
+            )
 
         context.update({
             "variants": variants,
             "default_variant": default_variant,
+            "price_info": default_price_info,
             "sizes": attributes["sizes"],
             "flavors": attributes["flavors"],
-
-            "installments": (
-                default_variant.get_installment_options()
-                if default_variant else []
-            ),
-        })
+            "installments": installments if default_variant else [],
+      })
 
         
         context["recommended_products"] = Supplements.objects.get_recommended(product)
 
-    
         context["feedbacks"] = Feedback.objects.filter(is_approved=True)
 
         context["feedback_form"] = FeedbackForm()
@@ -209,9 +235,6 @@ class SupplementDetailView(DetailView):
 
         return redirect(request.path)
     
-
-    
-
 
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class SupplementUpdateView(UpdateView):
@@ -266,7 +289,6 @@ class SupplementUpdateView(UpdateView):
     def form_invalid(self, form):
         context = self.get_context_data(form=form)
         return self.render_to_response(context)
-    
     
     
 @method_decorator(login_required(login_url='login'), name='dispatch')

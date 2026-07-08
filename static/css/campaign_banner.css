@@ -1,0 +1,144 @@
+
+
+.campaign-card{
+
+    max-width:900px;
+
+    margin:25px auto 35px;
+
+    background:#171717;
+
+    border:1px solid rgba(255,92,0,.35);
+
+    border-radius:18px;
+
+    padding:18px 24px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:20px;
+
+    box-shadow:0 10px 35px rgba(0,0,0,.35);
+
+    overflow:hidden;
+
+    position:relative;
+}
+
+.campaign-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:0;
+
+    width:5px;
+
+    height:100%;
+
+    background:#ff5c00;
+
+}
+
+.campaign-card__icon{
+
+    font-size:38px;
+
+    animation:firePulse 1.5s infinite;
+}
+
+.campaign-card__content{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+}
+
+.campaign-card__title{
+
+    color:#ff5c00;
+
+    font-size:14px;
+
+    text-transform:uppercase;
+
+    font-weight:bold;
+
+    letter-spacing:2px;
+}
+
+.campaign-card__discount{
+
+    font-size:30px;
+
+    font-weight:700;
+
+    color:white;
+
+    margin-top:4px;
+}
+
+.campaign-card__text{
+
+    color:#cfcfcf;
+
+    margin-top:5px;
+
+    font-size:15px;
+}
+
+.campaign-card__countdown{
+
+    text-align:center;
+
+    min-width:150px;
+}
+
+.campaign-card__countdown small{
+
+    color:#999;
+
+    display:block;
+
+    margin-bottom:6px;
+}
+
+#campaign-countdown{
+
+    font-size:24px;
+
+    color:#ff5c00;
+
+    font-weight:bold;
+}
+
+@keyframes firePulse{
+
+    0%{
+
+        transform:scale(1);
+
+    }
+
+    50%{
+
+        transform:scale(1.12);
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+    }
+
+}

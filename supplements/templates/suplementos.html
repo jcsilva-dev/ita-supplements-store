@@ -73,6 +73,9 @@
   </form>
 </div>
 
+<link rel="stylesheet" href="{% static 'css/campaign_banner.css' %}">
+
+{% include "campaign_banner.html" %}
 
 <!-- ================================================================
      § CATEGORIAS
@@ -216,18 +219,51 @@
 
           <!-- ── rodapé ── -->
           <div class="card__foot">
-            <div class="card__price" aria-label="Preço R$ {{ supplement.get_price }}">
-              <span class="card__price-currency">R$</span>
-              <span class="card__price-value">{{ supplement.get_price }}</span>
-            </div>
-            <a
-              href="{% url 'supplement_detail' supplement.id %}"
-              class="card__cta"
-              onclick="event.stopPropagation()"
-              aria-label="Ver detalhes de {{ supplement.model }}"
-            >
-              Ver detalhes <i class="card__cta-arrow" aria-hidden="true">→</i>
-            </a>
+         
+          <div class="card__price">
+
+              {% if supplement.discount.has_discount %}
+
+                  <div class="card__price-old">
+                      <span class="card__price-currency">R$</span>
+                      <span class="card__price-value">
+                          {{ supplement.discount.original_price }}
+                      </span>
+                  </div>
+
+                  <span class="card__discount-badge">
+                      {{ supplement.discount.percentage }}% OFF
+                  </span>
+
+                  <div class="card__price-new">
+                      <span class="card__price-currency">R$</span>
+                      <span class="card__price-value">
+                          {{ supplement.discount.discount_price }}
+                      </span>
+                  </div>
+
+              {% else %}
+
+                  <div class="card__price-normal">
+                      <span class="card__price-currency">R$</span>
+                      <span class="card__price-value">
+                          {{ supplement.get_price }}
+                      </span>
+                  </div>
+
+              {% endif %}
+
+          </div>
+          <a
+                  href="{% url 'supplement_detail' supplement.id %}"
+                  class="card__cta"
+                  onclick="event.stopPropagation()"
+                  aria-label="Ver detalhes de {{ supplement.model }}"
+              >
+                  Ver detalhes
+                  <i class="card__cta-arrow" aria-hidden="true">→</i>
+              </a>
+
           </div>
 
         </article>
@@ -249,6 +285,7 @@
   </div>
 </section>
 
+<script src="{% static 'js/campaign_banner.js' %}"></script>
 <script src="{% static 'js/suplementos.js' %}"></script>
 
 {% endblock %}

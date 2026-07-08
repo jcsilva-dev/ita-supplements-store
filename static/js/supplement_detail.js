@@ -59,13 +59,39 @@
     var sel = document.getElementById('js-variant-select');
     if (!sel) return;
 
-    sel.addEventListener('change', function () {
-      var opt = this.options[this.selectedIndex];
-
       /* price */
-      var price = parseFloat(opt.dataset.price);
-      document.getElementById('js-price').textContent     = price.toFixed(2);
-      document.getElementById('js-price-old').textContent = (price + 85).toFixed(2);
+    function toNumber(value) {
+        return parseFloat(value.replace(",", "."));
+    }
+
+    sel.addEventListener('change', function () {
+
+        var opt = this.options[this.selectedIndex];
+
+        var finalPrice = toNumber(opt.dataset.discountPrice);
+        var originalPrice = toNumber(opt.dataset.originalPrice);
+        var percentage = opt.dataset.percent;
+
+        document.getElementById("js-price").textContent =
+            finalPrice.toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        var priceOld = document.getElementById("js-price-old");
+        var discount = document.getElementById("js-discount");
+
+        if (priceOld) {
+            priceOld.textContent = originalPrice.toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        if (discount) {
+            discount.textContent = percentage + "% OFF";
+        }
+
 
       /* hidden variant id */
       var hidden = document.getElementById('js-variant-hidden');
@@ -113,7 +139,14 @@
         installments.forEach(function (item) {
           var o = document.createElement('option');
           o.value = item.times;
-          o.textContent = item.times + 'x de R$ ' + item.value.toFixed(2);
+          o.textContent =
+              item.times +
+              'x de R$ ' +
+              item.value.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+              });
+          
           picker.appendChild(o);
         });
       }
