@@ -5,6 +5,8 @@ from decimal import Decimal
 import uuid
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Q
+
 
 class Campaign(models.Model):
 
@@ -254,6 +256,32 @@ class SupplementQuerySet(models.QuerySet):
             self.exclude(id=product.id)
             .order_by('-total_visualizacoes')[:4]
         )
+    
+    def search(self, term):
+
+        if not term:
+
+            return self
+
+        return self.filter(
+
+            Q(model__icontains=term) |
+
+            Q(description__icontains=term) |
+
+            Q(brand__name__icontains=term) |
+
+            Q(category__name__icontains=term) |
+
+            Q(variants__sku__icontains=term) |
+
+            Q(variants__flavor__name__icontains=term) |
+
+            Q(variants__size__name__icontains=term) |
+
+            Q(variants__product_content_size__unit__icontains=term)
+
+        ).distinct()
 
 
 class SupplementManager(models.Manager):

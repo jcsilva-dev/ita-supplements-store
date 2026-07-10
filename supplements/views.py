@@ -42,14 +42,19 @@ class SupplementsView(ListView):
      template_name = 'suplementos.html'
      context_object_name = 'supplements'
 
+class SupplementsView(ListView):
+     model = Supplements
+     template_name = "suplementos.html"
+     context_object_name = "supplements"
+
      def get_queryset(self):
-       supplements = super().get_queryset().order_by('model')
-       search = self.request.GET.get('search')
+        search = self.request.GET.get("search")
 
-       if search:
-           supplements = supplements.filter(model__icontains=search)
-
-       return supplements
+        return (
+            Supplements.objects
+            .order_by("model")
+            .search(search)
+        )
      
      def get_context_data(self, **kwargs):
       context = super().get_context_data(**kwargs)
