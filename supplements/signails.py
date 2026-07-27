@@ -33,32 +33,25 @@ def handle_image_cleanup(instance, model_class, field_name, action):
 def image_supplement_post_delete(sender, instance, **kwargs):
     handle_image_cleanup(instance, sender, "photo", action="delete")
 
-
 @receiver(pre_save, sender=ImageSupplement)
 def image_supplement_pre_save(sender, instance, **kwargs):
     handle_image_cleanup(instance, sender, "photo", action="update")
 
-
-
 @receiver(post_delete, sender=HomeBanner)
 def image_homebanner_post_delete(sender, instance, **kwargs):
-    handle_image_cleanup(instance, sender, "image", action="delete")
-
+    handle_image_cleanup(instance, sender, "home_banner/desktop_image", action="delete")
 
 @receiver(pre_save, sender=HomeBanner)
 def image_homebanner_pre_save(sender, instance, **kwargs):
-    handle_image_cleanup(instance, sender, "image", action="update")
+    handle_image_cleanup(instance, sender, "home_banner/desktop_image", action="update")
 
 @receiver(post_delete, sender=FeedbackImage)
 def image_feedback_pre_delete(sender, instance, **kwargs):
     handle_image_cleanup(instance, sender, "image", action="delete")
 
-
 @receiver(post_delete, sender=Category)
 def image_category_post_delete(sender, instance, **kwargs):
     handle_image_cleanup(instance, sender, "image", action="delete")
-
-from django.db.models.signals import pre_save
 
 @receiver(pre_save, sender=Category)
 def image_category_pre_save(sender, instance, **kwargs):

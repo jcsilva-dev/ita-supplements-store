@@ -1,248 +1,357 @@
 
-    :root {
-        --accent-color: #8b5cf6;
-        --accent-hover: #7c3aed;
-        --bg-main: #0f1115;
-        --card-bg: #1a1d23;
-        --input-bg: #252932;
-        --text-bright: #f8fafc;
-        --text-dim: #94a3b8;
-        --border-ui: rgba(255, 255, 255, 0.08);
-    }
+/* ==========================================================================
+   §0 TOKENS — EXTENSÕES GLOBAIS DE ESCALA
+   Responsabilidade: valores que faltavam na escala global (base.css) para
+   cobrir este formulário, mas que não são exclusivos dele — qualquer outra
+   tela do projeto pode vir a precisar de um radius maior ou de um heading
+   grande. Por isso ficam em :root, seguindo o mesmo padrão de nomes já
+   usado (--radius-sm, --radius-pill, --fs-*).
+   RECOMENDAÇÃO: mova este bloco para dentro do :root do base.css na
+   próxima limpeza — ele está aqui apenas porque esta refatoração partiu
+   só do new_supplement.css. Duplicar :root não quebra nada (é aditivo),
+   mas o ideal é ter uma única fonte de verdade para tokens globais.
+   ========================================================================== */
+:root{
+  /* Escala de radius estendida (--radius-sm e --radius-pill já existiam) */
+  --radius-md:12px;
+  --radius-lg:18px;
+  --radius-xl:24px;
 
-    .page-wrapper {
-        background-color: var(--bg-main);
-        background-image:
-            radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
-            radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 20px;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    }
+  /* Heading grande fluido — nada na escala --fs-* existente ia além de
+     ~1.3rem (logo do header), então este é o primeiro token de título
+     "de página" do projeto. */
+  --fs-h1:clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+}
 
-    .form-container {
-        background: var(--card-bg);
-        width: 100%;
-        max-width: 850px;
-        border-radius: 24px;
-        padding: 48px;
-        border: 1px solid var(--border-ui);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    }
+/* ==========================================================================
+   §1 PAGE WRAPPER
+   Responsabilidade: moldura da tela (fundo, centralização, altura mínima).
+   Objetivo: manter a identidade escura/roxa desta tela — ela não faz parte
+   da storefront clara (base.css usa --bg-page claro e --color-primary
+   laranja para a loja), então os tokens de cor abaixo são propositalmente
+   locais, escopados em .page-wrapper, e não em :root: evita colidir/poluir
+   os tokens globais com uma paleta que só existe aqui. Se no futuro mais
+   telas administrativas usarem esse mesmo visual escuro/roxo, vale
+   promover este bloco para um arquivo compartilhado (ex. admin-tokens.css).
+   Motivo da troca 100vh -> 100dvh: 100vh não desconta a barra de endereço
+   móvel: em navegadores mobile o conteúdo fica cortado no primeiro
+   carregamento. 100dvh resolve isso, igual ao resto do projeto.
+   font-family local removida: a página agora herda var(--font-body) do
+   base.css, em vez de declarar 'Inter' de novo.
+   ========================================================================== */
+.page-wrapper{
+  /* Paleta local desta tela (ver comentário acima) */
+  --color-accent:#8b5cf6;
+  --color-accent-hover:#7c3aed;
+  --bg-canvas:#0f1115;
+  --bg-card:#1a1d23;
+  --bg-input:#252932;
+  --bg-input-focus:#2d323d;
+  --text-bright:#f8fafc;
+  --text-dim:#94a3b8;
 
-    .form-container h1 {
-        font-size: 32px;
-        font-weight: 800;
-        color: var(--text-bright);
-        margin-bottom: 8px;
-    }
+  /* Quase-duplicata de --color-danger (#e63946) do base.css — mesma
+     função (ação destrutiva), tom ligeiramente diferente. Mantido como
+     estava para não alterar a identidade visual sem sua decisão; se
+     fizer sentido, unifique com --color-danger numa limpeza futura. */
+  --color-delete:#ef4444;
 
-    .subtitle {
-        color: var(--text-dim);
-        margin-bottom: 32px;
-        font-size: 14px;
-    }
+  /* Sombras específicas desta tela (dependem do --color-accent local,
+     por isso não entram nos tokens globais de sombra do base.css). */
+  --shadow-card:0 25px 50px -12px rgba(0, 0, 0, .5);
+  --shadow-focus:0 0 0 4px rgba(139, 92, 246, .15);
+  --shadow-btn-hover:0 12px 20px -8px rgba(139, 92, 246, .5);
 
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 40px 0 20px;
-    }
+  background-color:var(--bg-canvas);
+  background-image:
+    radial-gradient(at 0% 0%, rgba(139, 92, 246, .15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(59, 130, 246, .1) 0px, transparent 50%);
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:var(--space-xl) var(--space-md);
+}
 
-    .section-header span {
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        color: var(--accent-color);
-    }
+/* ==========================================================================
+   §2 FORM CONTAINER
+   Responsabilidade: cartão principal do formulário.
+   Objetivo: espaçamento e radius fluidos/tokenizados, sem valores mágicos.
+   ========================================================================== */
+.form-container{
+  background:var(--bg-card);
+  width:100%;
+  max-width:850px;
+  border-radius:var(--radius-xl);
+  padding:var(--space-xl);
+  border:1px solid var(--border-color);
+  box-shadow:var(--shadow-card);
+}
 
-    .section-line {
-        flex: 1;
-        height: 1px;
-        background: var(--border-ui);
-    }
+.form-container h1{
+  font-size:var(--fs-h1);
+  font-weight:800;
+  color:var(--text-bright);
+  margin-bottom:var(--space-2xs);
+}
 
-    .form-group {
-        margin-bottom: 24px;
-    }
+.subtitle{
+  color:var(--text-dim);
+  margin-bottom:var(--space-lg);
+  font-size:var(--fs-copy);
+}
 
-    .form-group label {
-        display: block;
-        margin-bottom: 10px;
-        font-weight: 500;
-        color: var(--text-bright);
-        font-size: 14px;
-    }
+.section-header{
+  display:flex;
+  align-items:center;
+  gap:var(--space-xs);
+  margin:var(--space-xl) 0 var(--space-md);
+}
 
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        width: 100%;
-        background: var(--input-bg);
-        border: 1px solid var(--border-ui);
-        border-radius: 12px;
-        padding: 14px 16px;
-        color: white;
-        font-size: 15px;
-        transition: all 0.3s ease;
-    }
+.section-header span{
+  font-size:var(--fs-copy);
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  color:var(--color-accent);
+}
 
-    .form-group textarea {
-        min-height: 120px;
-        resize: vertical;
-    }
+.section-line{
+  flex:1;
+  height:1px;
+  background:var(--border-color);
+}
 
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-        outline: none;
-        border-color: var(--accent-color);
-        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
-        background: #2d323d;
-    }
+/* ==========================================================================
+   §3 FORM GROUPS
+   Responsabilidade: campos de input/select/textarea e seus rótulos.
+   Objetivo: mesma lógica fluida de espaçamento/tipografia do resto do
+   projeto; transições padronizadas em var(--transition-base).
+   ========================================================================== */
+.form-group{
+  margin-bottom:var(--space-md);
+}
 
-    /* =========================
-       VARIANTES
-    ========================== */
+.form-group label{
+  display:block;
+  margin-bottom:var(--space-xs);
+  font-weight:500;
+  color:var(--text-bright);
+  font-size:var(--fs-nav);
+}
 
-    .variant-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
+.form-group input,
+.form-group select,
+.form-group textarea{
+  width:100%;
+  background:var(--bg-input);
+  border:1px solid var(--border-color);
+  border-radius:var(--radius-md);
+  padding:var(--space-sm) var(--space-sm);
+  color:var(--text-bright);
+  font-size:var(--fs-body);
+  transition:background var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
+}
 
-    .variant-card {
-        background: var(--input-bg);
-        border: 1px solid var(--border-ui);
-        border-radius: 18px;
-        padding: 24px;
-    }
+.form-group textarea{
+  min-height:120px;
+  resize:vertical;
+}
 
-    .variant-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 20px;
-    }
+/* Modificador: remove a margem inferior quando o form-group é o único
+   conteúdo de um cartão que já controla seu próprio espaçamento (ex.: o
+   input de foto dentro de .image-form-card). Substitui o antigo
+   style="margin-bottom:0" inline no template. */
+.form-group--flush{
+  margin-bottom:0;
+}
 
-    .variant-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--accent-color);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
+/* Mensagem de erro de campo. Substitui o antigo
+   <small style="color:#ef4444;"> inline no template — mesma cor,
+   agora via var(--color-delete) (ver nota sobre quase-duplicata
+   de --color-danger em §1). */
+.field-error{
+  color:var(--color-delete);
+}
 
-    .variant-fields {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 18px;
-    }
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus{
+  outline:none;
+  border-color:var(--color-accent);
+  box-shadow:var(--shadow-focus);
+  background:var(--bg-input-focus);
+}
 
-    /* =========================
-       IMAGENS
-    ========================== */
+/* ==========================================================================
+   §4 VARIANTES
+   Responsabilidade: cartões de variação do produto (ex.: sabor/tamanho).
+   Objetivo: grid fluido — cada campo tenta caber em 220px, mas nunca
+   estoura a largura do cartão-pai em telas muito estreitas, graças ao
+   min(100%, 220px) dentro do minmax().
+   ========================================================================== */
+.variant-grid{
+  display:flex;
+  flex-direction:column;
+  gap:var(--space-md);
+}
 
-    .image-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 16px;
-    }
+.variant-card{
+  background:var(--bg-input);
+  border:1px solid var(--border-color);
+  border-radius:var(--radius-lg);
+  padding:var(--space-md);
+}
 
-    .image-form-card {
-        background: var(--input-bg);
-        border: 2px dashed var(--border-ui);
-        border-radius: 16px;
-        padding: 20px;
-        text-align: center;
-        transition: all 0.3s ease;
-        position: relative;
-    }
+.variant-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:var(--space-md);
+}
 
-    .image-form-card:hover {
-        border-color: var(--accent-color);
-    }
+.variant-title{
+  font-size:var(--fs-nav);
+  font-weight:700;
+  color:var(--color-accent);
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
 
-    .image-form-card small {
-        color: var(--text-dim);
-        display: block;
-        margin-bottom: 12px;
-        font-weight: 600;
-    }
+.variant-fields{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap:var(--space-md);
+}
 
-    .image-form-card input[type="file"] {
-        font-size: 12px;
-        color: var(--text-dim);
-    }
+/* ==========================================================================
+   §5 IMAGENS
+   Responsabilidade: upload e pré-visualização de imagens do produto.
+   Objetivo: mesma lógica de grid fluido da §4. A visibilidade da prévia
+   deixou de depender de JS setando style.display diretamente — agora é
+   controlada pela classe .is-visible (ver nota abaixo).
+   AÇÃO NECESSÁRIA NO JS: troque `preview.style.display = 'block'` por
+   `preview.classList.add('is-visible')`, e o `'none'` correspondente por
+   `preview.classList.remove('is-visible')`. Não tenho o JS deste formulário
+   para editar diretamente — me mande se quiser que eu faça essa parte.
+   ========================================================================== */
+.image-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap:var(--space-sm);
+}
 
-    .image-preview {
-        margin-top: 15px;
-        display: none;
-        aspect-ratio: 1;
-        border-radius: 10px;
-        overflow: hidden;
-        border: 1px solid var(--border-ui);
-    }
+.image-form-card{
+  background:var(--bg-input);
+  border:2px dashed var(--border-color);
+  border-radius:var(--radius-lg);
+  padding:var(--space-md);
+  text-align:center;
+  transition:border-color var(--transition-base);
+  position:relative;
+}
 
-    .image-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+/* Estado "já tem imagem selecionada". Substitui o antigo
+   card.style.borderStyle / card.style.borderColor setados via JS no
+   evento 'change' do input file — agora é só alternar esta classe. */
+.image-form-card.has-image{
+  border-style:solid;
+  border-color:var(--color-accent);
+}
 
-    .delete-row {
-        margin-top: 12px;
-        color: #ef4444;
-        font-size: 13px;
-    }
+.image-form-card small{
+  color:var(--text-dim);
+  display:block;
+  margin-bottom:var(--space-xs);
+  font-weight:600;
+}
 
-    /* =========================
-       ACTIONS
-    ========================== */
+.image-form-card input[type="file"]{
+  font-size:var(--fs-copy);
+  color:var(--text-dim);
+}
 
-    .form-actions {
-        display: flex;
-        gap: 16px;
-        margin-top: 48px;
-    }
+.image-preview{
+  display:none;
+  margin-top:var(--space-sm);
+  aspect-ratio:1;
+  border-radius:var(--radius-md);
+  overflow:hidden;
+  border:1px solid var(--border-color);
+}
 
-    .btn-save {
-        flex: 2;
-        background: var(--accent-color);
-        color: white;
-        padding: 16px;
-        border-radius: 14px;
-        font-weight: 700;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
+.image-preview.is-visible{
+  display:block;
+}
 
-    .btn-save:hover {
-        background: var(--accent-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 12px 20px -8px rgba(139, 92, 246, 0.5);
-    }
+.image-preview img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
 
-    .btn-cancel {
-        flex: 1;
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--text-bright);
-        padding: 16px;
-        border-radius: 14px;
-        text-align: center;
-        text-decoration: none;
-        font-weight: 600;
-        border: 1px solid var(--border-ui);
-        transition: 0.3s;
-    }
+.delete-row{
+  margin-top:var(--space-xs);
+  color:var(--color-delete);
+  font-size:var(--fs-copy);
+}
 
-    .btn-cancel:hover {
-        background: rgba(255, 255, 255, 0.1);
-    }
+/* ==========================================================================
+   §6 ACTIONS
+   Responsabilidade: botões de rodapé do formulário (salvar/cancelar).
+   Objetivo: mesma escala de espaçamento/radius do resto do arquivo;
+   efeitos de :hover isolados em @media (hover:hover) — ver §7.
+   ========================================================================== */
+.form-actions{
+  display:flex;
+  gap:var(--space-sm);
+  margin-top:var(--space-xl);
+}
 
+.btn-save{
+  flex:2;
+  background:var(--color-accent);
+  color:var(--text-bright);
+  padding:var(--space-sm);
+  border-radius:var(--radius-md);
+  font-weight:700;
+  border:none;
+  cursor:pointer;
+  transition:background var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.btn-cancel{
+  flex:1;
+  background:rgba(255, 255, 255, .05);
+  color:var(--text-bright);
+  padding:var(--space-sm);
+  border-radius:var(--radius-md);
+  text-align:center;
+  text-decoration:none;
+  font-weight:600;
+  border:1px solid var(--border-color);
+  transition:background var(--transition-base);
+}
+
+/* ==========================================================================
+   §7 CAPABILITY QUERIES
+   Responsabilidade: única fonte de :hover deste arquivo, seguindo o
+   mesmo padrão do header.css — hover só em dispositivos com ponteiro
+   de precisão, evitando estados "grudados" em telas touch.
+   ========================================================================== */
+@media (hover:hover){
+
+  .image-form-card:hover{
+    border-color:var(--color-accent);
+  }
+
+  .btn-save:hover{
+    background:var(--color-accent-hover);
+    transform:translateY(-2px);
+    box-shadow:var(--shadow-btn-hover);
+  }
+
+  .btn-cancel:hover{
+    background:rgba(255, 255, 255, .1);
+  }
+}

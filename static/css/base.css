@@ -1,436 +1,775 @@
+/* ==========================================================================
+   §1 DESIGN TOKENS
+   Responsabilidade: centralizar todo valor "mágico" do arquivo em variáveis.
+   Objetivo: nenhuma cor, espaçamento ou tamanho deve existir solto no CSS.
+   Motivo: um único ponto de ajuste para toda a identidade visual do projeto,
+   evitando duplicação e divergência de valores entre componentes.
+   ========================================================================== */
 :root{
-    --primary:#f37107;
-    --dark:#111;
+
+  /* Cores base */
+  --color-primary:#f37107;
+  --color-primary-hover:#ff8a2e;
+  --color-dark:#111111;
+  --color-dark-alt:#1f1f1f;
+
+  /* Backgrounds */
+  --bg-page:#f5f5f5;
+  --bg-menu:#1c1c1c;
+
+  /* Textos
+     --text-body           -> uso em fundo CLARO (--bg-page). Ex.: conteúdo principal.
+     --text-inverse        -> uso em fundo ESCURO (header/menu/footer). Ex.: links de nav.
+     --text-inverse-strong -> uso em fundo ESCURO, para destaque máximo. Ex.: ícones, logo em negrito.
+     --text-muted          -> variante apagada, sempre sobre fundo escuro. Ex.: copyright, saudação.
+     Nunca aplicar --text-body em componentes de fundo escuro (ou vice-versa):
+     foi exatamente essa mistura que deixava o texto do body ilegível sobre --bg-page. */
+  --text-body:#1a1a1a;
+  --text-muted:#a3a3a3;
+  --text-inverse:#e8e8e8;
+  --text-inverse-strong:#ffffff;
+
+  /* Bordas */
+  --border-color:rgba(255,255,255,.08);
+  --border-hairline:1px solid var(--border-color);
+
+  /* Estados de hover/feedback */
+  --color-danger:#e63946;
+
+  /* Radius */
+  --radius-sm:6px;
+  --radius-pill:999px;
+
+  /* Spacing fluido (clamp: mínimo, preferencial com vw, máximo) */
+  --space-3xs:clamp(.25rem, .2rem + .2vw, .375rem);
+  --space-2xs:clamp(.375rem, .3rem + .3vw, .5rem);
+  --space-xs:clamp(.5rem, .4rem + .4vw, .75rem);
+  --space-sm:clamp(.75rem, .6rem + .5vw, 1rem);
+  --space-md:clamp(1rem, .85rem + .6vw, 1.5rem);
+  --space-lg:clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+  --space-xl:clamp(2rem, 1.6rem + 1.5vw, 3rem);
+
+  /* Font-size fluido */
+  --fs-body:clamp(.95rem, .9rem + .2vw, 1rem);
+  --fs-nav:clamp(.9rem, .85rem + .2vw, 1rem);
+  --fs-logo:clamp(1.05rem, .95rem + .4vw, 1.3rem);
+  --fs-icon:clamp(1.1rem, 1rem + .3vw, 1.4rem);
+  --fs-badge:clamp(.6rem, .58rem + .1vw, .68rem);
+  --fs-copy:clamp(.75rem, .7rem + .2vw, .85rem);
+
+  /* Font-family */
+  --font-body:'Poppins', Arial, sans-serif;
+
+  /* Sombras */
+  --shadow-header:0 2px 16px rgba(0,0,0,.35);
+  /* Painel offcanvas agora abre pelo mesmo lado do botão hambúrguer (esquerda,
+     ver §8), então a sombra precisa cair para a direita do painel — sinal
+     invertido em relação à versão anterior (que abria pela direita). */
+  --shadow-menu:8px 0 24px rgba(0,0,0,.4);
+  --shadow-glow-soft:0 0 6px rgba(243,113,7,.45);
+
+  /* Transições e easing */
+  --ease-base:cubic-bezier(.4,0,.2,1);
+  --transition-fast:.18s ease;
+  --transition-base:.3s var(--ease-base);
+  --transition-menu:.35s var(--ease-base);
+
+  /* Container */
+  --container-max:1300px;
+  --container-padding:clamp(1rem, 3vw, 2.5rem);
+
+  /* Header */
+  --header-height:clamp(64px, 6vw + 48px, 84px);
+  --header-gap:clamp(.75rem, 2vw, 1.75rem);
+
+  /* Menu mobile (offcanvas) */
+  --menu-width:min(82vw, 320px);
+  --overlay-bg:rgba(0,0,0,.55);
+
+  /* Componente: badge do carrinho */
+  --cart-badge-size:16px;
+
+  /* Componente: truncamento seguro do texto da logo */
+  --logo-max-width:min(50vw, 20ch);
+
+  /* Z-index */
+  --z-header:1000;
+  --z-overlay:1001;
+  --z-menu:1002;
+  --z-skip-link:2000;
 }
 
-/* RESET */
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+/* ==========================================================================
+   Progressive enhancement: color-mix() ainda não é suportado em todo
+   navegador em uso. O :root já define --shadow-glow-soft com rgba() puro
+   como base universal; aqui apenas sobrescrevemos para quem suporta
+   color-mix(), evitando duplicar o RGB de --color-primary sem fallback.
+   ========================================================================== */
+@supports (color: color-mix(in srgb, red, blue)){
+  :root{
+    --shadow-glow-soft:0 0 6px color-mix(in srgb, var(--color-primary) 45%, transparent);
+  }
+}
+
+/* ==========================================================================
+   §2 RESET
+   Responsabilidade: zerar inconsistências padrão dos navegadores.
+   Objetivo: base previsível para construir o layout por cima.
+   Motivo: evita sobrescritas repetidas de margin/padding em cada componente.
+   ========================================================================== */
+*,
+*::before,
+*::after{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+img,svg{
+  display:block;
+  max-width:100%;
+}
+
+a{
+  color:inherit;
+}
+
+button{
+  font:inherit;
+  color:inherit;
+  cursor:pointer;
+  background:none;
+  border:none;
+}
+
+ul{
+  list-style:none;
+}
+
+/* ==========================================================================
+   §3 BASE
+   Responsabilidade: estilos globais de documento (body, tipografia base).
+   Objetivo: uma única declaração de body — eliminando a duplicação que
+   existia no arquivo original (Arial numa regra, Poppins em outra).
+   Motivo: fonte e cor de fundo do site são decisões globais, não devem
+   se repetir nem entrar em conflito. O body usa --text-body (escuro)
+   porque --bg-page é claro; antes ele usava o token que hoje é
+   --text-inverse, o que deixava o texto do conteúdo principal quase
+   invisível sobre o fundo claro.
+   ========================================================================== */
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
 }
 
 body{
-    font-family:Arial;
-    background:#f5f5f5;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  font-family:var(--font-body);
+  font-size:var(--fs-body);
+  background:var(--bg-page);
+  color:var(--text-body);
+  line-height:1.5;
 }
 
-/* HEADER */
+/* Trava de scroll quando o menu mobile está aberto.
+   O JavaScript apenas alterna a classe; quem decide o comportamento é o CSS. */
+body.menu-open{
+  overflow:hidden;
+}
+
+/* Skip link — primeiro elemento focável da página */
+.skip-link{
+  position:absolute;
+  top:-100%;
+  left:var(--space-sm);
+  background:var(--color-primary);
+  color:var(--color-dark);
+  padding:var(--space-xs) var(--space-sm);
+  border-radius:var(--radius-sm);
+  font-weight:600;
+  z-index:var(--z-skip-link);
+  transition:top var(--transition-fast);
+}
+
+.skip-link:focus{
+  top:var(--space-sm);
+}
+
+/* ==========================================================================
+   §4 LAYOUT
+   Responsabilidade: contêineres estruturais reutilizados por header e footer.
+   Objetivo: uma única definição de "container" com largura máxima e centro.
+   Motivo: header e footer usavam max-width diferentes (1300px / 1200px)
+   sem motivo funcional; padronizado em um token único.
+   ========================================================================== */
+.header-container,
+.footer-container{
+  max-width:var(--container-max);
+  margin-inline:auto;
+  width:100%;
+}
+
+main{
+  flex:1;
+}
+
+/* ==========================================================================
+   §5 HEADER
+   Responsabilidade: moldura externa do cabeçalho (cor, altura, sombra).
+   Objetivo: header com altura consistente e distribuição previsível
+   entre logo, navegação e ações, via Flexbox.
+   Motivo: o header original tinha padding fixo (15px) e justify-content
+   fixo em flex-start, o que empurrava tudo para a esquerda sem espaço
+   reservado para o carrinho — corrigido com justify-content:space-between.
+   ========================================================================== */
 .header{
-    background:var(--dark);
-    color:white;
-    padding:15px;
+  background:var(--color-dark);
+  border-bottom:var(--border-hairline);
+  box-shadow:var(--shadow-header);
+  position:relative;
+  z-index:var(--z-header);
 }
 
 .header-container{
-    max-width:1300px;
-    margin:auto;
-    display:flex;
-    align-items:center;
-    justify-content:flex-start;
-    gap:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--header-gap);
+  min-height:var(--header-height);
+  padding-inline:var(--container-padding);
 }
 
-/* LOGO */
-.logo{
-    color:var(--primary);
-    text-decoration:none;
-    font-weight:bold;
-    display:flex;
-    gap:8px;
-    align-items:center;
+/* ==========================================================================
+   §6 LOGO
+   Responsabilidade: identidade visual da marca no header e no footer.
+   Objetivo: uma única definição de .brand-logo (o arquivo original tinha
+   três blocos separados: cores, animação e linhas decorativas).
+   Motivo: manter o glow suave pedido, sem repetir seletor nem duplicar
+   propriedades que já existiam em blocos anteriores.
+   ========================================================================== */
+/* Layout mobile: Hambúrguer (order:1, em §8) | Logo (order:2) | Carrinho
+   (order:3, em §9). A logo fica com tamanho natural (sem flex:1) e os dois
+   elementos das pontas crescem igualmente (flex:1 cada) — como ambos
+   partem da mesma base e crescem na mesma proporção, o espaço restante
+   é dividido de forma idêntica dos dois lados, centralizando a logo de
+   verdade, independente do número de dígitos do badge ou do tamanho do
+   nome da loja. Desktop restaura order:1 na §8 (media query). */
+.brand-logo{
+  position:relative;
+  order:2;
+  display:flex;
+  align-items:center;
+  gap:var(--space-2xs);
+  padding-block:var(--space-3xs);
+  font-size:var(--fs-logo);
+  font-weight:600;
+  letter-spacing:.3px;
+  color:var(--color-primary);
+  text-decoration:none;
+  flex-shrink:0;
+  white-space:nowrap;
+  text-shadow:0 0 7px var(--color-primary);
+  animation:softGlow 3.5s infinite var(--ease-base);
 }
 
-/* NAV DESKTOP */
+.brand-logo strong{
+  font-weight:800;
+  color:var(--text-inverse-strong);
+}
+
+/* Rede de segurança: com white-space:nowrap + flex-shrink:0 no .brand-logo,
+   um nome de loja muito mais longo que "Ita Suplementos" (ou o mesmo texto
+   esticado por tradução automática do navegador / zoom 200%) não teria para
+   onde encolher e empurraria o carrinho e o hambúrguer para fora da tela.
+   Isso trunca com reticências antes que isso aconteça — não muda nada com
+   o texto atual, que nunca chega perto desse limite. */
+.brand-logo span{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:var(--logo-max-width);
+}
+
+.brand-logo::before,
+.brand-logo::after{
+  content:"";
+  position:absolute;
+  left:0;
+  width:100%;
+  height:1px;
+  background:linear-gradient(90deg, transparent, var(--color-primary), transparent);
+  opacity:.5;
+}
+
+.brand-logo::before{ top:-4px; }
+.brand-logo::after{ bottom:-4px; }
+
+.logo-icon{
+  color:var(--color-primary);
+  font-size:var(--fs-icon);
+  filter:drop-shadow(var(--shadow-glow-soft));
+}
+
+/* ==========================================================================
+   §7 NAVIGATION DESKTOP
+   Responsabilidade: lista de links e seu comportamento visual em telas largas.
+   Objetivo: hover elegante com underline animado, sem elementos exagerados.
+   Motivo: a seta decorativa (::before com "▾") do arquivo original foi
+   removida — some junto ao underline e não agregava clareza, apenas ruído.
+   O underline anima via transform:scaleX (não mais width): mesmo efeito
+   visual, mas scaleX roda no compositor da GPU, enquanto width força
+   reflow do layout a cada quadro da transição.
+
+   §7.1 — .nav-list agora contém APENAS os links de navegação real
+   (Início / Suplementos / Categorias / Contato). A saudação do usuário
+   e os links de conta (Entrar/Cadastrar/Sair) foram extraídos para um
+   bloco irmão, .header-user (ver abaixo), porque misturar os dois no
+   mesmo <ul> era a causa direta da quebra em duas linhas no desktop:
+   não havia como o menu principal ficar centralizado e compacto com
+   itens de contexto diferente competindo pelo mesmo espaço.
+   ========================================================================== */
 .nav-list{
-    display:flex;
-    list-style:none;
-    gap:20px;
+  display:flex;
+  flex-direction:column;
+  gap:var(--space-md);
 }
 
 .nav-list a{
-    color:#ddd;
-    text-decoration:none;
+  position:relative;
+  display:inline-block;
+  flex-shrink:0;
+  white-space:nowrap;
+  font-size:var(--fs-nav);
+  color:var(--text-inverse);
+  text-decoration:none;
+  transition:color var(--transition-fast);
 }
 
-.nav-list a:hover{
-    color:var(--primary);
+.nav-list a::after{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:-4px;
+  width:100%;
+  height:2px;
+  background:var(--color-primary);
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform var(--transition-base);
 }
 
-/* ACTIONS */
-.header-actions{
-    display:flex;
-    gap:15px;
-    align-items:center;
+/* Bloco da área do usuário (saudação + entrar/cadastrar/sair).
+   Mobile: aparece dentro do offcanvas, abaixo do menu principal, separado
+   por uma linha (border-top reaproveita --border-hairline, o mesmo token
+   já usado em outras divisórias do arquivo).
+   Desktop: a media query em §8 zera esse espaçamento, porque lá o bloco
+   sai do fluxo vertical e passa a ficar ao lado do menu, próximo ao
+   carrinho — ver comentário na media query. */
+.header-user{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:var(--space-sm);
+  padding-top:var(--space-md);
+  margin-top:var(--space-md);
+  border-top:var(--border-hairline);
 }
 
+.header-user a{
+  position:relative;
+  font-size:var(--fs-nav);
+  color:var(--text-inverse);
+  text-decoration:none;
+  white-space:nowrap;
+  transition:color var(--transition-fast);
+}
+
+.user-greeting{
+  font-size:var(--fs-nav);
+  color:var(--text-muted);
+}
+
+.glow-text{
+  color:var(--color-primary);
+  font-weight:600;
+}
+
+/* ==========================================================================
+   §8 MOBILE NAVIGATION
+   Responsabilidade: comportamento do menu em telas estreitas (offcanvas).
+   Objetivo: substituir o antigo "display:none / display:block" por um
+   padrão de e-commerce real: transform + opacity + visibility + overlay.
+   Motivo: o CSS conversa com classes que o JavaScript já controla —
+   body.menu-open, .nav.is-open e .nav-overlay — nenhuma delas foi criada
+   ou alterada aqui, apenas estilizadas.
+
+   §8.1 — Lado do painel: o botão .menu-toggle tem order:1, ou seja, fica
+   na ponta ESQUERDA do header no mobile (ver §6/§9). O painel precisa
+   abrir exatamente desse lado — antes ele estava fixo em right:0 com
+   translateX(100%), abrindo pela direita independente de onde o botão
+   estava, o que é a inconsistência relatada. Corrigido para left:0 +
+   translateX(-100%). --shadow-menu foi invertida no :root para acompanhar.
+   ========================================================================== */
 .nav{
-    margin-left:20px;
+  order:4;
+  position:fixed;
+  top:0;
+  left:0;
+  height:100dvh;
+  width:var(--menu-width);  
+  background:var(--bg-menu);
+  padding:calc(var(--header-height) + var(--space-md)) var(--space-lg) var(--space-lg);
+  box-shadow:var(--shadow-menu);
+  overflow-y:auto;
+   z-index: var(--z-menu);
+  transform:translateX(-100%);
+  opacity:0;
+  visibility:hidden;
+  transition:
+    transform var(--transition-menu),
+    opacity var(--transition-menu),
+    visibility 0s linear var(--transition-menu);
 }
 
-.header-actions{
-    margin-left:auto;
+.nav.is-open{
+  transform:translateX(0);
+  opacity:1;
+  visibility:visible;
+  transition:
+  transform var(--transition-menu),
+  opacity var(--transition-menu),
+  visibility 0s linear;
+}
+
+/* Overlay: escurece o conteúdo atrás do menu aberto.
+   Fica oculto por padrão; body.menu-open é quem decide se aparece. */
+.nav-overlay{
+  position:fixed;
+  inset:0;
+  background:var(--overlay-bg);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  z-index:var(--z-overlay);
+  transition:opacity var(--transition-base), visibility 0s linear var(--transition-base);
+}
+
+body.menu-open .nav-overlay{
+  opacity:1;
+  visibility:visible;
+  pointer-events:none;
+  transition:opacity var(--transition-base), visibility 0s linear;
+}
+
+/* Botão hambúrguer */
+.menu-toggle{
+  order:1;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  color:var(--text-inverse-strong);
+  font-size:var(--fs-icon);
+  padding:var(--space-2xs);
+  border-radius:var(--radius-sm);
+  flex:1;
+  transition:color var(--transition-fast);
+}
+
+/* Único breakpoint de largura do arquivo inteiro: necessário porque não
+   existe media query de "capacidade" capaz de alternar offcanvas <-> menu
+   inline. Tudo o resto do layout é fluido por natureza (clamp/flex/grid). */
+@media (min-width:900px){
+
+  .menu-toggle{
+    display:none;
+  }
+
+  .nav{
+    order:2;
+    position:static;
+    height:auto;
+    width:auto;
+    min-width:0;
+    background:transparent;
+    box-shadow:none;
+    padding:0;
+    overflow:visible;
+    flex:1;
     display:flex;
     align-items:center;
-    gap:15px;
+    /* space-between separa o menu principal (nav-list, à esquerda/centro)
+       do bloco de conta (.header-user, à direita) — é essa divisão que
+       elimina a quebra em duas linhas: cada bloco disputa espaço só com
+       seus próprios itens, não mais um <ul> só com conteúdos misturados. */
+    justify-content:space-between;
+    gap:var(--header-gap);
+
+    transform:none;
+    opacity:1;
+    visibility:visible;
+    transition:none;
+  }
+
+  .nav-list{
+    /* flex:1 faz o menu principal ocupar o espaço remanescente entre a
+       logo e o bloco de conta, e justify-content:center centraliza os
+       itens dentro desse espaço — mesmo efeito visual de "menu
+       centralizado" que existia antes, só que agora sem competir por
+       espaço com saudação/login. flex-wrap:nowrap é o que garante que
+       nunca mais quebre em duas linhas: se faltar espaço, os itens não
+       têm para onde ir (não há fonte sendo reduzida para caber). */
+    flex:1;
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    gap:var(--header-gap);
+    flex-wrap:nowrap;
+  }
+
+  .header-user{
+    /* No mobile esse bloco fica empilhado abaixo do menu, com uma linha
+       divisória (§7). No desktop ele sai desse fluxo e senta ao lado do
+       menu, então a divisória e o espaçamento vertical não fazem sentido
+       aqui — zerados. flex-shrink:0 impede que "Olá, Nome" seja
+       espremido pelo nav-list vizinho. */
+    padding-top:0;
+    margin-top:0;
+    border-top:none;
+    flex-shrink:0;
+  }
+
+  .nav-overlay{
+    display:none;
+  }
+
+  /* Restaura o layout desktop original: a logo volta para a ponta
+     esquerda (no mobile ela vai para order:2, ver §6), e o carrinho
+     perde o flex:1 que só existe para centralizar a logo no mobile —
+     no desktop quem cresce para ocupar o espaço central é a .nav. */
+  .brand-logo{
+    order:1;
+  }
+
+  /* Ajuste de .header-actions (definida na §9) consolidado aqui para
+     manter um único @media(min-width:768px) no arquivo inteiro. */
+  .header-actions{
+    order:3;
+    flex:none;
+  }
 }
 
+/* ==========================================================================
+   §9 HEADER ACTIONS
+   Responsabilidade: agrupador genérico de ações do header (hoje só o carrinho).
+   Objetivo: uma única definição (o original declarava .header-actions duas
+   vezes, com margin-left:auto competindo com display:flex isolado).
+   Motivo: order:3 + flex:1 colocam o carrinho na ponta direita no mobile
+   e o fazem crescer na mesma proporção do .menu-toggle (também flex:1) —
+   é essa simetria que centraliza a logo de verdade, sem depender do
+   tamanho do badge. justify-content:flex-end mantém o ícone colado
+   na borda direita real do header, mesmo com a caixa maior.
+   ========================================================================== */
+.header-actions{
+  order:3;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:var(--space-sm);
+  flex:1;
+}
+
+/* O ajuste responsivo (order:3) vive dentro do único @media(min-width:768px)
+   do arquivo, na §8 — para não repetir a mesma media query em dois lugares. */
+
+/* ==========================================================================
+   §10 CART
+   Responsabilidade: ícone do carrinho e badge de contagem.
+   Objetivo: badge sempre bem posicionada, independente do tamanho do número.
+   Motivo: min-width + flex centralizado evita que o badge deforme com
+   números de dois dígitos, o que o border-radius:50% fixo não garantia.
+   --cart-badge-size elimina a repetição de 16px em min-width e height
+   (era o mesmo valor, digitado duas vezes, na mesma regra). A cor do
+   número passou de --text-inverse para --text-inverse-strong: o fundo
+   do badge é vermelho (--color-danger), não uma das superfícies escuras
+   do sistema de tokens, então o texto precisa do contraste máximo
+   disponível — exatamente o papel que --text-inverse-strong existe
+   para cumprir. Os offsets de posição (top/right) viraram em: escalam
+   com --fs-badge (fluido, via clamp()), em vez de ficarem desproporcionais
+   nas pontas do clamp() como aconteceria com px fixo.
+   ========================================================================== */
 .cart{
-    color:white;
-    position:relative;
+  position:relative;
+  display:flex;
+  align-items:center;
+  color:var(--text-inverse-strong);
+  font-size:var(--fs-icon);
+  text-decoration:none;
 }
 
 .cart-badge{
-    position:absolute;
-    top:-8px;
-    right:-10px;
-    background:red;
-    font-size:10px;
-    padding:2px 6px;
-    border-radius:50%;
+  position:absolute;
+  top:-.6em;
+  right:-1em;
+  min-width:var(--cart-badge-size);
+  height:var(--cart-badge-size);
+  padding:0 4px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--color-danger);
+  color:var(--text-inverse-strong);
+  font-size:var(--fs-badge);
+  font-weight:700;
+  line-height:1;
+  border-radius:var(--radius-pill);
 }
 
-/* BOTÃO MOBILE */
-.menu-toggle{
-    display:none;
-    font-size:24px;
-    background:none;
-    border:none;
-    color:white;
-}
-
-/* ================= MOBILE ================= */
-
-@media (max-width:768px){
-
-    .menu-toggle{
-        display:block;
-    }
-
-    .nav{
-        display:none;
-        width:100%;
-    }
-
-    .nav.active{
-        display:block;
-    }
-
-    .nav-list{
-        flex-direction:column;
-        gap:12px;
-        padding:10px 0;
-    }
-
-    .header-actions{
-        display:none;
-        width:100%;
-        justify-content:center;
-    }
-
-    .header-actions.active{
-        display:flex;
-    }
-
-    .header-container{
-        flex-wrap:wrap;
-    }
-}
-
-.nav-list a{
-    position:relative;
-    display:inline-block;
-    transition:.3s;
-}
-
-/* linha embaixo */
-.nav-list a::after{
-    content:"";
-    position:absolute;
-    left:0;
-    bottom:-6px;
-    width:0%;
-    height:2px;
-    background:var(--primary);
-    transition:.3s;
-}
-
-/* ativa linha */
-.nav-list a:hover::after{
-    width:100%;
-}
-
-/* seta pequena */
-.nav-list a::before{
-    content:"▾";
-    position:absolute;
-    left:50%;
-    transform:translateX(-50%);
-    bottom:-18px;
-    font-size:10px;
-    opacity:0;
-    transition:.3s;
-    color:var(--primary);
-}
-
-.nav-list a:hover::before{
-    opacity:1;
-}
-
-.whatsapp-btn{
-    background:#08db47;
-    color:white;
-    padding:10px 16px;
-    border-radius:25px;
-    font-weight:600;
-    text-decoration:none;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    transition:.3s;
-}
-
-/* hover animado */
-.whatsapp-btn:hover{
-    animation:waShake .4s ease-in-out infinite;
-    transform:scale(1.05);
-}
-
-@keyframes waShake{
-    0%{ transform:scale(1.05) rotate(0); }
-    25%{ transform:scale(1.05) rotate(2deg); }
-    50%{ transform:scale(1.05) rotate(0); }
-    75%{ transform:scale(1.05) rotate(-2deg); }
-    100%{ transform:scale(1.05) rotate(0); }
-}
-
-.footer-socials a{
-    color:#aaa;
-    font-size:22px;
-    transition:.3s;
-    display:inline-block;
-}
-
-.footer-socials a:hover{
-    color:var(--primary);
-    transform:scale(1.4) rotate(-5deg);
-    filter:drop-shadow(0 0 8px var(--primary));
-}
-
-.logo i{
-    animation:pulse 2s infinite ease-in-out;
-}
-
-@keyframes pulse{
-    0%{ transform:scale(1); }
-    50%{ transform:scale(1.2); }
-    100%{ transform:scale(1); }
-}
-
-@keyframes glowPulse {
-    0% {
-        opacity: 0.6;
-        text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
-    }
-    50% {
-        opacity: 1;
-        text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary);
-    }
-    100% {
-        opacity: 0.6;
-        text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
-    }
-}
-
-.glow-text {
-    animation: glowPulse 2s infinite ease-in-out;
-}
-
+/* ==========================================================================
+   §11 FOOTER
+   Responsabilidade: rodapé institucional (logo, texto, redes, copyright).
+   Objetivo: centralização perfeita e spacing fluido em todos os elementos.
+   Motivo: unifica os dois max-width diferentes usados antes (1300px no
+   header, 1200px no footer) sob o mesmo token --container-max.
+   ========================================================================== */
 .footer{
-    background: linear-gradient(135deg,#111,#1f1f1f);
-    color:white;
-    padding:30px 15px;
-    margin-top:auto;
+  background:linear-gradient(135deg, var(--color-dark), var(--color-dark-alt));
+  color:var(--text-inverse-strong);
+  padding:var(--space-xl) var(--space-md);
+  margin-top:auto;
 }
 
 .footer-container{
-    max-width:1200px;
-    margin:auto;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    gap:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap:var(--space-sm);
 }
 
-/* LOGO IGUAL HEADER */
 .footer-logo{
-    font-size:20px;
-    font-weight:800;
-    color:var(--primary);
-    display:flex;
-    align-items:center;
-    gap:10px;
-    animation: glowPulse 2s infinite ease-in-out;
+  order: 2;
+  font-weight:800;
 }
 
-/* TEXTO */
 .footer-text{
-    opacity:.8;
-    font-size:14px;
+  order: 1;
+  color:var(--text-muted);
+  font-size:var(--fs-body);
 }
 
-/* SOCIAL */
+.footer-copy{
+  order: 4;
+  color:var(--text-muted);
+  opacity:.7;
+  font-size:var(--fs-copy);
+}
+
+/* ==========================================================================
+   §12 SOCIAL ICONS
+   Responsabilidade: ícones de redes sociais no footer.
+   Objetivo: uma única definição de .footer-socials/.footer-socials a
+   (o original tinha o bloco inteiro duplicado com valores de hover
+   diferentes: scale 1.4 numa regra, 1.3 na outra).
+   Motivo: consistência — o mesmo ícone não pode ter dois comportamentos
+   de hover concorrendo por especificidade.
+   ========================================================================== */
 .footer-socials{
-    display:flex;
-    gap:20px;
+  order: 3;
+  display:flex;
+  gap:var(--space-md);
 }
 
 .footer-socials a{
-    color:#aaa;
-    font-size:22px;
-    transition:.3s;
+  color:var(--text-muted);
+  font-size:var(--fs-icon);
+  text-decoration:none;
+  transition:color var(--transition-base), transform var(--transition-base);
 }
 
-.footer-socials a:hover{
-    color:var(--primary);
-    transform:scale(1.3) rotate(-5deg);
-    filter:drop-shadow(0 0 8px var(--primary));
+/* ==========================================================================
+   §13 ANIMATIONS
+   Responsabilidade: única fonte de @keyframes do arquivo.
+   Objetivo: manter apenas o glow suave da logo, pedido explicitamente.
+   Motivo: o arquivo original tinha 4 animações concorrentes (pulse,
+   glowPulse, softGlow, waShake) aplicadas a elementos parecidos com
+   intensidades diferentes. Ficou só a mais discreta (softGlow), e o
+   waShake do WhatsApp foi removido — a classe .whatsapp-btn não existe
+   mais no HTML desde que o botão saiu do header.
+   softGlow agora anima só opacity (compositado pela GPU). Antes também
+   animava text-shadow e filter — propriedades que forçam o navegador a
+   recalcular o blur da sombra a cada quadro, rodando para sempre. A
+   sombra virou um valor fixo (0 0 7px) no .brand-logo; a pulsação de
+   opacidade sozinha já reproduz quase o mesmo efeito de "respirar".
+   ========================================================================== */
+@keyframes softGlow{
+  0%,
+  100%{
+    opacity:.65;
+  }
+  50%{
+    opacity:1;
+  }
 }
 
-/* COPYRIGHT */
-.footer-copy{
-    font-size:12px;
-    opacity:.5;
+/* ==========================================================================
+   §14 ACCESSIBILITY
+   Responsabilidade: garantir navegação por teclado e leitores de tela.
+   Objetivo: outline visível e consistente em qualquer elemento focável.
+   Motivo: nenhum :focus-visible existia no arquivo original.
+   ========================================================================== */
+a:focus-visible,
+button:focus-visible{
+  outline:2px solid var(--color-primary);
+  outline-offset:3px;
+  border-radius:var(--radius-sm);
 }
 
+/* ==========================================================================
+   §15 CAPABILITY QUERIES
+   Responsabilidade: única fonte de media queries de capacidade do arquivo.
+   Objetivo: hover apenas em dispositivos com ponteiro de precisão, e
+   respeito total a prefers-reduced-motion.
+   Motivo: no arquivo original os efeitos de hover disparavam também em
+   telas touch (tocar podia deixar o estado "grudado"); e nenhuma consulta
+   de reduced-motion existia, então o glow rodava infinitamente até para
+   quem pediu menos animação no sistema.
+   ========================================================================== */
+@media (hover:hover){
 
-body{
-    font-family:'Poppins', sans-serif;
+  .nav-list a:hover{
+    color:var(--color-primary-hover);
+  }
+
+  .nav-list a:hover::after{
+    transform:scaleX(1);
+  }
+
+  .header-user a:hover{
+    color:var(--color-primary-hover);
+  }
+
+  .menu-toggle:hover{
+    color:var(--color-primary-hover);
+  }
+
+  .cart:hover{
+    color:var(--color-primary-hover);
+  }
+
+  .footer-socials a:hover{
+    color:var(--color-primary-hover);
+    transform:translateY(-2px);
+  }
 }
 
-/* LOGO BASE */
-.brand-logo{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    font-size:18px;
-    font-weight:600;
-    color:var(--primary);
-    letter-spacing:0.5px;
-    text-decoration:none;
+@media (prefers-reduced-motion: reduce){
+  *{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
 }
 
-/* destaque do nome */
-.brand-logo strong{
-    font-weight:800;
-    color:white;
-}
-
-/* ícone */
-.logo-icon{
-    color:var(--primary);
-    font-size:20px;
-    filter:drop-shadow(0 0 6px var(--primary));
-}
-
-/* ================= GLOW MAIS SUAVE ================= */
-
-@keyframes softGlow {
-    0% {
-        opacity:0.6;
-        text-shadow:0 0 4px var(--primary);
-        filter:drop-shadow(0 0 4px var(--primary));
-    }
-    50% {
-        opacity:1;
-        text-shadow:0 0 10px var(--primary);
-        filter:drop-shadow(0 0 10px var(--primary));
-    }
-    100% {
-        opacity:0.6;
-        text-shadow:0 0 4px var(--primary);
-        filter:drop-shadow(0 0 4px var(--primary));
-    }
-}
-
-/* aplica no logo inteiro */
-.brand-logo{
-    animation:softGlow 3.5s infinite ease-in-out;
-}
-
-.brand-logo{
-    position:relative;
-    padding:6px 0;
-}
-
-/* linha de cima */
-.brand-logo::before{
-    content:"";
-    position:absolute;
-    top:-4px;
-    left:0;
-    width:100%;
-    height:1px;
-    background:linear-gradient(90deg,transparent,var(--primary),transparent);
-    opacity:0.5;
-}
-
-/* linha de baixo */
-.brand-logo::after{
-    content:"";
-    position:absolute;
-    bottom:-4px;
-    left:0;
-    width:100%;
-    height:1px;
-    background:linear-gradient(90deg,transparent,var(--primary),transparent);
-    opacity:0.5;
-}
-
-
-@media (max-width:768px){
-
-    .header-container{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:10px;
-    }
-
-    .logo{
-        font-size:18px;
-    }
-
-    .header-actions{
-        display:flex !important;
-        gap:12px;
-        margin:0;
-        width:auto;
-    }
-
-    .btn-header{
-        padding:8px 12px;
-        font-size:12px;
-    }
-
-    .cart-link{
-        font-size:20px;
-    }
-
-    .menu-toggle{
-        display:block;
-        color:white;
-        font-size:24px;
-    }
-
-    nav{
-        display:none;
-        width:100%;
-    }
-
-    nav.active{
-        display:block;
-    }
-}
+/*TODO:
+Investigar por que o overlay intercepta os cliques do menu mobile quando pointer-events está habilitado.*/

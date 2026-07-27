@@ -58,18 +58,22 @@
   --f-display:    'Barlow Condensed', sans-serif;
   --f-body:       'Barlow', sans-serif;
 
-  /* ── MELHORIA: tokens de espaçamento fluidos evitam números mágicos ──
+  /* ── tokens de espaçamento fluidos evitam números mágicos ──
      Usados para padding de página, mantendo consistência em todos os breakpoints. */
   --page-px:       clamp(10px, 3vw, 24px);
   --section-gap:   clamp(40px, 6vw, 60px);
 
-  /* ── MELHORIA: tamanho do banner como token fluido ──
+  /* ── tamanho do banner como token fluido ──
      Evita redefinir height em cada breakpoint com valores fixos. */
   --banner-h:      clamp(220px, 40vw, 500px);
 
-  /* ── MELHORIA: tamanho do anel de categoria como token ──
+  /* ── tamanho do anel de categoria como token ──
      Substituiu width/height fixos em .cat-item__ring. */
   --cat-ring:      clamp(56px, 8vw, 72px);
+
+  /* ── gaps fluidos reutilizáveis (evitam valores fixos repetidos) ── */
+  --gap-sm:        clamp(10px, 2vw, 18px);
+  --gap-md:        clamp(12px, 2.5vw, 18px);
 }
 
 
@@ -84,7 +88,7 @@ body {
   color: var(--text-1);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* MELHORIA: evita overflow horizontal causado por elementos wide como cats__track */
+  /* evita overflow horizontal causado por elementos wide como cats__track */
   overflow-x: hidden;
 }
 
@@ -92,34 +96,26 @@ img   { display: block; max-width: 100%; }
 a     { text-decoration: none; color: inherit; }
 button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 
-/* ── MELHORIA: foco visível para acessibilidade de teclado ──
-   O original não definia :focus-visible em nenhum elemento interativo.
-   Esta regra global garante que botões, links e inputs sejam navegáveis
-   via teclado sem remover o outline em clicks com mouse. */
+/* ── foco visível para acessibilidade de teclado ──
+   Garante que botões, links e inputs sejam navegáveis via teclado
+   sem afetar o estado visual em cliques com mouse. */
 :focus-visible {
   outline: 2px solid var(--fire);
   outline-offset: 3px;
   border-radius: var(--r-md);
 }
 
-/* ── MELHORIA: respeita preferência de redução de movimento do sistema ──
-   O original não tratava prefers-reduced-motion. Usuários com vestibular
-   disorders ou epilepsia ficavam expostos a todas as animações. */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
-  }
-}
+/* NOTA: a regra de "prefers-reduced-motion" e todas as regras de
+   "hover/pointer" foram centralizadas na § 10 RESPONSIVE (10.2 e 10.3),
+   junto com os demais media features, para manter todas as media queries
+   concentradas em um único lugar do arquivo. */
 
 
 /* ----------------------------------------------------------------
    § 3  HERO / BANNER
    ---------------------------------------------------------------- */
 .hero {
-  /* MELHORIA: usa --page-px no lugar de padding: 28px 24px 0
-     No original, o padding era fixo e redefinido em cada breakpoint mobile. */
+  /* usa --page-px fluido no lugar de padding fixo redefinido por breakpoint */
   padding: var(--page-px) var(--page-px) 0;
   max-width: 1440px;
   margin: 0 auto;
@@ -127,14 +123,27 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 
 .banner {
   position: relative;
-  /* MELHORIA: height fluida via clamp() substitui height: 500px fixo
-     que era redefinido para 350px em 992px e 260px em 768px.
-     Agora escala suavemente sem nenhum breakpoint adicional. */
+  /* height fluida via clamp() substitui height fixo redefinido em cada breakpoint */
   height: var(--banner-h);
   border-radius: var(--r-2xl);
   overflow: hidden;
   background: var(--surface-1);
   isolation: isolate;
+}
+
+.banner picture{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+}
+
+.banner picture img{
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+    object-position:center;
 }
 
 .banner__slide {
@@ -157,9 +166,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   z-index: 1; pointer-events: none;
 }
 
-/* orange accent line top-left
-   MELHORIA: escondido em telas estreitas via @media min-width (mobile-first)
-   ao invés de display:none num breakpoint max-width como no original. */
+/* orange accent line top-left — visível a partir do breakpoint sm (mobile-first) */
 .banner::after {
   content: '';
   position: absolute;
@@ -167,7 +174,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   width: 3px; height: 60%;
   background: linear-gradient(to bottom, var(--fire), transparent);
   z-index: 2;
-  display: none; /* oculto por padrão no mobile */
+  display: none; /* oculto por padrão no mobile, exibido em § 10.1 */
 }
 
 /* dots */
@@ -219,8 +226,8 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 .search-form:focus-within { border-color: var(--fire); }
 
 .search-form input {
-  /* MELHORIA: min-width: 0 evita que o input flex empurre o botão para fora
-     em telas muito estreitas. É uma regra essencial para flex items com texto. */
+  /* min-width: 0 evita que o input flex empurre o botão para fora
+     em telas muito estreitas — regra essencial para flex items com texto */
   flex: 1;
   min-width: 0;
   border: none; outline: none;
@@ -244,14 +251,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   text-transform: uppercase;
   transition: box-shadow .3s, transform .25s var(--spring);
 }
-/* MELHORIA: hover apenas em dispositivos que suportam pointer fino (mouse)
-   Evita que o estado hover fique "travado" em telas touch após o tap. */
-@media (hover: hover) and (pointer: fine) {
-  .search-form__btn:hover {
-    box-shadow: var(--shadow-fire);
-    transform: scale(1.04);
-  }
-}
+/* hover apenas em § 10.2 (dispositivos com pointer fino) */
 
 
 /* ----------------------------------------------------------------
@@ -260,8 +260,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 .cats {
   max-width: 1440px;
   margin: 0 auto var(--section-gap);
-  /* MELHORIA: overflow:hidden aqui contém o cats__track sem vazar
-     e evita overflow-x na página toda. */
+  /* overflow:hidden contém o cats__track sem vazar e evita overflow-x na página */
   overflow: hidden;
 }
 .cats__heading {
@@ -278,16 +277,11 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   -webkit-mask: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
           mask: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
 }
-
-/* MELHORIA: pause do ticker só em pointer fino (mouse).
-   No original, :hover pausava a animação, o que em touch não funcionava
-   pois o hover não é disparado da mesma forma — o track ficava sempre animado. */
-@media (hover: hover) and (pointer: fine) {
-  .cats__mask:hover .cats__track { animation-play-state: paused; }
-}
+/* pause do ticker no hover: ver § 10.2 (restrito a pointer fino) */
 
 .cats__track {
-  display: flex; gap: 18px;
+  display: flex;
+  gap: var(--gap-md); /* gap fluido no lugar de 18px fixo */
   width: max-content;
   animation: scroll-cats 32s linear infinite;
   will-change: transform;
@@ -300,21 +294,16 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 
 .cat-item {
   flex-shrink: 0;
-  /* MELHORIA: largura fixa de 88px substituída por valor fluido com clamp.
-     Em telas muito estreitas, 88px poderia ser proporcionalmente grande demais. */
+  /* largura fluida com clamp evita que 88px fixo fique proporcionalmente
+     grande demais em telas muito estreitas */
   width: clamp(72px, 12vw, 88px);
   text-align: center;
   transition: transform .38s var(--spring);
 }
-
-/* MELHORIA: hover de cat-item restrito a pointer fino */
-@media (hover: hover) and (pointer: fine) {
-  .cat-item:hover { transform: translateY(-6px) scale(1.06); }
-}
+/* hover de cat-item: ver § 10.2 */
 
 .cat-item__ring {
-  /* MELHORIA: tamanho do anel via token --cat-ring com clamp()
-     substitui width/height fixos que quebravam em viewports muito estreitas. */
+  /* tamanho do anel via token --cat-ring com clamp() substitui width/height fixos */
   width: var(--cat-ring);
   height: var(--cat-ring);
   border-radius: 50%;
@@ -324,13 +313,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   border: 1.5px solid var(--border);
   transition: border-color .3s, box-shadow .3s;
 }
-
-@media (hover: hover) and (pointer: fine) {
-  .cat-item:hover .cat-item__ring {
-    border-color: var(--fire);
-    box-shadow: 0 0 0 3px var(--fire-dim);
-  }
-}
+/* hover do anel: ver § 10.2 */
 
 .cat-item__ring img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -349,14 +332,13 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 .products {
   max-width: 1440px;
   margin: 0 auto;
-  /* MELHORIA: padding lateral usa --page-px (fluido) ao invés de valores
-     fixos redefinidos em 992px (18px), 768px (14px) e 480px (10px). */
+  /* padding lateral fluido via --page-px substitui valores fixos por breakpoint */
   padding: 0 var(--page-px) clamp(60px, 8vw, 100px);
 }
 
 .products__grid {
     display: grid;
-    gap: 14px;
+    gap: var(--gap-sm); /* gap fluido no lugar de 14px fixo */
     grid-template-columns: repeat(2, 1fr);
 }
 
@@ -380,7 +362,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   background: var(--surface-1);
   border-radius: var(--r-2xl);
   border: 1px solid var(--border);
-  /* MELHORIA: padding fluido substitui redefinições em 768px (10px) e 480px (8px) */
+  /* padding fluido substitui redefinições por breakpoint */
   padding: clamp(8px, 2vw, 14px);
   display: flex; flex-direction: column;
   cursor: pointer;
@@ -390,16 +372,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
     border-color .3s;
   will-change: transform;
 }
-
-/* MELHORIA: hover do card restrito a pointer fino.
-   Em touch, :hover travava o card elevado após o tap — má UX. */
-@media (hover: hover) and (pointer: fine) {
-  .card:hover {
-    transform: translateY(-10px) scale(1.012);
-    box-shadow: var(--shadow-lift);
-    border-color: var(--border-hover);
-  }
-}
+/* hover do card: ver § 10.2 */
 
 /* ── image wrapper ── */
 .card__img-box {
@@ -429,10 +402,8 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   transition: opacity .8s var(--ease-out), transform 1.1s var(--ease-out);
 }
 
-/* Secondary image (hover reveal)
-   MELHORIA: a segunda imagem só é relevante em hover (pointer fino).
-   Em touch, o usuário nunca vê card__img--b pois o hover não funciona
-   da mesma forma. A imagem primária permanece visível em touch. */
+/* Secondary image (hover reveal) — ver § 10.2.
+   Em touch, a imagem secundária nunca aparece; a primária permanece visível. */
 .card__img--b {
   z-index: 2;
   opacity: 0;
@@ -440,12 +411,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   transition: opacity .8s var(--ease-out), transform 1.1s var(--ease-out);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .card:hover .card__img--a { opacity: 0; transform: scale(.97); }
-  .card:hover .card__img--b { opacity: 1; transform: scale(1); }
-}
-
-/* Single image — gentle pan */
+/* Single image — gentle pan (efeito de zoom aplicado no hover, ver § 10.2) */
 .card__img--solo {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
@@ -455,14 +421,9 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   transition: transform 1.2s var(--ease-out);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .card:hover .card__img--solo { transform: scale(1.07); }
-}
-
-/* ── carousel nav arrows (show on hover)
-   MELHORIA: nav de carousel só aparece em hover de pointer fino.
-   Em touch, os botões ficavam invisíveis mas presentes no DOM,
-   causando cliques acidentais. Em touch, o JS deve usar swipe. */
+/* ── carousel nav arrows ──
+   Em pointer fino, aparecem no hover (ver § 10.2).
+   Em touch, permanecem visíveis permanentemente (ver § 10.2) para permitir navegação. */
 .card__nav {
   position: absolute; top: 50%;
   transform: translateY(-50%);
@@ -478,26 +439,16 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   backdrop-filter: blur(4px);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .card__img-box:hover .card__nav { opacity: 1; }
-  .card__nav:hover { background: var(--fire); transform: translateY(-50%) scale(1.12); }
-}
-
-/* Em touch: mostra as setas permanentemente para que o usuário possa navegar */
-@media (hover: none) {
-  .card__nav { opacity: 1; }
-}
-
 .card__nav--l { left: 10px; }
 .card__nav--r { right: 10px; }
 
 /* ── stock badge ── */
 .card__badge {
   position: absolute; top: 12px; left: 12px;
-  /* MELHORIA: padding fluido evita que o badge quebre em telas muito pequenas */
+  /* padding fluido evita que o badge quebre em telas muito pequenas */
   padding: clamp(4px, 1vw, 5px) clamp(8px, 2vw, 12px);
   border-radius: var(--r-pill);
-  /* MELHORIA: font-size fluido substitui redefinições em 768px (8px) */
+  /* font-size fluido substitui redefinições por breakpoint */
   font-size: clamp(8px, 1.5vw, 9px);
   font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase;
@@ -510,7 +461,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 
 /* ── content ── */
 .card__brand {
-  /* MELHORIA: font-size fluido substitui redefinição em 480px (9px) */
+  /* font-size fluido substitui redefinição por breakpoint */
   font-size: clamp(9px, 1.5vw, 10px);
   font-weight: 600;
   letter-spacing: .1em; text-transform: uppercase;
@@ -520,7 +471,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 
 .card__name {
   font-family: var(--f-display);
-  /* MELHORIA: font-size fluido substitui redefinições em 768px (16px) e 480px (15px) */
+  /* font-size fluido substitui redefinições por breakpoint */
   font-size: clamp(15px, 3vw, 20px);
   font-weight: 700;
   letter-spacing: .03em; line-height: 1.2;
@@ -529,7 +480,8 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  /* MELHORIA: min-height fluido substitui redefinições em 768px (40px) e 480px (36px) */
+  /* min-height fluido substitui redefinições por breakpoint
+     e garante alinhamento do rodapé mesmo com nomes curtos/longos */
   min-height: clamp(36px, 6vw, 48px);
   margin-bottom: clamp(10px, 2vw, 16px);
 }
@@ -547,14 +499,14 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 }
 
 .card__price-currency {
-  /* MELHORIA: fluido substitui redefinição em 480px (11px) */
+  /* fluido substitui redefinição por breakpoint */
   font-size: clamp(11px, 2vw, 12px);
   font-weight: 600;
   color: var(--text-2);
 }
 .card__price-value {
   font-family: var(--f-display);
-  /* MELHORIA: font-size fluido substitui redefinições em 768px (22px) e 480px (20px) */
+  /* font-size fluido substitui redefinições por breakpoint */
   font-size: clamp(20px, 4vw, 26px);
   font-weight: 900;
   letter-spacing: .02em;
@@ -565,20 +517,16 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   display: inline-flex; align-items: center; gap: 7px;
   background: var(--surface-3);
   color: var(--text-1);
-  /* MELHORIA: padding fluido substitui redefinição em 768px */
+  /* padding fluido substitui redefinição por breakpoint */
   padding: clamp(8px, 1.5vw, 10px) clamp(14px, 2.5vw, 18px);
   border-radius: var(--r-lg);
   font-family: var(--f-display);
-  /* MELHORIA: font-size fluido substitui redefinição em 768px (12px) */
+  /* font-size fluido substitui redefinição por breakpoint */
   font-size: clamp(12px, 2vw, 13px);
   font-weight: 700;
   letter-spacing: .08em; text-transform: uppercase;
   border: 1px solid var(--border);
   white-space: nowrap;
-  /* MELHORIA: flex: 1 faz o botão crescer para preencher a linha
-     quando o flex-wrap quebrar, dando um layout limpo em telas estreitas
-     sem precisar de flex-direction: column + width: 100% no breakpoint. */
-  flex: 1;
   justify-content: center;
   transition:
     background .3s,
@@ -592,17 +540,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   transition: transform .4s var(--spring);
   font-style: normal;
 }
-
-@media (hover: hover) and (pointer: fine) {
-  .card:hover .card__cta {
-    background: var(--fire);
-    border-color: var(--fire);
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-fire);
-  }
-  .card:hover .card__cta-arrow { transform: translateX(4px); }
-}
+/* hover do CTA: ver § 10.2 */
 
 
 /* ----------------------------------------------------------------
@@ -650,10 +588,7 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
   letter-spacing: .08em; text-transform: uppercase;
   transition: box-shadow .3s, transform .3s var(--spring);
 }
-
-@media (hover: hover) and (pointer: fine) {
-  .empty__back:hover { box-shadow: var(--shadow-fire); transform: translateY(-2px); }
-}
+/* hover do botão: ver § 10.2 */
 
 
 /* ----------------------------------------------------------------
@@ -669,111 +604,139 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 
 /* ----------------------------------------------------------------
    § 10 RESPONSIVE
+   ----------------------------------------------------------------
+   Todas as media queries do arquivo (breakpoints de largura, feature
+   queries de hover/pointer e prefers-reduced-motion) ficam concentradas
+   aqui, organizadas em três blocos:
+
+   10.1 — Breakpoints de layout (largura de tela)
+   10.2 — Interações por tipo de ponteiro (hover / touch)
+   10.3 — Acessibilidade (prefers-reduced-motion)
+
+   O grid de produtos usa apenas 2 breakpoints de coluna (768 / 1200),
+   pois o container tem max-width: 1440px — em monitores 4K/ultrawide
+   o conteúdo permanece centralizado com 4 colunas de largura confortável,
+   sem esticar demais os cards. Banner, paddings, gaps e tipografia são
+   fluidos via clamp() e não dependem de breakpoint.
    ---------------------------------------------------------------- */
 
-/* ── MELHORIA: estrutura de breakpoints ──────────────────────────
-   O original tinha 5 breakpoints (1200, 992, 768, 480, 360) com
-   muita redundância e nomes de dispositivos específicos nos comentários.
 
-   Reestruturado para apenas 2 breakpoints semânticos e de propósito geral:
-   - sm: a partir de 600px — layout de tablet/paisagem mobile
-   - md: a partir de 900px — layout de notebook/desktop
 
-   O grid de produtos não usa nenhum breakpoint (auto-fit puro).
-   O banner usa clamp(). O padding usa clamp().
-   Os breakpoints restantes servem apenas para:
-   - Mostrar o accent line do banner (::after) em telas maiores
-   - Ajustar border-radius do banner em telas maiores
-   ─────────────────────────────────────────────────────────────── */
+   
+/* ===== 10.1 Breakpoints de layout ===== */
 
-/* Tablet / landscape mobile: a partir de 600px */
+/* Tablet / paisagem mobile: a partir de 600px */
 @media (min-width: 600px) {
-
-  /* Accent line do banner aparece em telas médias e acima
-     (no original era display:none em 768px com max-width — aqui invertemos para mobile-first) */
+  /* Accent line do banner aparece em telas médias e acima (mobile-first) */
   .banner::after {
     display: block;
   }
-
 }
 
 /* Notebook / desktop: a partir de 900px */
 @media (min-width: 900px) {
-
-  /* Banner com border-radius maior em telas amplas */
-  .banner {
-    border-radius: var(--r-2xl);
-  }
-
   /* Hero com padding superior maior em telas amplas */
   .hero {
     padding-top: 28px;
   }
-
 }
+
+/* ===== 10.2 Interações por tipo de ponteiro (hover / touch) =====
+   Regras restritas a (hover: hover) and (pointer: fine) só ativam em
+   dispositivos com mouse real, evitando que estados de :hover fiquem
+   "travados" em telas touch após o tap. */
+@media (hover: hover) and (pointer: fine) {
+  /* § 4 Search */
+  .search-form__btn:hover {
+    box-shadow: var(--shadow-fire);
+    transform: scale(1.04);
+  }
+
+  /* § 5 Categories ticker */
+  .cats__mask:hover .cats__track { animation-play-state: paused; }
+
+  .cat-item:hover { transform: translateY(-6px) scale(1.06); }
+
+  .cat-item:hover .cat-item__ring {
+    border-color: var(--fire);
+    box-shadow: 0 0 0 3px var(--fire-dim);
+  }
+
+  /* § 7 Product card */
+  .card:hover {
+    transform: translateY(-10px) scale(1.012);
+    box-shadow: var(--shadow-lift);
+    border-color: var(--border-hover);
+  }
+
+  .card:hover .card__img--a { opacity: 0; transform: scale(.97); }
+  .card:hover .card__img--b { opacity: 1; transform: scale(1); }
+
+  .card:hover .card__img--solo { transform: scale(1.07); }
+
+  .card__img-box:hover .card__nav { opacity: 1; }
+  .card__nav:hover { background: var(--fire); transform: translateY(-50%) scale(1.12); }
+
+  .card:hover .card__cta {
+    background: var(--fire);
+    border-color: var(--fire);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-fire);
+  }
+  .card:hover .card__cta-arrow { transform: translateX(4px); }
+
+  /* § 8 Empty state */
+  .empty__back:hover { box-shadow: var(--shadow-fire); transform: translateY(-2px); }
+}
+
+/* Em touch (sem hover real): mostra as setas do carrossel permanentemente
+   para que o usuário possa navegar sem depender de :hover. */
+@media (hover: none) {
+  .card__nav { opacity: 1; }
+}
+
+/* ===== 10.3 Acessibilidade (prefers-reduced-motion) =====
+   Usuários com vestibular disorders ou epilepsia deixam de ficar
+   expostos a animações e transições longas. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
 
 /* ================================================================
    § 11 PROMOTION PRICE
-   ================================================================ */
+   ================================================================
+   Bloco unificado: o arquivo original continha duas declarações
+   sobrepostas para estas classes (a segunda usando !important só para
+   vencer a primeira). Aqui existe apenas uma declaração por seletor,
+   já com os valores que efetivamente estavam sendo aplicados,
+   preservando o visual exatamente como estava. */
 .card__price{
     display:flex;
     flex-direction:column;
     align-items:flex-start;
-    gap:6px;
-    width:100%;
-}
-
-.card__price-old{
-    display:flex;
-    align-items:center;
-    gap:4px;
-
-    text-decoration:line-through;
-    opacity:.6;
-}
-
-.card__price-old .card__price-currency,
-.card__price-old .card__price-value{
-    color:var(--text-2);
-    text-decoration:line-through;
-}
-
-.card__discount-badge{
-
-    align-self:flex-start;
-
-}
-
-.card__price-new{
-    display:flex;
-    align-items:baseline;
-    gap:4px;
-}
-
-.card__price-new .card__price-currency{
-    font-size:11px;
-    color:var(--text-2);
-}
-
-.card__price-new .card__price-value{
-    font-size:22px;
-    color:var(--fire);
-    font-weight:800;
-}
-
-
-
-.card__price{
-    display:flex !important;
-    flex-direction:column !important;
-    align-items:flex-start !important;
     width:100%;
     gap:8px;
 }
 
 .card__price-old{
     display:flex;
+    align-items:center;
     gap:4px;
+    text-decoration:line-through;
+    opacity:.6;
+}
+
+/* Apenas a cor precisa ser sobrescrita aqui: o text-decoration já é
+   herdado visualmente do .card__price-old, e a fonte/tamanho já vêm
+   de .card__price-currency / .card__price-value (§ 7). */
+.card__price-old .card__price-value{
+    color:var(--text-2);
 }
 
 .card__discount-badge{
@@ -783,7 +746,14 @@ button{ cursor: pointer; font-family: inherit; border: none; background: none; }
 
 .card__price-new{
     display:flex;
+    align-items:baseline;
     gap:4px;
+}
+
+/* Tamanho e cor já vêm de .card__price-currency/.card__price-value (§ 7);
+   aqui só é necessário reforçar o peso da fonte do preço promocional. */
+.card__price-new .card__price-value{
+    font-weight:800;
 }
 
 .card__price-normal{

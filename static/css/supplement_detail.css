@@ -1,7 +1,3 @@
-
-/* ----------------------------------------------------------------
-   § 1  DESIGN TOKENS  (same brand as listing page)
-   ---------------------------------------------------------------- */
 :root {
   --fire:         #ff5c00;
   --fire-dim:     rgba(255,92,0,.15);
@@ -44,6 +40,30 @@
 
   --f-display: 'Barlow Condensed', sans-serif;
   --f-body:    'Barlow', sans-serif;
+
+  /* ── MELHORIA: tokens fluidos de espaçamento ──
+     Substituem os valores fixos que antes eram redefinidos em
+     @media (max-width:900px) e @media (max-width:600px). Isso permite
+     que a página escale suavemente entre 320px e telas ultrawide sem
+     precisar de breakpoints para cada ajuste de padding/gap. */
+  --page-px:   clamp(14px, 3vw, 24px);
+  --gap-2xl:   clamp(24px, 4vw, 40px);
+  --gap-lg:    clamp(18px, 3vw, 32px);
+  --gap-md:    clamp(10px, 2vw, 18px);
+  --gap-sm:    clamp(8px, 1.5vw, 14px);
+
+  /* ── MELHORIA: tokens fluidos de tipografia ──
+     .info__title ia de 44px → 34px → 28px em dois breakpoints;
+     .price-main__val ia de 48px → 38px. Ambos agora usam clamp()
+     e passam suavemente pelos valores intermediários originais. */
+  --fs-title:  clamp(28px, 5vw, 44px);
+  --fs-price:  clamp(32px, 6vw, 48px);
+
+  /* ── MELHORIA: largura mínima fluida dos cards recomendados ──
+     Substitui o breakpoint que forçava 2 colunas fixas em telas ≤600px.
+     Com este token, o auto-fill do .rec-grid já produz ~2 colunas em
+     celulares e mais colunas conforme o espaço cresce, sem media query. */
+  --card-min:  clamp(120px, 38vw, 220px);
 }
 
 /* ----------------------------------------------------------------
@@ -61,10 +81,26 @@ img   { display:block; max-width:100%; }
 a     { text-decoration:none; color:inherit; }
 button{ cursor:pointer; font-family:inherit; border:none; background:none; }
 
+/* ── MELHORIA: foco visível para acessibilidade de teclado ──
+   Nenhuma regra de :focus-visible existia no arquivo original.
+   Isso garante navegação por teclado em links, botões e no
+   star-picker sem afetar o clique com mouse. */
+:focus-visible {
+  outline: 2px solid var(--fire);
+  outline-offset: 3px;
+  border-radius: var(--r-md);
+}
+
 /* ----------------------------------------------------------------
    § 3  LAYOUT SHELL
    ---------------------------------------------------------------- */
-.pg { max-width:1280px; margin:0 auto; padding:0 24px; }
+.pg {
+  max-width: 1280px;
+  margin: 0 auto;
+  /* MELHORIA: padding fluido via --page-px substitui o valor fixo
+     de 24px que era redefinido para 14px em @media (max-width:600px). */
+  padding: 0 var(--page-px);
+}
 
 /* ----------------------------------------------------------------
    § 4  BREADCRUMB
@@ -77,17 +113,23 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   letter-spacing: .04em;
 }
 .breadcrumb a { transition: color .2s; }
-.breadcrumb a:hover { color: var(--fire); }
+/* hover: ver § 14.2 */
 .breadcrumb__sep { color: var(--text-3); }
 .breadcrumb__current { color: var(--text-2); }
 
 /* ----------------------------------------------------------------
    § 5  HERO GRID
    ---------------------------------------------------------------- */
+/* MELHORIA: layout mobile-first.
+   O original assumia 2 colunas por padrão e usava
+   @media (max-width:900px) para cair para 1 coluna no mobile.
+   Aqui invertemos: a base já é 1 coluna (mobile), e o layout de
+   2 colunas é aplicado a partir de 900px em § 14.1 — mesma filosofia
+   mobile-first adotada na página de listagem. */
 .detail-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  grid-template-columns: 1fr;
+  gap: var(--gap-2xl);
   padding: 32px 0 60px;
   align-items: start;
 }
@@ -96,8 +138,10 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
    § 6  GALLERY
    ---------------------------------------------------------------- */
 .gallery {
-  position: sticky;
-  top: 24px;
+  /* MELHORIA: position:static por padrão (mobile), position:sticky
+     é aplicado a partir de 900px em § 14.1, junto com o grid de 2 colunas
+     (sticky só faz sentido quando há uma coluna ao lado para acompanhar). */
+  position: static;
 }
 
 .gallery__stage {
@@ -127,9 +171,7 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   transform: scale(1.03);
 }
 
-.gallery__stage:hover .gallery__slide.is-active {
-  transform: scale(1.06);
-}
+/* hover-zoom: ver § 14.2 */
 
 .gallery__slide.is-active {
   opacity: 1;
@@ -166,8 +208,7 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   opacity: 0;
   transition: opacity .2s, background .2s, transform .2s;
 }
-.gallery__stage:hover .gallery__arrow { opacity: 1; }
-.gallery__arrow:hover { background: var(--fire); transform: translateY(-50%) scale(1.1); }
+/* reveal + hover: ver § 14.2 */
 .gallery__arrow--l { left: 14px; }
 .gallery__arrow--r { right: 14px; }
 
@@ -216,7 +257,7 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   letter-spacing: .06em; text-transform: uppercase;
   transition: opacity .2s, transform .2s;
 }
-.admin-btn:hover { opacity: .8; transform: translateY(-1px); }
+/* hover: ver § 14.2 */
 .admin-btn--edit   { background: var(--surface-3); color: var(--text-1); border: 1px solid var(--border); }
 .admin-btn--delete { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(248,113,113,.25); }
 
@@ -236,7 +277,10 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
 /* title */
 .info__title {
   font-family: var(--f-display);
-  font-size: 44px; font-weight: 900;
+  /* MELHORIA: font-size fluido via --fs-title substitui os dois
+     valores fixos redefinidos em 900px (34px) e 600px (28px). */
+  font-size: var(--fs-title);
+  font-weight: 900;
   line-height: 1.05; letter-spacing: .02em;
   color: var(--text-1);
   margin-bottom: 20px;
@@ -260,21 +304,83 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
 
 /* stock alert */
 .stock-alert {
-  display: flex; align-items: flex-start; gap: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   padding: 14px 18px;
   border-radius: var(--r-lg);
   border: 1px solid;
   margin-bottom: 20px;
-  font-size: 13px; font-weight: 500; line-height: 1.5;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
 }
-.stock-alert--ok    { background:var(--green-dim); border-color:rgba(34,197,94,.3);  color:var(--green); }
-.stock-alert--low   { background:var(--amber-dim); border-color:rgba(250,204,21,.3); color:var(--amber); }
-.stock-alert--out   { background:var(--red-dim);   border-color:rgba(248,113,113,.3);color:var(--red);   }
-.stock-alert__icon  { font-size:16px; margin-top:1px; flex-shrink:0; }
-.stock-bar          { height:4px; border-radius:var(--r-pill); background:rgba(255,255,255,.1); margin-top:8px; overflow:hidden; }
-.stock-bar__fill    { height:100%; border-radius:var(--r-pill); transition:width .6s var(--ease-out); }
-.stock-bar__fill--low { background: var(--amber); }
-.stock-bar__fill--hot { background: var(--fire); }
+
+.stock-alert--ok {
+  background: var(--green-dim);
+  border-color: rgba(34,197,94,.3);
+  color: var(--green);
+}
+
+.stock-alert--low {
+  background: var(--amber-dim);
+  border-color: rgba(250,204,21,.3);
+  color: var(--amber);
+}
+
+.stock-alert--out {
+  background: var(--red-dim);
+  border-color: rgba(248,113,113,.3);
+  color: var(--red);
+}
+
+.stock-alert__icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+
+.stock-alert--out .stock-alert__icon {
+  background: #dc2626;
+}
+
+.stock-alert--low .stock-alert__icon {
+  background: #f97316;
+}
+
+.stock-alert--medium .stock-alert__icon {
+  background: #22ea08;
+}
+
+.stock-bar {
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: rgba(255,255,255,.1);
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.stock-bar__fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  transition: width .6s var(--ease-out);
+}
+
+.stock-bar__fill--low {
+  background: #f97316;
+}
+
+.stock-bar__fill--medium {
+  background: #eab308;
+}
+
+.qty-message{
+    margin-top:6px;
+    font-size:.82rem;
+    color:#777;
+}
 
 /* ── BUY BOX ── */
 .buy-box {
@@ -292,9 +398,119 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   margin-bottom: 8px;
 }
 
-/* select */
-.select-field {
+/* ── VARIANT SELECTOR (cards) ── */
+.variant-fieldset {
+  border: none;
+  margin: 0 0 20px;
+  padding: 0;
+  min-width: 0;
+}
+
+.variant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(76px, 22vw, 104px), 1fr));
+  gap: 10px;
+}
+
+/* input escondido visualmente, mas acessível via teclado/leitor de tela */
+.variant-card__input {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.variant-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 12px 8px;
+  min-height: 52px;
+  cursor: pointer;
+  font-family: var(--f-body);
+  color: var(--text-1);
+  transition: border-color .25s, background .25s, transform .2s var(--spring), box-shadow .25s;
+}
+
+.variant-card__primary {
+  font-size: clamp(12px, 3vw, 13px);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.variant-card__secondary {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  line-height: 1.2;
+}
+
+.variant-card__badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+/* hover (só em dispositivos com ponteiro real) */
+@media (hover: hover) {
+  .variant-card__input:not(:disabled):not(:checked) + .variant-card:hover {
+    border-color: var(--fire);
+    transform: translateY(-1px);
+  }
+}
+
+/* foco via teclado */
+.variant-card__input:focus-visible + .variant-card {
+  outline: 2px solid var(--fire);
+  outline-offset: 2px;
+}
+
+/* selecionado */
+.variant-card__input:checked + .variant-card {
+  border-color: var(--fire);
+  background: var(--surface-3);
+  box-shadow: 0 0 0 1px var(--fire);
+}
+.variant-card__input:checked + .variant-card .variant-card__secondary {
+  color: var(--text-2);
+}
+
+/* indisponível / sem estoque */
+.variant-card__input:disabled + .variant-card,
+.variant-card--unavailable {
+  opacity: .45;
+  cursor: not-allowed;
+  background: var(--surface-1);
+}
+
+
+/* ── INSTALLMENTS (custom dropdown) ── */
+.installments-select {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.installments-trigger {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
@@ -302,17 +518,70 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   font-family: var(--f-body);
   font-size: 14px; font-weight: 500;
   padding: 13px 16px;
-  outline: none;
-  margin-bottom: 20px;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239499a8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 16px center;
   cursor: pointer;
   transition: border-color .25s;
 }
-.select-field:focus { border-color: var(--fire); }
-.select-field option { background: var(--surface-2); }
+.installments-trigger:focus-visible {
+  outline: 2px solid var(--fire);
+  outline-offset: 2px;
+}
+.installments-trigger[aria-expanded="true"] {
+  border-color: var(--fire);
+}
+
+.installments-trigger__chevron {
+  flex-shrink: 0;
+  color: var(--text-3);
+  transition: transform .25s;
+}
+.installments-trigger[aria-expanded="true"] .installments-trigger__chevron {
+  transform: rotate(180deg);
+}
+
+.installments-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  max-height: clamp(160px, 40vh, 260px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 12px 28px rgba(0,0,0,.28);
+  z-index: 20;
+}
+
+.installments-option {
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  font-family: var(--f-body);
+  font-size: 14px; font-weight: 500;
+  color: var(--text-1);
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+
+@media (hover: hover) {
+  .installments-option:hover {
+    background: var(--surface-3);
+  }
+}
+
+.installments-option--active {
+  background: var(--surface-3);
+}
+
+.installments-option[aria-selected="true"] {
+  color: var(--fire);
+  font-weight: 700;
+}
 
 /* price */
 .price-row {
@@ -333,10 +602,20 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
 }
 .price-main__val {
   font-family: var(--f-display);
-  font-size: 48px; font-weight: 900;
+  font-size: var(--fs-price);
+  font-weight: 900;
   letter-spacing: .01em;
   color: var(--fire);
   line-height: 1;
+}
+/* recommended riscado */
+.rec-card__old-price{
+    font-size:.82rem;
+    color:var(--text-muted);
+    text-decoration:line-through;
+    text-decoration-thickness:1.5px;
+    opacity:.75;
+    margin-bottom:4px;
 }
 
 /* quantity */
@@ -380,12 +659,7 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   margin-bottom: 10px;
   transition: background .3s, border-color .3s, color .3s, transform .3s var(--spring), box-shadow .3s;
 }
-.btn-cart:hover {
-  background: var(--surface-4);
-  border-color: var(--fire);
-  color: var(--fire);
-  transform: translateY(-2px);
-}
+/* hover: ver § 14.2 */
 
 .btn-buy {
   display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -400,11 +674,7 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   transition: box-shadow .3s, transform .3s var(--spring), filter .3s;
   border: none;
 }
-.btn-buy:hover {
-  box-shadow: var(--wpp-glow);
-  transform: translateY(-3px);
-  filter: brightness(1.08);
-}
+/* hover: ver § 14.2 */
 
 /* description */
 .info__desc {
@@ -449,8 +719,12 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
    ---------------------------------------------------------------- */
 .rec-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 18px;
+  /* MELHORIA: --card-min fluido substitui o breakpoint que forçava
+     2 colunas fixas em telas ≤600px. Com auto-fill + clamp(), a
+     grade já produz ~2 colunas em celulares e cresce naturalmente
+     conforme o espaço disponível aumenta — sem media query extra. */
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min), 1fr));
+  gap: var(--gap-md);
   margin-bottom: 70px;
 }
 
@@ -463,11 +737,7 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   transition: transform .4s var(--spring), box-shadow .4s var(--spring), border-color .3s;
   will-change: transform;
 }
-.rec-card:hover {
-  transform: translateY(-8px) scale(1.01);
-  box-shadow: 0 20px 50px rgba(0,0,0,.6);
-  border-color: var(--border-hover);
-}
+/* hover: ver § 14.2 */
 
 .rec-card__img-wrap {
   position: relative;
@@ -494,8 +764,7 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   z-index: 2; opacity: 0; transform: scale(1.06);
   transition: opacity .8s var(--ease-out), transform 1s var(--ease-out);
 }
-.rec-card:hover .rec-card__img--a { opacity:0; transform:scale(.97); }
-.rec-card:hover .rec-card__img--b { opacity:1; transform:scale(1); }
+/* swap no hover: ver § 14.2 */
 
 .rec-card__badge {
   position: absolute; top:10px; left:10px;
@@ -515,10 +784,12 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
 .reviews { margin-bottom: 70px; }
 
 /* summary bar */
+/* MELHORIA: mobile-first — base em 1 coluna, 2 colunas (180px 1fr)
+   aplicadas a partir de 900px em § 14.1 (mesma lógica do .detail-grid). */
 .review-summary {
   display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: 32px;
+  grid-template-columns: 1fr;
+  gap: 20px;
   align-items: center;
   padding: 30px;
   background: var(--surface-1);
@@ -553,7 +824,7 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   padding: 22px;
   transition: border-color .3s;
 }
-.fb-card:hover { border-color: rgba(255,255,255,.12); }
+/* hover: ver § 14.2 */
 
 .fb-card__header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
 .fb-card__user   { font-family:var(--f-display); font-size:16px; font-weight:700; letter-spacing:.04em; color:var(--text-1); }
@@ -572,8 +843,7 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   cursor:pointer;
   transition:border-color .2s, transform .2s;
 }
-.fb-card__thumb:hover { border-color:var(--fire); transform:scale(1.06); }
-
+/* hover: ver § 14.2 */
 
 .btn-more {
   display: inline-flex;
@@ -612,24 +882,7 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
     background .25s,
     box-shadow .35s;
 }
-
-.btn-more:hover {
-  transform: translateY(-3px);
-
-  border-color: rgba(255,92,0,.35);
-
-  color: var(--fire);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,92,0,.10),
-      rgba(255,92,0,.04)
-    );
-
-  box-shadow:
-    0 10px 30px rgba(255,92,0,.12);
-}
+/* hover: ver § 14.2 */
 
 
 /* ----------------------------------------------------------------
@@ -639,7 +892,9 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: var(--r-2xl);
-  padding: 32px;
+  /* MELHORIA: padding fluido substitui "32px" fixo redefinido para
+     "22px 18px" em @media (max-width:600px). */
+  padding: clamp(18px, 4vw, 32px);
   max-width: 680px;
   margin: 0 auto 70px;
 }
@@ -667,12 +922,8 @@ button{ cursor:pointer; font-family:inherit; border:none; background:none; }
   cursor:pointer;
   transition:color .15s, transform .15s;
 }
-.star-picker input:checked ~ label,
-.star-picker label:hover,
-.star-picker label:hover ~ label {
-  color:var(--amber);
-  transform:scale(1.1);
-}
+.star-picker input:checked ~ label { color:var(--amber); }
+/* preview no hover (mouse): ver § 14.2 */
 
 /* inputs */
 .field {
@@ -704,7 +955,7 @@ textarea.field { resize:vertical; min-height:110px; }
   padding:17px;
   transition:box-shadow .3s, transform .3s var(--spring), filter .3s;
 }
-.btn-submit:hover { box-shadow:var(--fire-glow); transform:translateY(-2px); filter:brightness(1.08); }
+/* hover: ver § 14.2 */
 
 /* ----------------------------------------------------------------
    § 12  LIGHTBOX
@@ -726,14 +977,14 @@ textarea.field { resize:vertical; min-height:110px; }
   display:flex; align-items:center; gap:6px;
   transition:color .2s;
 }
-.lightbox__close:hover { color:var(--fire); }
+/* hover: ver § 14.2 */
 .lightbox__nav {
   position:absolute; top:50%; transform:translateY(-50%);
   color:#fff; font-size:36px;
   padding:10px 20px;
   transition:color .2s;
 }
-.lightbox__nav:hover { color:var(--fire); }
+/* hover: ver § 14.2 */
 .lightbox__nav--l { left:10px; }
 .lightbox__nav--r { right:10px; }
 
@@ -748,20 +999,114 @@ textarea.field { resize:vertical; min-height:110px; }
 
 /* ----------------------------------------------------------------
    § 14  RESPONSIVE
+   ----------------------------------------------------------------
+   Concentra todas as media queries do arquivo em três blocos:
+
+   14.1 — Breakpoint estrutural (mudanças de grid que não podem ser
+          resolvidas com CSS fluido: 1 coluna → 2 colunas)
+   14.2 — Interações por tipo de ponteiro (hover apenas em mouse)
+   14.3 — Acessibilidade (prefers-reduced-motion)
+
+   Tipografia, padding, gaps e a grade de recomendados usam clamp()/
+   auto-fill definidos junto de cada componente e não precisam de
+   breakpoint — por isso não aparecem mais aqui.
    ---------------------------------------------------------------- */
-@media (max-width:900px) {
-  .detail-grid { grid-template-columns:1fr; gap:24px; }
-  .gallery { position:static; }
-  .info__title { font-size:34px; }
-  .review-summary { grid-template-columns:1fr; gap:20px; }
-}
-@media (max-width:600px) {
-  .pg { padding:0 14px; }
-  .info__title { font-size:28px; }
-  .price-main__val { font-size:38px; }
-  .rec-grid { grid-template-columns:repeat(2,1fr); gap:12px; }
-  .review-form-wrap { padding:22px 18px; }
+
+/* ===== 14.1 Breakpoint estrutural (mobile-first) ===== */
+@media (min-width: 900px) {
+  .detail-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .gallery {
+    position: sticky;
+    top: 24px;
+  }
+  .review-summary {
+    grid-template-columns: 180px 1fr;
+  }
 }
 
-  .hidden-chip { display:none !important; }
-  .js-fb-item.is-hidden { display:none; }
+/* ===== 14.2 Interações por tipo de ponteiro (hover / touch) =====
+   Restringe todo :hover a (hover:hover) and (pointer:fine), evitando
+   que efeitos de hover fiquem "travados" em telas touch após o tap
+   (item 6 do briefing). Em touch, o comportamento permanece o
+   original: sem esses estados visuais, a navegação continua
+   funcionando normalmente via clique/tap. */
+@media (hover: hover) and (pointer: fine) {
+  /* § 4 Breadcrumb */
+  .breadcrumb a:hover { color: var(--fire); }
+
+  /* § 6 Gallery */
+  .gallery__stage:hover .gallery__slide.is-active { transform: scale(1.06); }
+  .gallery__stage:hover .gallery__arrow { opacity: 1; }
+  .gallery__arrow:hover { background: var(--fire); transform: translateY(-50%) scale(1.1); }
+
+  /* § 7 Info panel */
+  .admin-btn:hover { opacity: .8; transform: translateY(-1px); }
+  .btn-cart:hover {
+    background: var(--surface-4);
+    border-color: var(--fire);
+    color: var(--fire);
+    transform: translateY(-2px);
+  }
+  .btn-buy:hover {
+    box-shadow: var(--wpp-glow);
+    transform: translateY(-3px);
+    filter: brightness(1.08);
+  }
+
+  /* § 9 Recommended cards */
+  .rec-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 20px 50px rgba(0,0,0,.6);
+    border-color: var(--border-hover);
+  }
+  .rec-card:hover .rec-card__img--a { opacity:0; transform:scale(.97); }
+  .rec-card:hover .rec-card__img--b { opacity:1; transform:scale(1); }
+
+  /* § 10 Reviews */
+  .fb-card:hover { border-color: rgba(255,255,255,.12); }
+  .fb-card__thumb:hover { border-color:var(--fire); transform:scale(1.06); }
+  .btn-more:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,92,0,.35);
+    color: var(--fire);
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255,92,0,.10),
+        rgba(255,92,0,.04)
+      );
+    box-shadow: 0 10px 30px rgba(255,92,0,.12);
+  }
+
+  /* § 11 Review form */
+  .star-picker label:hover,
+  .star-picker label:hover ~ label {
+    color:var(--amber);
+    transform:scale(1.1);
+  }
+  .btn-submit:hover { box-shadow:var(--fire-glow); transform:translateY(-2px); filter:brightness(1.08); }
+
+  /* § 12 Lightbox */
+  .lightbox__close:hover { color:var(--fire); }
+  .lightbox__nav:hover { color:var(--fire); }
+}
+
+/* ===== 14.3 Acessibilidade (prefers-reduced-motion) =====
+   Ausente no arquivo original. Reduz drasticamente animações e
+   transições para usuários sensíveis a movimento (vestibular
+   disorders, epilepsia), sem alterar o layout. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ----------------------------------------------------------------
+   § 15  UTILITÁRIOS
+   ---------------------------------------------------------------- */
+.hidden-chip { display:none !important; }
+.js-fb-item.is-hidden { display:none; }

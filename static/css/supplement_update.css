@@ -1,256 +1,422 @@
+/* ==========================================================================
+   §1 TOKENS
+   Responsabilidade: extensões de token específicas desta tela (radius e
+   tipografia que --root do base.css não cobre) + paleta "dark glass" local,
+   escopada em .page-wrapper — mesmo padrão de .delete-scope em
+   supplement_delete.css: cores e dimensões que não têm equivalente
+   IDÊNTICO em base.css ficam aqui, page-scoped, para não alterar a
+   identidade visual desta tela nem forçar uma cor/alpha diferente da
+   original só para "usar o token global".
+   ========================================================================== */
+:root{
+  /* base.css só define --radius-sm e --radius-pill globalmente; --radius-md
+     e --radius-lg são extensões locais (mesmo padrão de
+     supplement_delete.css), com o valor de --radius-lg específico desta
+     tela (20px), diferente do usado na tela de exclusão (18px). */
+  --radius-md:12px;
+  --radius-lg:20px;
 
-    :root {
-        --accent-color: #ff7a00; 
-        --accent-hover: #e66e00;
-        --card-bg: rgba(23, 25, 30, 0.98);
-        --input-bg: #1e2128;
-        --text-bright: #f8fafc;
-        --text-dim: #94a3b8;
-        --border-ui: rgba(255, 255, 255, 0.08);
-        --radius-lg: 20px;
-        --radius-md: 12px;
+  /* Reaproveita exatamente a mesma escala fluida de --fs-h1 já usada em
+     supplement_delete.css (base.css não define título de página em :root). */
+  --fs-h1:clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+}
+
+.page-wrapper{
+  /* Paleta "dark glass" exclusiva desta tela. --accent-color (#ff7a00) e
+     --accent-hover (#e66e00) são visualmente próximos de --color-primary
+     e --color-primary-hover do base.css, mas não idênticos — mantidos
+     locais para não mudar o tom de laranja já usado nesta tela. O mesmo
+     vale para --text-bright (#f8fafc) vs --text-inverse-strong (#ffffff)
+     e --text-dim (#94a3b8) vs --text-muted (#a3a3a3): próximos, não iguais.
+     --border-ui foi removido por ser IDÊNTICO a --border-color do
+     base.css (rgba(255,255,255,.08)) — usa-se --border-hairline direto. */
+  --accent-color:#ff7a00;
+  --accent-hover:#e66e00;
+  --card-bg:rgba(23, 25, 30, .98);
+  --input-bg:#1e2128;
+  --text-bright:#f8fafc;
+  --text-dim:#94a3b8;
+
+  /* Fundo escuro específico desta tela — próximo de --color-dark (#111111)
+     do base.css, mas não idêntico; mantido local por fidelidade visual. */
+  --page-bg:#0f1115;
+
+  /* Dimensões de componentes específicos (mesmo padrão de --icon-size em
+     supplement_delete.css e --cart-badge-size em header.css): não são
+     escala de radius nem espaçamento, são o tamanho de uma peça pontual. */
+  --thumb-height:120px;
+  --thumb-radius:8px;
+  --thumb-border:rgba(255, 255, 255, .05);
+
+  /* Cores usadas pelas novas classes .field-error e .empty-preview,
+     vindas dos estilos inline removidos do template. Nenhuma delas é
+     idêntica a --color-danger/--text-muted globais, por isso ficam locais. */
+  --field-error-color:#f87171;
+  --empty-preview-color:#333;
+}
+
+/* ==========================================================================
+   §2 LAYOUT
+   Responsabilidade: moldura da página (centralização, fundo, cartão).
+   Objetivo: Mobile First — .page-wrapper e .update-container carregam o
+   espaçamento mobile por padrão; a media query em §8 aumenta o respiro
+   em telas maiores. 100vh trocado por 100dvh (não descontava a barra de
+   endereço móvel). font-family local removida: a página herda
+   var(--font-body) do <body> (definido globalmente em base.css).
+   ========================================================================== */
+.page-wrapper{
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:var(--space-lg) var(--space-md);
+  background-color:var(--page-bg);
+  background-image:
+    radial-gradient(at 0% 0%, rgba(255, 122, 0, .1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(30, 41, 59, .5) 0px, transparent 50%);
+  background-attachment:fixed;
+}
+
+/* Safari/iOS não lida bem com background-attachment: fixed */
+@media (hover:none){
+
+    .page-wrapper{
+        background-attachment:scroll;
     }
 
-    
-    .page-wrapper {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 50px 20px;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background-color: #0f1115;
-        background-image: 
-            radial-gradient(at 0% 0%, rgba(255, 122, 0, 0.1) 0px, transparent 50%),
-            radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.5) 0px, transparent 50%);
-        background-attachment: fixed;
-    }
+}
 
-    
-    .update-container {
-        background: var(--card-bg);
-        width: 100%;
-        max-width: 800px; 
-        border-radius: var(--radius-lg);
-        padding: 45px;
-        border: 1px solid var(--border-ui);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-        backdrop-filter: blur(15px);
-    }
+.update-container{
+  background:var(--card-bg);
+  width:100%;
+  max-width:800px;
+  border-radius:var(--radius-lg);
+  padding:var(--space-lg);
+  border:var(--border-hairline);
+  box-shadow:0 25px 50px -12px rgba(0, 0, 0, .7);
+  backdrop-filter:blur(15px);
+  -webkit-backdrop-filter:blur(15px);
+}
 
-    .header-group {
-        text-align: left;
-        margin-bottom: 35px;
-        border-left: 4px solid var(--accent-color);
-        padding-left: 20px;
-    }
+.header-group{
+  text-align:left;
+  margin-bottom:var(--space-lg);
+  border-left:4px solid var(--accent-color);
+  padding-left:var(--space-md);
+}
 
-    .header-group h1 {
-        font-size: 28px;
-        font-weight: 800;
-        color: var(--text-bright);
-        letter-spacing: -0.5px;
-    }
+.header-group h1{
+  font-size:var(--fs-h1);
+  font-weight:800;
+  color:var(--text-bright);
+  letter-spacing:-.5px;
+}
 
-    .header-group p {
-        color: var(--text-dim);
-        font-size: 14px;
-        margin-top: 5px;
-    }
+.header-group p{
+  color:var(--text-dim);
+  font-size:var(--fs-nav);
+  margin-top:var(--space-3xs);
+}
 
-    
-    .main-form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); 
-        gap: 20px;
-    }
+.section-divider{
+  display:flex;
+  align-items:center;
+  gap:var(--space-sm);
+  margin:var(--space-xl) 0 var(--space-lg);
+}
 
-    
-    .full-width {
-        grid-column: span 2;
-    }
+.section-divider span{
+  font-size:var(--fs-copy);
+  font-weight:800;
+  color:var(--accent-color);
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  white-space:nowrap;
+}
 
-    .form-group {
-        margin-bottom: 5px;
-    }
+.section-divider div{
+  flex:1;
+  height:1px;
+  background:var(--border-color);
+}
 
-    .form-group label {
-        display: block;
-        margin-bottom: 10px;
-        font-weight: 600;
-        color: var(--text-bright);
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
+/* ==========================================================================
+   §3 FORMULÁRIO
+   Responsabilidade: grid de campos principais e estado de foco.
+   Objetivo: Mobile First — uma coluna por padrão (§8 muda para duas em
+   telas maiores). :focus agora cobre input, select E textarea (o arquivo
+   original só estilizava input, deixando select/textarea sem foco visível).
+   ========================================================================== */
+.main-form-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:var(--space-md);
+}
 
-    .form-group input, 
-    .form-group select, 
-    .form-group textarea {
-        width: 100%;
-        background: var(--input-bg);
-        border: 1px solid var(--border-ui);
-        border-radius: var(--radius-md);
-        padding: 14px 16px;
-        color: white;
-        font-size: 15px;
-        transition: all 0.3s ease;
-    }
+.full-width{
+  grid-column:1 / -1;
+}
 
-    .form-group input:focus {
-        outline: none;
-        border-color: var(--accent-color);
-        background: #252932;
-        box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.1);
-    }
+.form-group{
+  margin-bottom:var(--space-3xs);
+}
 
-    
-    .section-divider {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin: 40px 0 25px;
-    }
+.form-group label{
+  display:block;
+  margin-bottom:var(--space-xs);
+  font-weight:600;
+  color:var(--text-bright);
+  font-size:var(--fs-copy);
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
 
-    .section-divider span {
-        font-size: 12px;
-        font-weight: 800;
-        color: var(--accent-color);
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        white-space: nowrap;
-    }
+.form-group input,
+.form-group select,
+.form-group textarea{
+    box-sizing:border-box;
+    width:100%;
+    background:var(--input-bg);
+    border:var(--border-hairline);
+    border-radius:var(--radius-md);
+    padding:var(--space-sm) var(--space-md);
+    color:var(--text-inverse-strong);
+    font-size:var(--fs-body);
+    transition:border-color var(--transition-base),
+               background var(--transition-base),
+               box-shadow var(--transition-base);
+}
 
-    .section-divider div {
-        flex: 1;
-        height: 1px;
-        background: var(--border-ui);
-    }
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+  outline:none;
+  border-color:var(--accent-color);
+  background:#252932;
+  /* Halo equivalente a --accent-color a 10% de opacidade (mesma lógica de
+     --shadow-glow-soft no base.css, mantido literal aqui pois --accent-color
+     é um token local e color-mix() exigiria repetir o hex). */
+  box-shadow:0 0 0 4px rgba(255, 122, 0, .1);
+}
 
-    
-    .image-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-        gap: 15px;
-    }
+/* Mensagem de erro de campo — substitui o style inline removido do template. */
+.field-error{
+  color:var(--field-error-color);
+  font-size:var(--fs-badge);
+}
 
-    .image-card {
-        background: #16191d;
-        border-radius: var(--radius-md);
-        padding: 15px;
-        border: 1px solid var(--border-ui);
-        position: relative;
-        transition: 0.3s ease;
-    }
+input[type="file"]{
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+    font-size:var(--fs-badge);
+    color:var(--text-dim);
+    overflow:hidden;
+}
 
-    .variant-card{
-        background: #16191d;
-        border: 1px solid var(--border-ui);
-        border-radius: var(--radius-md);
-        padding: 20px;
-        margin-bottom: 20px;
-    }
+.image-card input[type="file"]{
+    display:block;
+    width:100%;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+}
 
-    .variants-wrapper{
-            display:flex;
-            flex-direction:column;
-            gap:20px;
-    }
+.image-card a{
+    color:var(--text-inverse-strong);
+    font-size:var(--fs-badge);
+    font-weight:500;
+    text-decoration:none;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+}
+/* ==========================================================================
+   §4 GALERIA
+   Responsabilidade: grade de fotos do formset e seus cartões.
+   Objetivo: auto-fit já é responsivo por natureza, sem precisar de
+   breakpoint de largura. Hover isolado em §7 (capability query).
+   ========================================================================== */
+.image-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
+  gap:var(--space-sm);
+}
 
-    .image-card:hover {
-        border-color: rgba(255, 122, 0, 0.4);
-    }
+.image-card{
+  background:#16191d;
+  border-radius:var(--radius-md);
+  padding:var(--space-sm);
+  border:var(--border-hairline);
+  position:relative;
+  overflow:hidden;
+  transition:border-color var(--transition-base);
+}
 
-    .image-card .slot-label {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--text-dim);
-        margin-bottom: 12px;
-        display: block;
-    }
+.image-card .slot-label{
+  font-size:var(--fs-badge);
+  font-weight:700;
+  color:var(--text-dim);
+  margin-bottom:var(--space-xs);
+  display:block;
+}
 
-    .thumb-container {
-        width: 100%;
-        height: 120px;
-        border-radius: 8px;
-        background: #000;
-        overflow: hidden;
-        margin-bottom: 12px;
-        border: 1px solid rgba(255,255,255,0.05);
-    }
+.thumb-container{
+  width:100%;
+  height:var(--thumb-height);
+  border-radius:var(--thumb-radius);
+  background:#000;
+  overflow:hidden;
+  margin-bottom:var(--space-xs);
+  border:1px solid var(--thumb-border);
+}
 
-    .thumb-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
+.thumb-container img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
 
-    
-    .delete-action {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 12px;
-        color: #f87171;
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px solid var(--border-ui);
-    }
+/* Placeholder exibido quando o formset ainda não tem foto — substitui o
+   style inline removido do template. */
+.empty-preview{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100%;
+  color:var(--empty-preview-color);
+}
 
-    
-    .form-actions {
-        display: flex;
-        gap: 15px;
-        margin-top: 50px;
-    }
+.delete-action{
+  display:flex;
+  align-items:center;
+  gap:var(--space-2xs);
+  font-size:var(--fs-copy);
+  color:var(--field-error-color);
+  margin-top:var(--space-xs);
+  padding-top:var(--space-xs);
+  border-top:var(--border-hairline);
+}
 
-    .btn-save {
-        flex: 2;
-        background: var(--accent-color);
-        color: #000;
-        padding: 18px;
-        border-radius: var(--radius-md);
-        font-weight: 800;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
+/* ==========================================================================
+   §5 VARIANTES
+   Responsabilidade: cartões de variantes do produto (formset dinâmico).
+   Objetivo: empilhamento vertical, mesmo em telas grandes — reaproveita
+   .main-form-grid e .form-group já definidos acima para os campos
+   internos de cada variante.
+   ========================================================================== */
+.variants-wrapper{
+  display:flex;
+  flex-direction:column;
+  gap:var(--space-md);
+}
 
-    .btn-save:hover {
-        background: var(--accent-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(255, 122, 0, 0.2);
-    }
+.variant-card{
+  background:#16191d;
+  border:var(--border-hairline);
+  border-radius:var(--radius-md);
+  padding:var(--space-md);
+}
 
-    .btn-back {
-        flex: 1;
-        background: transparent;
-        color: var(--text-bright);
-        padding: 18px;
-        border-radius: var(--radius-md);
-        text-align: center;
-        text-decoration: none;
-        font-weight: 600;
-        border: 1px solid var(--border-ui);
-        transition: 0.3s;
-    }
+/* ==========================================================================
+   §6 BOTÕES
+   Responsabilidade: ações de salvar/voltar ao final do formulário.
+   Objetivo: transições restritas às propriedades realmente animadas
+   (antes: transition: all) e var(--transition-base) no lugar do valor
+   fixo 0.3s ease. Hover isolado em §7.
+   ========================================================================== */
+.form-actions{
+  display:flex;
+  gap:var(--space-sm);
+  margin-top:var(--space-xl);
+}
 
-    .btn-back:hover {
-        background: rgba(255,255,255,0.05);
-        border-color: var(--text-dim);
-    }
+.btn-save{
+  flex:2;
+  background:var(--accent-color);
+  color:#000;
+  padding:var(--space-md);
+  border-radius:var(--radius-md);
+  font-weight:800;
+  border:none;
+  cursor:pointer;
+  transition:background var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
 
-    
-    input[type="file"] {
-        font-size: 11px;
-        color: var(--text-dim);
-    }
+.btn-back{
+  flex:1;
+  background:transparent;
+  color:var(--text-bright);
+  padding:var(--space-md);
+  border-radius:var(--radius-md);
+  text-align:center;
+  text-decoration:none;
+  font-weight:600;
+  border:var(--border-hairline);
+  transition:background var(--transition-base), border-color var(--transition-base);
+}
 
-    
-    @media (max-width: 650px) {
-        .main-form-grid { grid-template-columns: 1fr; }
-        .full-width { grid-column: span 1; }
-        .update-container { padding: 25px; }
-    }
+
+
+/* ==========================================================================
+   §7 ESTADOS (CAPABILITY QUERIES)
+   Responsabilidade: única fonte de :hover deste arquivo, restrita a
+   dispositivos com ponteiro de precisão — evita hover "grudado" em touch,
+   mesmo padrão de header.css §15 e supplement_delete.css §6.
+   ========================================================================== */
+@media (hover:hover){
+
+  .image-card:hover{
+    border-color:rgba(255, 122, 0, .4);
+  }
+
+  .btn-save:hover{
+    background:var(--accent-hover);
+    transform:translateY(-2px);
+    box-shadow:0 10px 20px rgba(255, 122, 0, .2);
+  }
+
+  .btn-back:hover{
+    background:rgba(255, 255, 255, .05);
+    border-color:var(--text-dim);
+  }
+}
+
+/* ==========================================================================
+   §8 MEDIA QUERIES
+   Responsabilidade: único breakpoint de largura do arquivo — mantido em
+   650px (mesmo ponto de corte do arquivo original), agora em min-width
+   (Mobile First) em vez de max-width (Desktop First). Abaixo dele, tudo
+   já está definido em §2/§3 como uma coluna; aqui só se adiciona o
+   necessário para telas maiores.
+   ========================================================================== */
+@media (min-width:650px){
+
+  .page-wrapper{
+    padding:var(--space-xl) var(--space-lg);
+  }
+
+  .update-container{
+    padding:var(--space-xl);
+  }
+
+  .main-form-grid{
+    grid-template-columns:repeat(2, 1fr);
+  }
+}
+
+/* ==========================================================================
+   §9 ACESSIBILIDADE
+   Responsabilidade: nenhuma regra adicional necessária aqui — o outline
+   de :focus-visible para links/botões (a:focus-visible, button:focus-visible)
+   já é global, definido em base.css §14, e se aplica a .btn-save/.btn-back
+   automaticamente. O :focus dos campos de formulário (input/select/textarea)
+   é tratado em §3, por ser um estado próprio desta tela (halo laranja).
+   ========================================================================== */
+
+/* ==========================================================================
+   §10 ANIMAÇÕES
+   Responsabilidade: nenhuma — este arquivo não usa @keyframes. A regra de
+   prefers-reduced-motion também já é global (base.css §15, seletor `*`) e
+   cobre qualquer transição definida aqui, sem necessidade de duplicá-la.
+   ========================================================================== */

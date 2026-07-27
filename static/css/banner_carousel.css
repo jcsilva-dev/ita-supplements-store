@@ -37,8 +37,6 @@
     margin-bottom: 30px;
 }
 
-  
-
   .banner-carousel__track {
     display: flex;
     transition: transform 0.55s ease;
@@ -53,13 +51,16 @@
     text-decoration: none;
   }
 
- 
-  .banner-carousel__slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    display: block;
+  .banner-carousel__slide picture,
+  .banner-carousel__slide picture img{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+
+  .banner-carousel__slide picture img{
+    object-fit:cover;
+    object-position:center;
   }
 
   .banner-carousel__overlay {

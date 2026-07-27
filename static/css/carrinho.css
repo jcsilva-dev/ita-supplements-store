@@ -1,6 +1,3 @@
-/* ----------------------------------------------------------------
-   § 1  DESIGN TOKENS
-   ---------------------------------------------------------------- */
 :root {
   --fire:       #ff5c00;
   --fire-dim:   rgba(255,92,0,.14);
@@ -37,6 +34,24 @@
 
   --f-display: 'Barlow Condensed', sans-serif;
   --f-body:    'Barlow', sans-serif;
+
+  --page-px:      clamp(14px, 3vw, 24px);
+  --gap-lg:       clamp(16px, 3vw, 24px);
+  --gap-md:       clamp(10px, 2vw, 18px);
+
+  --fs-header-title: clamp(26px, 5vw, 40px);
+  --fs-item-name:    clamp(16px, 2.2vw, 19px);
+
+  --item-img-size:   clamp(64px, 12vw, 90px);
+
+  /* ── NOVO: padding fluido do sidebar de resumo ──
+     Corrige o problema #5: 28px fixo apertava o total em 320px. */
+  --summary-px: clamp(16px, 4vw, 28px);
+
+  /* ── NOVO: tamanho mínimo de área de toque (Apple HIG / Material) ──
+     Corrige o problema #9: botão de remover em 36px estava abaixo
+     do mínimo recomendado de 44px para toque confortável. */
+  --tap-min: 44px;
 }
 
 /* ----------------------------------------------------------------
@@ -48,10 +63,17 @@ body {
   font-family: var(--f-body);
   color: var(--text-1);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 img { display:block; max-width:100%; }
 a   { text-decoration:none; color:inherit; }
 button { cursor:pointer; font-family:inherit; border:none; background:none; }
+
+:focus-visible {
+  outline: 2px solid var(--fire);
+  outline-offset: 3px;
+  border-radius: var(--r-md);
+}
 
 /* ----------------------------------------------------------------
    § 3  LAYOUT
@@ -59,7 +81,7 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
 .pg {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--page-px);
 }
 
 /* ----------------------------------------------------------------
@@ -67,23 +89,27 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
    ---------------------------------------------------------------- */
 .cart-header {
   background: none !important;
-  padding: 12px 0 24px;
+  padding: clamp(12px, 4vw, 36px) 0 24px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: clamp(10px, 2.5vw, 16px);
 }
 .cart-header__icon {
-  width: 48px; height: 48px;
+  /* MELHORIA: tamanho levemente fluido evita aperto do gap em 320px
+     ao lado do título grande (problema #6). */
+  width: clamp(40px, 8vw, 48px);
+  height: clamp(40px, 8vw, 48px);
   border-radius: var(--r-lg);
   background: var(--fire-dim);
   display: flex; align-items: center; justify-content: center;
   color: var(--fire);
-  font-size: 20px;
+  font-size: clamp(16px, 3vw, 20px);
   flex-shrink: 0;
 }
 .cart-header__title {
   font-family: var(--f-display);
-  font-size: 40px; font-weight: 900;
+  font-size: var(--fs-header-title);
+  font-weight: 900;
   letter-spacing: .03em;
   line-height: 1;
 }
@@ -98,8 +124,8 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
    ---------------------------------------------------------------- */
 .cart-grid {
   display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: var(--gap-lg);
   align-items: start;
   padding-bottom: 100px;
 }
@@ -116,22 +142,20 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
 .cart-item {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: var(--gap-md);
   background: var(--surface-1);
   border: 1.5px solid var(--border);
   border-radius: var(--r-xl);
-  padding: 18px;
+  padding: clamp(12px, 2.5vw, 18px);
   position: relative;
+  flex-wrap: wrap;
   transition: border-color .3s, transform .4s var(--spring);
-}
-.cart-item:hover {
-  border-color: rgba(255,255,255,.12);
-  transform: translateY(-3px);
 }
 
 /* product image */
 .cart-item__img {
-  width: 90px; height: 90px;
+  width: var(--item-img-size);
+  height: var(--item-img-size);
   flex-shrink: 0;
   border-radius: var(--r-lg);
   overflow: hidden;
@@ -143,15 +167,28 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
 }
 
 /* info */
-.cart-item__info { flex: 1; min-width: 0; }
+.cart-item__info {
+  flex: 1;
+  min-width: min(180px, 100%);
+}
 
 .cart-item__name {
   font-family: var(--f-display);
-  font-size: 19px; font-weight: 700;
+  font-size: var(--fs-item-name);
+  font-weight: 700;
   letter-spacing: .03em; line-height: 1.2;
   color: var(--text-1);
   margin-bottom: 6px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  /* MELHORIA (problema #2): substitui nowrap+ellipsis por line-clamp
+     de 2 linhas. Em vez de truncar o nome do produto numa única
+     linha (o que em 320–360px cortava nomes médios de forma
+     agressiva), o nome agora pode ocupar até 2 linhas — mais legível
+     e mais parecido com o padrão de grandes e-commerces. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
 }
 
 .cart-item__meta {
@@ -171,7 +208,8 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
 
 .cart-item__price {
   font-family: var(--f-display);
-  font-size: 22px; font-weight: 900;
+  font-size: clamp(18px, 3vw, 22px);
+  font-weight: 900;
   letter-spacing: .02em;
   color: var(--fire);
 }
@@ -183,7 +221,10 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
 
 /* remove button */
 .cart-item__remove {
-  width: 36px; height: 36px;
+  /* MELHORIA (problema #9): 36px → --tap-min (44px), área de toque
+     confortável em mobile, sem alterar o ícone/estilo visual. */
+  width: var(--tap-min);
+  height: var(--tap-min);
   border-radius: var(--r-md);
   background: var(--red-dim);
   border: 1px solid rgba(248,113,113,.2);
@@ -193,20 +234,18 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
   transition: background .2s, transform .25s var(--spring);
   font-size: 14px;
 }
-.cart-item__remove:hover {
-  background: var(--red);
-  color: #fff;
-  transform: scale(1.1) rotate(90deg);
-}
 
 /* ----------------------------------------------------------------
    § 7  ORDER SUMMARY (sticky sidebar)
    ---------------------------------------------------------------- */
 .order-summary {
   background: var(--surface-1);
+  overflow: visible;
   border: 1.5px solid var(--border);
   border-radius: var(--r-2xl);
-  padding: 28px;
+  /* MELHORIA (problema #5): padding fluido via --summary-px substitui
+     28px fixo, que em 320px espremia o total contra a borda. */
+  padding: var(--summary-px);
   position: sticky;
   top: 28px;
 }
@@ -241,6 +280,8 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 .order-summary__total-label {
   font-size: 15px; font-weight: 700;
@@ -248,42 +289,109 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
 }
 .order-summary__total-value {
   font-family: var(--f-display);
-  font-size: 36px; font-weight: 900;
+  font-size: clamp(28px, 5vw, 36px);
+  font-weight: 900;
   letter-spacing: .02em;
   color: var(--fire);
   line-height: 1;
 }
 
 /* payment select area */
-.payment-section { margin: 22px 0; }
+.payment-section {
+  width: 100%;
+  min-width: 0;
+  margin: 22px 0;
+}
 
 .payment-section__label {
-  font-size: 10px; font-weight: 700;
-  letter-spacing: .12em; text-transform: uppercase;
+  font-size: clamp(11px, 1.8vw, 13px);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
   color: var(--text-3);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   display: block;
 }
 
-.select-field {
+
+.payment-dropdown {
+  position: relative;
   width: 100%;
+  z-index: 50;
+}
+
+
+.payment-dropdown__menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 20;
+
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  color: var(--text-1);
-  font-family: var(--f-body);
-  font-size: 14px; font-weight: 500;
-  padding: 13px 16px;
-  outline: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239499a8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  cursor: pointer;
-  transition: border-color .25s;
+  box-shadow: var(--shadow-lift);
+
+  max-height: min(280px, 60vh);
+  overflow-y: auto;
+
+  padding: 6px;
+
+  display: none;
 }
-.select-field:focus  { border-color: var(--fire); }
-.select-field option { background: var(--surface-2); }
+
+.payment-dropdown__option.active {
+  color: var(--text-1);
+  background: var(--surface-3);
+}
+
+
+.payment-dropdown.open .payment-dropdown__menu {
+  display: block;
+}
+
+.payment-dropdown__button {
+  width:100%;
+  min-height:var(--tap-min);
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding: clamp(14px,3vw,18px)
+           clamp(16px,3.5vw,20px);
+
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+
+  color:var(--text-1);
+  font-size:clamp(14px,2.4vw,16px);
+}
+.payment-dropdown__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: var(--tap-min);
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  font-size: clamp(14px, 2.4vw, 16px);
+  color: var(--text-2);
+}
+.payment-dropdown__option.is-selected { color: var(--text-1); }
+@media (hover: hover) and (pointer: fine) {
+  .payment-dropdown__option:hover { background: var(--surface-3); color: var(--text-1); }
+}
+.payment-dropdown__badge {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: #4ade80;
+  background: rgba(74,222,128,.12);
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+}
 
 /* CTA */
 .btn-checkout {
@@ -300,11 +408,6 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
   margin-top: 20px;
   transition: box-shadow .3s, transform .3s var(--spring), filter .3s;
 }
-.btn-checkout:hover {
-  box-shadow: var(--wpp-glow);
-  transform: translateY(-3px);
-  filter: brightness(1.07);
-}
 
 .link-continue {
   display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -313,7 +416,6 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
   color: var(--text-3);
   transition: color .2s;
 }
-.link-continue:hover { color: var(--fire); }
 
 /* ----------------------------------------------------------------
    § 8  EMPTY STATE
@@ -321,7 +423,7 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
 .cart-empty {
   display: flex; flex-direction: column; align-items: center;
   text-align: center;
-  padding: 90px 24px;
+  padding: clamp(50px, 8vw, 90px) var(--page-px);
   background: var(--surface-1);
   border: 1.5px solid var(--border);
   border-radius: var(--r-2xl);
@@ -337,7 +439,8 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
 }
 .cart-empty__title {
   font-family: var(--f-display);
-  font-size: 30px; font-weight: 900;
+  font-size: clamp(24px, 4vw, 30px);
+  font-weight: 900;
   letter-spacing: .04em;
   margin-bottom: 10px;
 }
@@ -357,10 +460,6 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
   letter-spacing: .08em; text-transform: uppercase;
   transition: box-shadow .3s, transform .3s var(--spring);
 }
-.btn-primary:hover {
-  box-shadow: var(--fire-glow);
-  transform: translateY(-2px);
-}
 
 /* ----------------------------------------------------------------
    § 9  SCROLL REVEAL
@@ -375,21 +474,41 @@ button { cursor:pointer; font-family:inherit; border:none; background:none; }
 /* ----------------------------------------------------------------
    § 10  RESPONSIVE
    ---------------------------------------------------------------- */
-@media (max-width: 860px) {
+@media (min-width: 860px) {
   .cart-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 360px;
   }
   .order-summary {
-    position: static;
+    position: sticky;
   }
 }
 
-@media (max-width: 600px) {
-  .pg { padding: 0 14px; }
-  .cart-header { padding: 36px 0 24px; }
-  .cart-header__title { font-size: 30px; }
-  .cart-item { flex-wrap: wrap; }
-  .cart-item__img { width: 70px; height: 70px; }
-  .cart-item__name { font-size: 16px; }
+@media (hover: hover) and (pointer: fine) {
+  .cart-item:hover {
+    border-color: rgba(255,255,255,.12);
+    transform: translateY(-3px);
+  }
+  .cart-item__remove:hover {
+    background: var(--red);
+    color: #fff;
+    transform: scale(1.1) rotate(90deg);
+  }
+  .btn-checkout:hover {
+    box-shadow: var(--wpp-glow);
+    transform: translateY(-3px);
+    filter: brightness(1.07);
+  }
+  .link-continue:hover { color: var(--fire); }
+  .btn-primary:hover {
+    box-shadow: var(--fire-glow);
+    transform: translateY(-2px);
+  }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

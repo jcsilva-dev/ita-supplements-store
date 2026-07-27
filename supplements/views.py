@@ -185,13 +185,21 @@ class SupplementDetailView(DetailView):
 
         default_variant = product.get_default_variant()
 
-        default_price_info = DiscountService.get_product_price(default_variant)
-
         attributes = product.get_available_attributes()
 
-        installments = default_variant.get_installment_options(price=default_price_info.discount_price)
+        if default_variant:
 
-        
+            default_price_info = DiscountService.get_product_price(default_variant)
+
+            installments = default_variant.get_installment_options(
+                price=default_price_info.discount_price
+            )
+
+        else:
+
+            default_price_info = None
+            installments = []
+                
         for variant in variants:
 
             variant.price_info = DiscountService.get_product_price(variant)
@@ -199,13 +207,7 @@ class SupplementDetailView(DetailView):
             variant.installments = variant.get_installment_options(
                 price=variant.price_info.discount_price
             )
-            print(
-                "VARIANTE:", variant.id,
-                "| PREÇO:", variant.price_info.discount_price,
-                "| PRIMEIRA PARCELA:",
-                variant.installments[0]["value"] if variant.installments else "SEM PARCELAS"
-            )
-
+            
         context.update({
             "variants": variants,
             "default_variant": default_variant,
@@ -215,8 +217,17 @@ class SupplementDetailView(DetailView):
             "installments": installments if default_variant else [],
       })
 
-        
-        context["recommended_products"] = Supplements.objects.get_recommended(product)
+        recommended_products = Supplements.objects.get_recommended(product)
+        for rec in recommended_products:
+
+            variant = rec.get_default_variant()
+            if variant:
+                rec.price_info = DiscountService.get_product_price(variant)
+
+            else:
+             rec.price_info = None
+
+        context["recommended_products"] = recommended_products
 
         context["feedbacks"] = Feedback.objects.filter(is_approved=True)
 

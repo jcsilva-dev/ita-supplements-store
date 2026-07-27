@@ -355,7 +355,7 @@ class Flavor(models.Model):
 
 
 class Supplements(models.Model):
-    id = models.AutoField(primary_key=True)
+    
     model = models.CharField(max_length=200, verbose_name="Modelo")
     
     brand = models.ForeignKey(
@@ -473,13 +473,42 @@ class ImageSupplement(models.Model):
         return f"Imagem do produto: {self.supplement}" 
     
 
-
 class HomeBanner(models.Model):
-    image = models.ImageField(upload_to="home_banners/", help_text="imagen do banner. sugestao: 1920x500 ou 1600x450")
-    headline = models.CharField(max_length=100, blank=True, help_text="Texto opcional do banner (se quiser mostrar em cima).")
-    link = models.URLField(blank=True, help_text="Link opcional. Se preencher, ao clicar no banner vai abrir esse link.")
-    order = models.PositiveBigIntegerField(default=1, help_text="Ordem de exibição (1, 2, 3).")
-    is_active = models.BooleanField(default=True, help_text="Se desativar, esse banner não aparece no site.")
+    desktop_image = models.ImageField(
+        upload_to="home_banners/desktop/",
+        blank=True,
+        null=True,
+        help_text="Banner para desktop (sugestão: 1920×700)."
+    )
+
+    mobile_image = models.ImageField(
+        upload_to="home_banners/mobile/",
+        blank=True,
+        null=True,
+        help_text="Banner para celular (sugestão: 1080×1350). Se não preencher, será usada a imagem desktop."
+    )
+
+    headline = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Texto opcional do banner."
+    )
+
+    link = models.URLField(
+        blank=True,
+        help_text="Link opcional."
+    )
+
+    order = models.PositiveIntegerField(
+        default=1,
+        help_text="Ordem de exibição."
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Se desativar, esse banner não aparece."
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -488,5 +517,7 @@ class HomeBanner(models.Model):
     def __str__(self):
         return f"Banner {self.order}"
     
+
+
 
     

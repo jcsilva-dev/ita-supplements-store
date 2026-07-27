@@ -106,6 +106,8 @@
 
       <!-- Meta chips -->
       {% with variant=default_variant %}
+
+      {% if variant %}
       <div class="info__chips">
         <span class="chip">Marca <strong id="js-brand">{{ object.brand }}</strong></span>
         <span class="chip">Estoque <strong id="js-stock">{{ variant.quantity_stock }}</strong></span>
@@ -118,128 +120,260 @@
       </div>
 
       <!-- Stock alert -->
-      <div id="js-stock-alert">
-        {% if variant.quantity_stock <= 0 %}
-        <div class="stock-alert stock-alert--out">
-          <span class="stock-alert__icon">✕</span>
-          <span>Produto <strong>esgotado</strong>. Verifique outras opções abaixo.</span>
-        </div>
-        {% elif variant.quantity_stock <= 5 %}
-        <div class="stock-alert stock-alert--low">
-          <span class="stock-alert__icon">⚠</span>
-          <div>
-            <strong>Últimas {{ variant.quantity_stock }} unidades!</strong> Garanta o seu antes que acabe.
-            <div class="stock-bar"><div class="stock-bar__fill stock-bar__fill--low" style="width:20%"></div></div>
-          </div>
-        </div>
-        {% elif variant.quantity_stock <= 10 %}
-        <div class="stock-alert stock-alert--low">
-          <span class="stock-alert__icon">🔥</span>
-          <div>
-            Alta procura agora — apenas <strong>{{ variant.quantity_stock }}</strong> restantes.
-            <div class="stock-bar"><div class="stock-bar__fill stock-bar__fill--hot" style="width:40%"></div></div>
-          </div>
-        </div>
-        {% endif %}
-      </div>
+<div id="js-stock-alert">
 
-      <!-- BUY BOX -->
-      <div class="buy-box">
+    {% if variant.quantity_stock <= 0 %}
 
-        <!-- Variant selector -->
-        <p class="buy-box__label">Selecione uma opção</p>
-        <select id="js-variant-select" class="select-field" aria-label="Selecionar variante">
-          {% for v in variants %}
-          <option
-            data-original-price="{{ v.price_info.original_price|floatformat:2 }}"
-            data-discount-price="{{ v.price_info.discount_price|floatformat:2 }}"
-            data-percent="{{ v.price_info.percentage }}"
-            value="{{ v.id }}"
-            data-stock="{{ v.quantity_stock }}"
-            data-brand="{{ object.brand }}"
-            data-flavor="{{ v.flavor|default:'' }}"
-            data-size="{{ v.size|default:'' }}"
-            {% localize off %}
-            data-installments='[
-            {% for opt in v.installments %}
-            {"times":{{ opt.times }},"value":{{ opt.value }}}
-            {% if not forloop.last %},{% endif %}
-            {% endfor %}
-            ]'
-            {% endlocalize %}
-            {% if v.id == variant.id %}selected{% endif %}
-          >
-            {% if v.flavor %}{{ v.flavor }}{% endif %}{% if v.size %} {{ v.size }}{% endif %} — R$ {{ v.price_info.discount_price |floatformat:2 }}
-          </option>
-          {% endfor %}
-        </select>
+    <div class="stock-alert stock-alert--out">
+        <span class="stock-alert__icon"></span>
 
-         {% if price_info.has_discount  %}
-        <p class="price-old">
-            De R$
-            <span id="js-price-old">
-                {{ price_info.original_price |floatformat:2 }}
+        <div>
+            <strong>Produto indisponível</strong><br>
+            Esta opção está sem estoque no momento.
+        </div>
+    </div>
+
+    {% elif variant.quantity_stock <= 3 %}
+
+    <div class="stock-alert stock-alert--low">
+        <span class="stock-alert__icon"></span>
+
+        <div>
+            <strong>Últimas {{ variant.quantity_stock }} unidades</strong><br>
+            Estoque limitado para esta opção.
+        </div>
+
+        <div class="stock-bar">
+            <div class="stock-bar__fill stock-bar__fill--low"></div>
+        </div>
+    </div>
+
+    {% elif variant.quantity_stock <= 10 %}
+
+    <div class="stock-alert stock-alert--medium">
+        <span class="stock-alert__icon"></span>
+
+        <div>
+            Restam apenas <strong>{{ variant.quantity_stock }}</strong> unidades em estoque.
+        </div>
+
+        <div class="stock-bar">
+            <div class="stock-bar__fill stock-bar__fill--medium"></div>
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+
+     <!-- BUY BOX -->
+<div class="buy-box">
+
+  <!-- Variant selector -->
+  <fieldset class="variant-fieldset">
+    <legend class="buy-box__label">Selecione uma opção</legend>
+
+    <div class="variant-grid" id="js-variant-grid" role="radiogroup" aria-label="Variantes disponíveis">
+      {% for v in variants %}
+      <input
+        type="radio"
+        name="variant_option"
+        id="variant-{{ v.id }}"
+        class="variant-card__input"
+        value="{{ v.id }}"
+        data-original-price="{{ v.price_info.original_price|floatformat:2 }}"
+        data-discount-price="{{ v.price_info.discount_price|floatformat:2 }}"
+        data-percent="{{ v.price_info.percentage }}"
+        data-stock="{{ v.quantity_stock }}"
+        data-brand="{{ object.brand }}"
+        data-flavor="{{ v.flavor|default:'' }}"
+        data-size="{{ v.size|default:'' }}"
+        {% localize off %}
+        data-installments='[
+        {% for opt in v.installments %}
+        {"times":{{ opt.times }},"value":{{ opt.value }}}
+        {% if not forloop.last %},{% endif %}
+        {% endfor %}
+        ]'
+        {% endlocalize %}
+        {% if v.id == variant.id %}checked{% endif %}
+        {% if v.quantity_stock <= 0 %}disabled{% endif %}
+      >
+      <label
+    for="variant-{{ v.id }}"
+    class="variant-card{% if v.quantity_stock <= 0 %} variant-card--unavailable{% endif %}"
+     >
+
+        {% if v.flavor %}
+            <span class="variant-card__primary">
+                {{ v.flavor }}
             </span>
-        </p>
-
-         <div
-            class="price-discount"
-            id="js-discount">
-            {{ price_info.percentage }}% OFF
-        </div>
-
-        {% endif %}
-         <div class="price-row">
-          <div class="price-main">
-
-              <span class="price-main__cur">
-                  R$
-              </span>
-
-              <span
-                  class="price-main__val"
-                  id="js-price"
-              >
-                  {{ price_info.discount_price |floatformat:2 }}
-              </span>
-
-          </div>
-      </div>
-
-        {% if variant %}
-        <form method="POST" action="{% url 'add_to_cart' %}" id="js-buy-form">
-          {% csrf_token %}
-          <input type="hidden" name="variant_id" id="js-variant-hidden" value="{{ variant.id }}">
-
-          <!-- Installments -->
-          <p class="buy-box__label" style="margin-top:18px;">Parcelamento</p>
-          <select name="installments" id="js-installments" class="select-field" aria-label="Opções de parcelamento">
-            {% for option in installments %} 
-            <option value="{{ option.times }}">{{ option.times }}x de R$ {{ option.value|floatformat:2 }}</option>
-            {% endfor %}
-          </select>
-
-          <!-- Quantity -->
-          <div class="qty-row">
-            <label class="qty-row__label" for="js-qty">Quantidade</label>
-            <input type="number" name="quantity" id="js-qty" class="qty-input" value="1" min="1" aria-label="Quantidade">
-          </div>
-
-          <button type="submit" name="action" value="cart" class="btn-cart">
-            🛒 Adicionar ao Carrinho
-          </button>
-
-          <button type="submit" name="action" value="buy" class="btn-buy">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.122 1.528 5.855L.057 23.077a.75.75 0 00.915.921l5.42-1.424A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.92 0-3.72-.5-5.28-1.374l-.38-.216-3.938 1.033 1.055-3.826-.235-.389A9.937 9.937 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-            Comprar Agora
-          </button>
-        </form>
-        {% else %}
-        <div class="stock-alert stock-alert--out">Produto sem variante cadastrada.</div>
         {% endif %}
 
-      </div>
-      <!-- /buy-box -->
+        {% if v.size %}
+            <span class="variant-card__secondary">
+                {{ v.size }}
+            </span>
+        {% endif %}
+
+        {% if v.product_content_size %}
+            <span class="variant-card__secondary">
+                {{ v.product_content_size }}
+            </span>
+        {% endif %}
+
+        {% if v.quantity_stock <= 0 %}
+            <span class="variant-card__badge">
+                Esgotado
+            </span>
+        {% endif %}
+
+    </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  {% if price_info.has_discount %}
+  <p class="price-old">
+    De R$
+    <span id="js-price-old">
+      {{ price_info.original_price|floatformat:2 }}
+    </span>
+  </p>
+
+  <div class="price-discount" id="js-discount">
+    {{ price_info.percentage }}% OFF
+  </div>
+  {% endif %}
+
+  <div class="price-row">
+    <div class="price-main">
+      <span class="price-main__cur">R$</span>
+      <span class="price-main__val" id="js-price">
+        {{ price_info.discount_price|floatformat:2 }}
+      </span>
+    </div>
+  </div>
+
+<div class="price-summary">
+
+    <div class="price-summary__row">
+        <span>Subtotal</span>
+        <strong id="js-subtotal">
+            R$ {{ price_info.discount_price|floatformat:2 }}
+        </strong>
+    </div>
+  </div>
+
+  {% if variant %}
+  <form method="POST" action="{% url 'add_to_cart' %}" id="js-buy-form">
+    {% csrf_token %}
+    <input type="hidden" name="variant_id" id="js-variant-hidden" value="{{ variant.id }}">
+
+    <!-- Installments (custom dropdown) -->
+<p class="buy-box__label" style="margin-top:18px;">Parcelamento</p>
+
+<div class="installments-select" id="js-installments-select">
+
+  <button
+    type="button"
+    class="installments-trigger"
+    id="js-installments-trigger"
+    aria-haspopup="listbox"
+    aria-expanded="false"
+    aria-controls="js-installments-list"
+  >
+    <span id="js-installments-trigger-label">
+      {% if installments %}
+        {{ installments.0.times }}x de R$ {{ installments.0.value|floatformat:2 }}
+      {% endif %}
+    </span>
+    <svg class="installments-trigger__chevron" viewBox="0 0 12 8" width="12" height="8" aria-hidden="true">
+      <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <ul
+    class="installments-list"
+    id="js-installments-list"
+    role="listbox"
+    tabindex="-1"
+    aria-label="Opções de parcelamento"
+    hidden
+  >
+    {% for option in installments %}
+    <li
+      role="option"
+      class="installments-option"
+      id="installment-opt-{{ forloop.counter0 }}"
+      data-value="{{ option.times }}"
+      aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+    >
+      {{ option.times }}x de R$ {{ option.value|floatformat:2 }}
+    </li>
+    {% endfor %}
+  </ul>
+
+  <input
+    type="hidden"
+    name="installments"
+    id="js-installments-value"
+    value="{% if installments %}{{ installments.0.times }}{% endif %}"
+  >
+</div>
+
+    <!-- Quantity -->
+    <div class="qty-row">
+      <label class="qty-row__label" for="js-qty">Quantidade</label>
+
+      <div class="qty-control">  
+      <button
+        type="button"
+        class="qty-btn"
+        id="js-qty-minus">
+        −
+      </button>
+      
+
+      <input 
+      type="number" 
+      name="quantity" 
+      id="js-qty" 
+      class="qty-input" 
+      value="1" 
+      min="1" 
+      aria-label="Quantidade">
+      
+     <button
+      type="button"
+      class="qty-btn"
+      id="js-qty-plus">
+      +
+     </button>
+      
+    
+     </div>
+
+     <p id="js-qty-message" class="qty-message"></p>
+     
+  </div>
+
+    <button type="submit" name="action" value="cart" class="btn-cart">
+      🛒 Adicionar ao Carrinho
+    </button>
+
+    <button type="submit" name="action" value="buy" class="btn-buy">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.122 1.528 5.855L.057 23.077a.75.75 0 00.915.921l5.42-1.424A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.92 0-3.72-.5-5.28-1.374l-.38-.216-3.938 1.033 1.055-3.826-.235-.389A9.937 9.937 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      Comprar Agora
+    </button>
+  </form>
+  {% else %}
+  <div class="stock-alert stock-alert--out">Produto sem variante cadastrada.</div>
+  {% endif %}
+
+</div>
+<!-- /buy-box -->
+
 
       <!-- Description -->
       {% if object.description %}
@@ -248,7 +382,18 @@
         <p class="info__desc-body">{{ object.description }}</p>
       </div>
       {% endif %}
+    
 
+      {% else %}
+
+      <div class="stock-alert stock-alert--out">
+          <div>
+              <strong>Produto indisponível</strong><br>
+              Este produto ainda não possui uma variante cadastrada.
+          </div>
+      </div>
+
+    {% endif %}
       {% endwith %}
     </div>
     <!-- /info panel -->
@@ -285,7 +430,32 @@
 
       <p class="rec-card__brand">{{ rec.brand.name|default:"" }}</p>
       <h3 class="rec-card__name">{{ rec.model }}</h3>
-      <p class="rec-card__price">R$ {{ rec.get_price }}</p>
+      
+      {% if rec.price_info %}
+
+      {% if rec.price_info.has_discount %}
+
+          <p class="rec-card__old-price">
+              R$ {{ rec.price_info.original_price|floatformat:2 }}
+          </p>
+
+          <p class="rec-card__price">
+              R$ {{ rec.price_info.discount_price|floatformat:2 }}
+          </p>
+
+          <span class="rec-card__discount">
+              {{ rec.price_info.percentage |floatformat:0 }}% OFF
+          </span>
+
+      {% else %}
+
+          <p class="rec-card__price">
+              R$ {{ rec.price_info.original_price|floatformat:2 }}
+          </p>
+
+      {% endif %}
+
+  {% endif %}
 
     </a>
     {% endwith %}

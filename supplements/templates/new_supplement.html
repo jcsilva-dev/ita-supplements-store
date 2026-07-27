@@ -38,7 +38,7 @@
                     {{ field }}
 
                     {% if field.errors %}
-                        <small style="color:#ef4444;">
+                        <small class="field-error">
                             {{ field.errors }}
                         </small>
                     {% endif %}
@@ -85,7 +85,7 @@
                                         {{ field }}
 
                                         {% if field.errors %}
-                                            <small style="color:#ef4444;">
+                                            <small class="field-error">
                                                 {{ field.errors }}
                                             </small>
                                         {% endif %}
@@ -125,7 +125,7 @@
                             Slot {{ forloop.counter }}
                         </small>
 
-                        <div class="form-group" style="margin-bottom:0;">
+                        <div class="form-group form-group--flush">
 
                             {{ f.photo }}
 

@@ -7,19 +7,12 @@
 
 {% block content %}
 
-<!-- ================================================================
-     FONTS
-     ================================================================ -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-
 <link rel="stylesheet" href="{% static 'css/carrinho.css' %}">
 
-<!-- ================================================================
-     PAGE HEADER
-     ================================================================ -->
 <div class="pg">
   <header class="cart-header reveal">
     <div class="cart-header__icon" aria-hidden="true">🛒</div>
@@ -32,16 +25,11 @@
   </header>
 </div>
 
-
-<!-- ================================================================
-     CART — populated state
-     ================================================================ -->
 {% if items %}
 
 <div class="pg">
   <div class="cart-grid">
 
-    <!-- ── ITEMS ── -->
     <section aria-label="Itens do carrinho">
       <div class="cart-items">
         {% for item in items %}
@@ -54,37 +42,61 @@
               <img src="{% static 'images/no-image.png' %}" alt="{{ item.name }}" loading="lazy">
             {% endif %}
           </div>
+           
 
           <div class="cart-item__info">
-            <p class="cart-item__name">{{ item.name }}</p>
 
-            <div class="cart-item__meta">
-              <span class="cart-item__tag">Qtd: {{ item.quantity }}</span>
-              {% if item.flavor %}
-              <span class="cart-item__tag">{{ item.flavor }}</span>
-              {% endif %}
+          <p class="cart-item__name">{{ item.name }}</p>
+
+          <div class="cart-item__meta">
+
+              <span class="cart-item__tag">
+                  Qtd: {{ item.quantity }}
+              </span>
+
               {% if item.size %}
-              <span class="cart-item__tag">{{ item.size }}</span>
+              <span class="cart-item__tag">
+                  Tamanho: {{ item.size }}
+              </span>
               {% endif %}
-            </div>
 
-            <p class="cart-item__price">R$ {{ item.price }}</p>
-            <p class="cart-item__subtotal">Subtotal: R$ {{ item.subtotal|floatformat:2 }}</p>
+              {% if item.flavor %}
+              <span class="cart-item__tag">
+                  Sabor: {{ item.flavor }}
+              </span>
+              {% endif %}
+
+              {% if item.content %}
+              <span class="cart-item__tag">
+                  Conteúdo: {{ item.content }}
+              </span>
+              {% endif %}
+
           </div>
 
-          <a
-            href="{% url 'remove_item' item.key %}"
-            class="cart-item__remove"
-            aria-label="Remover {{ item.name }}"
-            title="Remover item"
-          >✕</a>
+          <p class="cart-item__price">
+              R$ {{ item.price }}
+          </p>
+
+          <p class="cart-item__subtotal">
+              Subtotal: R$ {{ item.subtotal|floatformat:2 }}
+          </p>
+
+      </div>
+
+        <a href="{% url 'remove_item' item.key %}"
+          class="cart-item__remove"
+          aria-label="Remover {{ item.name }}"
+          title="Remover item">
+          ✕
+        </a>
+          
 
         </div>
         {% endfor %}
       </div>
     </section>
 
-    <!-- ── ORDER SUMMARY ── -->
     <aside class="order-summary reveal" style="transition-delay:.1s" aria-label="Resumo do pedido">
 
       <h2 class="order-summary__title">Resumo</h2>
@@ -109,21 +121,76 @@
         {% csrf_token %}
 
         <div class="payment-section">
-          <label class="payment-section__label" for="cart-installments">Forma de pagamento</label>
-          <select name="cart_installments" id="cart-installments" class="select-field">
-            <option value="1">À vista</option>
-            <option value="2">2x sem juros</option>
-            <option value="3">3x sem juros</option>
-            <option value="4">4x sem juros</option>
-            <option value="5">5x sem juros</option>
-            <option value="6">6x sem juros</option>
-            <option value="7">7x</option>
-            <option value="8">8x</option>
-            <option value="9">9x</option>
-            <option value="10">10x</option>
-            <option value="11">11x</option>
-            <option value="12">12x</option>
-          </select>
+          <span class="payment-section__label" id="payment-section-label">Forma de pagamento</span>
+
+          <!--
+            MELHORIA: o antigo <select> nativo foi removido por completo
+            (era HTML inválido: envolvia esta div, algo que um <select>
+            não pode fazer). O valor real que vai para o Django continua
+            chegando por este <input type="hidden" name="cart_installments">,
+            controlado pelo carrinho.js — request.POST.get("cart_installments")
+            funciona exatamente como antes.
+          -->
+          <div class="payment-dropdown" id="payment-dropdown">
+
+            <input
+              type="hidden"
+              name="cart_installments"
+              id="cart-installments"
+              value="1"
+            >
+
+            <button
+              type="button"
+              class="payment-dropdown__button"
+              aria-expanded="false"
+              aria-haspopup="listbox"
+              aria-labelledby="payment-section-label"
+            >
+              <span class="payment-dropdown__selected">À vista</span>
+              <span class="payment-dropdown__arrow" aria-hidden="true">▾</span>
+            </button>
+
+            <div class="payment-dropdown__menu" role="listbox">
+              <button type="button" class="payment-dropdown__option active" data-value="1" role="option" aria-selected="true">
+                <span>À vista</span>
+              </button>
+              <button type="button" class="payment-dropdown__option" data-value="2" role="option" aria-selected="false">
+                <span>2x sem juros</span>
+              </button>
+              <button type="button" class="payment-dropdown__option" data-value="3" role="option" aria-selected="false">
+                <span>3x sem juros</span>
+              </button>
+              <button type="button" class="payment-dropdown__option" data-value="4" role="option" aria-selected="false">
+                <span>4x sem juros</span>
+              </button>
+              <button type="button" class="payment-dropdown__option" data-value="5" role="option" aria-selected="false">
+                <span>5x sem juros</span>
+              </button>
+              <button type="button" class="payment-dropdown__option" data-value="6" role="option" aria-selected="false">
+                <span>6x sem juros</span>
+              </button>
+              <button type="button" class="payment-dropdown__option" data-value="7" role="option" aria-selected="false">
+                <span>7x sem juros</span>
+              </button>
+              <button type="button" class="payment-dropdown__option" data-value="8" role="option" aria-selected="false">
+                <span>8x sem juros</span>
+              </button>
+              <button type="button" class="payment-dropdown__option" data-value="9" role="option" aria-selected="false">
+                <span>9x sem juros</span>
+              </button>
+              <button type="button" class="payment-dropdown__option" data-value="10" role="option" aria-selected="false">
+                <span>10x sem juros</span>
+              </button>
+              <button type="button" class="payment-dropdown__option" data-value="11" role="option" aria-selected="false">
+                <span>11x sem juros</span>
+              </button>
+              <button type="button" class="payment-dropdown__option" data-value="12" role="option" aria-selected="false">
+                <span>12x sem juros</span>
+              </button>
+            </div>
+
+          </div>
         </div>
 
         <button type="submit" class="btn-checkout">
@@ -145,9 +212,6 @@
   </div>
 </div>
 
-<!-- ================================================================
-     CART — empty state
-     ================================================================ -->
 {% else %}
 
 <div class="pg">
@@ -161,7 +225,7 @@
       Explorar produtos
     </a>
   </div>
-</div> 
+</div>
 
 {% endif %}
 

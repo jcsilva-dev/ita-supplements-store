@@ -8,97 +8,117 @@
     <meta name="theme-color" content="#111">
 
     <title>{% block title %}Ita Suplementos{% endblock %}</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-   
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
 
-<header class="header">
-    <div class="header-container">
+<body>
 
-         <a href="{% url 'supplements' %}" class="brand-logo">
-        <i class="fas fa-bolt logo-icon"></i>
-        <span>Ita <strong>Suplementos</strong></span>
-        </a>
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
-        <!-- BOTÃO MOBILE -->
-        <button class="menu-toggle" type="button">
-            <i class="fas fa-bars"></i>
-        </button>
+    <header class="header">
+        <div class="header-container">
 
-        <!-- NAV -->
-        <nav class="nav">
-            <ul class="nav-list">
+            <!-- LOGO -->
+            <a href="{% url 'supplements' %}" class="brand-logo" aria-label="Ita Suplementos - página inicial">
+                <i class="fas fa-bolt logo-icon" aria-hidden="true"></i>
+                <span>Ita <strong>Suplementos</strong></span>
+            </a>
 
-                {% if user.is_authenticated %}
-                    <li class="user-greeting">
-                       Olá, <span class="glow-text">{{ user.username }}</span>
+            <!-- BOTÃO MENU MOBILE -->
+            <button
+                type="button"
+                class="menu-toggle"
+                aria-label="Abrir menu de navegação"
+                aria-expanded="false"
+                aria-controls="mobile-menu"
+            >
+                <i class="fas fa-bars" aria-hidden="true"></i>
+            </button>
+
+            <!-- NAVEGAÇÃO -->
+            <nav class="nav" id="mobile-menu" aria-label="Navegação principal">
+                <ul class="nav-list">
+
+                    <li><a href="/">Início</a></li>
+                    <li><a href="{% url 'supplements' %}">Suplementos</a></li>
+                    <li><a href="{% url 'category_supplement' 'all' %}">Categorias</a></li>
+
+                    {% if user.is_authenticated %}
+                    <li>
+                    <a href="{% url 'new_supplement' %}">Cadastrar Produto</a>
                     </li>
-                {% endif %}
+                    {% endif %}
 
-                <li><a href="/">Início</a></li>
-                <li><a href="{% url 'supplements' %}">Suplementos</a></li>
-                <li><a href="{% url 'category_supplement' 'all' %}">Categoria</a></li>
-                <li><a href="#">Contato</a></li>
+                    <li><a href="#">Contato</a></li>
 
+                </ul>
+
+                <div class="header-user">
                 {% if user.is_authenticated %}
-                    <li><a href="{% url 'new_supplement' %}">Cadastrar</a></li>
-                    <li><a href="{% url 'logout' %}">Sair</a></li>
-                {% else %}
-                    <li><a href="{% url 'login' %}">Login</a></li>
-                    <li><a href="{% url 'register' %}">Registrar</a></li>
-                {% endif %}
 
-            </ul>
-        </nav>
+                    <span class="user-greeting">
+                        Olá,
+                        <span class="glow-text">{{ user.username }}</span>
+                    </span>
 
-        <!-- AÇÕES -->
-        <div class="header-actions">
-            <a href="{% url 'cart' %}" class="cart">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-badge">{{ cart_count|default:0 }}</span>
-            </a>
+                    <a href="{% url 'logout' %}">Sair</a>
 
-            <a class="whatsapp-btn" href="https://wa.me/5583991771531" target="_blank">
-                WhatsApp
-            </a>
+                    {% else %} 
+
+                        <a href="{% url 'register' %}">Registrar</a>
+                        <a href="{% url 'login' %}">Login</a>
+                     
+                    {% endif %}
+
+                </div>
+
+            </nav>
+
+            <!-- ÁREA DE AÇÕES -->
+            <div class="header-actions">
+                <a
+                    href="{% url 'cart' %}"
+                    class="cart"
+                    aria-label="Carrinho de compras, {{ cart_count|default:0 }} itens"
+                >
+                    <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                    <span class="cart-badge">{{ cart_count|default:0 }}</span>
+                </a>
+            </div>
+
         </div>
+    </header>
 
-    </div>
-</header>
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
 
-<main>
-    {% block content %}{% endblock %}
-</main>
+    <footer class="footer">
+        <div class="footer-container">
 
-<footer class="footer">
+            <div class="footer-socials">
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+                <a href="https://wa.me/5583991771531" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                </a>
+            </div>
 
-    <div class="footer-container">
+            <div class="brand-logo footer-logo">
+                <i class="fas fa-bolt logo-icon" aria-hidden="true"></i>
+                <span>Ita <strong>Suplementos</strong></span>
+            </div>
 
-      <div class="brand-logo footer-logo">
-      <i class="fas fa-bolt logo-icon"></i>
-      <span>Ita <strong>Suplementos</strong></span>
-      </div>
-
-        <p class="footer-text">
-            Foco e performance em cada treino • 2026
-        </p>
-
-        <div class="footer-socials">
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-facebook"></i></a>
-            <a href="#"><i class="fab fa-whatsapp"></i></a>
+            <p class="footer-copy">
+                © 2026 Ita Suplementos. Todos os direitos reservados.
+            </p>
         </div>
+    </footer>
 
-        <p class="footer-copy">
-            © 2026 Ita Suplementos. Todos os direitos reservados.
-        </p>
-
-    </div>
-
-</footer>
-
-<script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
 
 </body>
 </html>

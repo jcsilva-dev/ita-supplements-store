@@ -159,36 +159,36 @@ def cart_view(request):
       
        image = variant.product.get_main_image()
 
-
        items.append({
            "key": key,
            "variant_id": variant.id,
            "product_id": variant.product.id,
 
-
            "product_name": variant.product.model,
-
 
            "sku": variant.sku,
 
+          "size": variant.size.name if variant.size else "",
+          "flavor": variant.flavor.name if variant.flavor else "",
+          "content": (
+              str(variant.product_content_size)
+              if variant.product_content_size
+              else ""
+          ),
 
-           "size": variant.size.name if variant.size else "",
-           "flavor": variant.flavor.name if variant.flavor else "",
+         "brand": (
+             variant.product.brand.name
+             if variant.product.brand
+             else ""
+         ),
 
+        "quantity": quantity,
 
-           "quantity": quantity,
+        "price": price,
+        "subtotal": subtotal,
 
-
-           "price": price,
-           "subtotal": subtotal,
-
-
-           "image": image,
-
-
-           "stock": variant.quantity_stock,
-       })
-
+        "image": image,
+        })
 
        total += subtotal
 

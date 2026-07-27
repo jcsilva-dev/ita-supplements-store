@@ -8,7 +8,7 @@
 
 <div class="page-wrapper">
     <div class="update-container">
-        
+
         <div class="header-group">
             <h1>Atualizar Registro</h1>
             <p>Gerencie as informações e a galeria do suplemento.</p>
@@ -24,11 +24,11 @@
 
             <div class="main-form-grid">
                 {% for field in form %}
-                    <div class="form-group {% if field.name == 'description' or field.name == 'nome' %}full-width{% endif %}">
+                    <div class="form-group {% if field.name == 'description' %}full-width{% endif %}">
                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                         {{ field }}
                         {% if field.errors %}
-                            <small style="color: #f87171; font-size: 11px;">{{ field.errors.0 }}</small>
+                            <small class="field-error">{{ field.errors.0 }}</small>
                         {% endif %}
                     </div>
                 {% endfor %}
@@ -45,13 +45,13 @@
                     <div class="image-card">
                         {{ f.id }}
                         <span class="slot-label">POSIÇÃO {{ forloop.counter }}</span>
-                        
+
                         <div class="thumb-container">
                             {% if f.instance.photo %}
-                                <img src="{{ f.instance.photo.url }}" alt="Preview">
+                                <img src="{{ f.instance.photo.url }}" alt="Pré-visualização da imagem do suplemento">
                             {% else %}
-                                <div style="display:flex; align-items:center; justify-content:center; height:100%; color:#333;">
-                                    <svg width="40" height="40" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7l-3 3.72L9 13l-3 4h12l-4-5z"/></svg>
+                                <div class="empty-preview">
+                                    <svg width="40" height="40" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7l-3 3.72L9 13l-3 4h12l-4-5z"/></svg>
                                 </div>
                             {% endif %}
                         </div>
@@ -91,7 +91,7 @@
                                     {{ field }}
 
                                     {% if field.errors %}
-                                        <small style="color:#f87171;">
+                                        <small class="field-error">
                                             {{ field.errors.0 }}
                                         </small>
                                     {% endif %}
@@ -114,11 +114,10 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-save">Confirmar Alterações</button>
-                <a href="javascript:history.back()" class="btn-back">Voltar</a>
+                <a href="{% url 'supplements' %}" class="btn-back">Voltar</a>
             </div>
         </form>
     </div>
 </div>
 
-{% endblock %}
-                            
+{% endblock %}                          

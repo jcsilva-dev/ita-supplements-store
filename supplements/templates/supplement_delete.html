@@ -3,23 +3,20 @@
 
 {% block content %}
 
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="{% static 'css/supplement_delete.css' %}">
-
 
 <div class="delete-scope">
     <div class="delete-modal">
-        
+
         <div class="warning-icon">
-            <i class="fas fa-exclamation-triangle"></i>
+            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
         </div>
 
         <h2>Atenção, Guerreiro!</h2>
         <p>
             Você está prestes a remover este item do estoque de forma definitiva.
             <span class="item-highlight">
-                <i class="fas fa-box-open" style="margin-right: 8px; opacity: 0.7;"></i>
+                <i class="fas fa-box-open item-icon" aria-hidden="true"></i>
                 {{ object.name|default:"Produto Selecionado" }}
             </span>
         </p>
@@ -28,13 +25,14 @@
             {% csrf_token %}
             <div class="button-stack">
                 <button type="submit" class="confirm-btn">
-                    <i class="fas fa-trash-alt"></i> Confirmar Exclusão
+                    <i class="fas fa-trash-alt" aria-hidden="true"></i> Confirmar Exclusão
                 </button>
-                <a href="javascript:history.back()" class="cancel-btn">
-                    <i class="fas fa-arrow-left"></i> Voltar e manter produto
+                <a href="{% url 'supplements' %}" class="cancel-btn">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar e manter produto
                 </a>
             </div>
         </form>
+
     </div>
 </div>
 

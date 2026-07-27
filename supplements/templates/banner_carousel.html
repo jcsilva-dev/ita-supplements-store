@@ -9,20 +9,32 @@
         aria-label="Banner {{ forloop.counter }}"
       >
 
-        <img
-          src="{{ b.image.url }}"
-          alt="{% if b.title %}{{ b.title }}{% else %}Banner promocional{% endif %}"
-          loading="lazy"
-        />
+        <picture>
 
-        <div class="banner-carousel__overlay"></div>
+            {% if b.mobile_image %}
+                <source
+                    media="(max-width: 768px)"
+                    srcset="{{ b.mobile_image.url }}">
+            {% endif %}
 
-        {% if b.title %}
-          <div class="banner-carousel__text">{{ b.title }}</div>
+            {% if b.desktop_image %}
+                <img
+                    src="{{ b.desktop_image.url }}"
+                    alt="{% if b.headline %}{{ b.headline }}{% else %}Banner promocional{% endif %}"
+                    loading="lazy">
+            {% endif %}
+
+        </picture>
+
+        {% if b.headline %}
+            <div class="banner-carousel__text">
+                {{ b.headline }}
+            </div>
         {% endif %}
 
-      </a>
+       </a>
     {% endfor %}
+      
   </div>
 
  

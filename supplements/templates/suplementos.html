@@ -19,8 +19,9 @@
 <!-- ================================================================
      STYLES
      ================================================================ -->
-
 <link rel="stylesheet" href="{% static 'css/suplementos.css' %}">
+<link rel="stylesheet" href="{% static 'css/campaign_banner.css' %}">
+
 <!-- ================================================================
      § HERO
      ================================================================ -->
@@ -28,14 +29,23 @@
   <div class="banner">
     {% if banners %}
       {% for banner in banners %}
+    <picture>
+
+        {% if banner.mobile_image %}
+            <source
+                media="(max-width: 768px)"
+                srcset="{{ banner.mobile_image.url }}">
+        {% endif %}
+
         <img
-          src="{{ banner.image.url }}"
-          class="banner__slide{% if forloop.first %} is-active{% endif %}"
-          loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
-          alt="Banner {{ forloop.counter }}"
-          draggable="false"
-        >
-      {% endfor %}
+            src="{% if banner.desktop_image %}{{ banner.desktop_image.url }}{% else %}{{ banner.image.url }}{% endif %}"
+            class="banner__slide{% if forloop.first %} is-active{% endif %}"
+            loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+            alt="Banner {{ forloop.counter }}"
+            draggable="false">
+
+    </picture>
+   {% endfor %} 
       <div class="banner__dots" role="tablist" aria-label="Navegar banners">
         {% for banner in banners %}
           <button
@@ -73,9 +83,9 @@
   </form>
 </div>
 
-<link rel="stylesheet" href="{% static 'css/campaign_banner.css' %}">
-
-{% include "campaign_banner.html" %}
+<div class="campaign-banner-wrapper">
+    {% include "campaign_banner.html" %}
+</div>
 
 <!-- ================================================================
      § CATEGORIAS
@@ -219,50 +229,52 @@
 
           <!-- ── rodapé ── -->
           <div class="card__foot">
-         
-          <div class="card__price">
+
+            <div class="card__price">
 
               {% if supplement.discount.has_discount %}
 
-                  <div class="card__price-old">
-                      <span class="card__price-currency">R$</span>
-                      <span class="card__price-value">
-                          {{ supplement.discount.original_price }}
-                      </span>
-                  </div>
-
-                  <span class="card__discount-badge">
-                      {{ supplement.discount.percentage }}% OFF
+                <div class="card__price-old">
+                  <span class="card__price-currency">R$</span>
+                  <span class="card__price-value">
+                    {{ supplement.discount.original_price }}
                   </span>
+                </div>
 
-                  <div class="card__price-new">
-                      <span class="card__price-currency">R$</span>
-                      <span class="card__price-value">
-                          {{ supplement.discount.discount_price }}
-                      </span>
-                  </div>
+                <span class="card__discount-badge">
+                  {{ supplement.discount.percentage|floatformat:0 }}% OFF
+                </span>
+
+                <div class="card__price-new">
+                  <span class="card__price-currency">R$</span>
+                  <span class="card__price-value">
+                    {{ supplement.discount.discount_price }}
+                  </span>
+                </div>
 
               {% else %}
 
-                  <div class="card__price-normal">
-                      <span class="card__price-currency">R$</span>
-                      <span class="card__price-value">
-                          {{ supplement.get_price }}
-                      </span>
-                  </div>
+                <div class="card__price-normal">
+                  <span class="card__price-currency">R$</span>
+                  <span class="card__price-value">
+                    {{ supplement.get_price }}
+                  </span>
+                </div>
 
               {% endif %}
 
-          </div>
-          <a
-                  href="{% url 'supplement_detail' supplement.id %}"
-                  class="card__cta"
-                  onclick="event.stopPropagation()"
-                  aria-label="Ver detalhes de {{ supplement.model }}"
-              >
-                  Ver detalhes
-                  <i class="card__cta-arrow" aria-hidden="true">→</i>
-              </a>
+            </div>
+
+            <a
+                href="{% url 'supplement_detail' supplement.id %}"
+                class="card__cta"
+                onclick="event.stopPropagation()"
+                aria-label="Ver detalhes de {{ supplement.model }}"
+            >
+                Ver detalhes
+                <i class="card__cta-arrow" aria-hidden="true">→</i>
+            </a>
+            
 
           </div>
 

@@ -1,144 +1,188 @@
+/* ----------------------------------------------------------------
+   CAMPAIGN BANNER — tokens fluidos
+   ----------------------------------------------------------------
+   MELHORIA: os valores fixos de padding, fontes e tamanhos do banner
+   foram convertidos em tokens com clamp(), permitindo que o componente
+   escale suavemente entre celulares pequenos e monitores grandes sem
+   precisar de um breakpoint para cada largura de tela.
+   ---------------------------------------------------------------- */
+.campaign-card {
+  --cc-px:        clamp(14px, 4vw, 24px);
+  --cc-py:        clamp(14px, 3vw, 18px);
+  --cc-gap:       clamp(12px, 3vw, 20px);
+  --cc-icon:      clamp(28px, 6vw, 38px);
+  --cc-title-fs:  clamp(11px, 2vw, 14px);
+  --cc-discount-fs: clamp(22px, 4.5vw, 30px);
+  --cc-text-fs:   clamp(13px, 2.2vw, 15px);
+  --cc-count-fs:  clamp(19px, 3.5vw, 24px);
+}
 
-
+/* ----------------------------------------------------------------
+   § CARD
+   ---------------------------------------------------------------- */
 .campaign-card{
+    width: 100%;
+    max-width: 780px;
 
-    max-width:900px;
+    margin: clamp(16px, 4vw, 25px) auto
+            clamp(24px, 5vw, 35px);
 
-    margin:25px auto 35px;
+    padding: var(--cc-py) var(--cc-px);
 
-    background:#171717;
+    border: 1px solid rgba(255,92,0,.35);
+    border-radius: 18px;
 
-    border:1px solid rgba(255,92,0,.35);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--cc-gap);
 
-    border-radius:18px;
-
-    padding:18px 24px;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    gap:20px;
-
-    box-shadow:0 10px 35px rgba(0,0,0,.35);
-
-    overflow:hidden;
-
-    position:relative;
+    background: #171717;
+    box-shadow: 0 10px 35px rgba(0,0,0,.35);
+    overflow: hidden;
+    position: relative;
 }
 
-.campaign-card::before{
-
-    content:"";
-
-    position:absolute;
-
-    left:0;
-
-    top:0;
-
-    width:5px;
-
-    height:100%;
-
-    background:#ff5c00;
-
+.campaign-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 100%;
+  background: #ff5c00;
 }
 
-.campaign-card__icon{
-
-    font-size:38px;
-
-    animation:firePulse 1.5s infinite;
+/* ----------------------------------------------------------------
+   § ÍCONE
+   ---------------------------------------------------------------- */
+.campaign-card__icon {
+  /* MELHORIA: tamanho fluido via --cc-icon substitui 38px fixo,
+     evitando que o ícone fique desproporcional em telas pequenas. */
+  font-size: var(--cc-icon);
+  flex-shrink: 0;
+  animation: firePulse 1.5s infinite;
 }
 
-.campaign-card__content{
-
-    display:flex;
-
-    flex-direction:column;
-
-    flex:1;
+/* ----------------------------------------------------------------
+   § CONTEÚDO (título / desconto / texto)
+   ---------------------------------------------------------------- */
+.campaign-card__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* MELHORIA: min-width evita que o texto force overflow horizontal
+     quando o card estiver com pouco espaço disponível, permitindo
+     que o flex-wrap do .campaign-card funcione corretamente. */
+  min-width: min(180px, 100%);
 }
 
-.campaign-card__title{
-
-    color:#ff5c00;
-
-    font-size:14px;
-
-    text-transform:uppercase;
-
-    font-weight:bold;
-
-    letter-spacing:2px;
+.campaign-card__title {
+  color: #ff5c00;
+  /* MELHORIA: font-size fluido via --cc-title-fs substitui 14px fixo. */
+  font-size: var(--cc-title-fs);
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 2px;
 }
 
-.campaign-card__discount{
-
-    font-size:30px;
-
-    font-weight:700;
-
-    color:white;
-
-    margin-top:4px;
+.campaign-card__discount {
+  /* MELHORIA: font-size fluido via --cc-discount-fs substitui 30px
+     fixo — a maior fonte do card, era a mais crítica para overflow
+     em celulares pequenos. */
+  font-size: var(--cc-discount-fs);
+  font-weight: 700;
+  color: white;
+  margin-top: 4px;
+  /* MELHORIA: quebra de linha segura para descontos com texto longo,
+     sem depender de white-space:nowrap. */
+  word-break: break-word;
 }
 
-.campaign-card__text{
-
-    color:#cfcfcf;
-
-    margin-top:5px;
-
-    font-size:15px;
+.campaign-card__text {
+  color: #cfcfcf;
+  margin-top: 5px;
+  /* MELHORIA: font-size fluido via --cc-text-fs substitui 15px fixo. */
+  font-size: var(--cc-text-fs);
 }
 
-.campaign-card__countdown{
-
-    text-align:center;
-
-    min-width:150px;
+/* ----------------------------------------------------------------
+   § CONTADOR REGRESSIVO
+   ---------------------------------------------------------------- */
+.campaign-card__countdown {
+  text-align: center;
+  /* MELHORIA: min-width fluido substitui 150px fixo, permitindo que
+     o bloco encolha em telas muito estreitas em vez de forçar
+     overflow horizontal no card. */
+  min-width: clamp(110px, 30vw, 150px);
+  flex-shrink: 0;
+  /* MELHORIA: garante boa área de toque caso o contador receba
+     interação futura (ex: link/botão), sem alterar a aparência atual. */
+  padding: 4px 0;
 }
 
-.campaign-card__countdown small{
-
-    color:#999;
-
-    display:block;
-
-    margin-bottom:6px;
+.campaign-card__countdown small {
+  color: #999;
+  display: block;
+  margin-bottom: 6px;
+  font-size: clamp(11px, 1.8vw, 13px);
 }
 
-#campaign-countdown{
-
-    font-size:24px;
-
-    color:#ff5c00;
-
-    font-weight:bold;
+#campaign-countdown {
+  /* MELHORIA: font-size fluido via --cc-count-fs substitui 24px fixo. */
+  font-size: var(--cc-count-fs);
+  color: #ff5c00;
+  font-weight: bold;
 }
 
-@keyframes firePulse{
+/* ----------------------------------------------------------------
+   § RESPONSIVE
+   ----------------------------------------------------------------
+   Única mudança estrutural real: em telas muito estreitas, a linha
+   horizontal (ícone + conteúdo + contador) vira empilhada, pois não
+   há CSS fluido capaz de manter 3 blocos lado a lado com boa
+   legibilidade em ~320–380px. Esse é o único ponto que exige uma
+   media query — o restante do componente já é 100% fluido.
+   ---------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .campaign-card {
+    flex-direction: column;
+    text-align: center;
+  }
 
-    0%{
+  .campaign-card__content {
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+  }
 
-        transform:scale(1);
+  .campaign-card__countdown {
+    width: 100%;
+    min-width: 0;
+  }
+}
 
-    }
+/* ----------------------------------------------------------------
+   § ACESSIBILIDADE
+   ---------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .campaign-card__icon {
+    animation-duration: .01ms;
+    animation-iteration-count: 1;
+  }
+}
 
-    50%{
+@keyframes firePulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
 
-        transform:scale(1.12);
-
-    }
-
-    100%{
-
-        transform:scale(1);
-
-    }
-
+.campaign-banner-wrapper{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-inline: clamp(16px, 4vw, 32px);
+    box-sizing: border-box;
 }
