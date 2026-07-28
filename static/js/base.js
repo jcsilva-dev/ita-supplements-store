@@ -79,7 +79,18 @@
   menuToggle.addEventListener("click", toggleMenu);
 
   // Fechar ao clicar no overlay (fora do menu)
-  overlay.addEventListener("click", closeMenu);
+  document.addEventListener("click", function (event) {
+
+    if (!isOpen) return;
+
+    const clickedInsideMenu = nav.contains(event.target);
+    const clickedToggle = menuToggle.contains(event.target);
+
+    if (!clickedInsideMenu && !clickedToggle) {
+        closeMenu();
+    }
+
+  });
 
   // Fechar ao clicar em qualquer link dentro do menu
   nav.querySelectorAll("a").forEach(function (link) {
