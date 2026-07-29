@@ -3,72 +3,134 @@
 {% block content %}
 
 <style>
+   /* ===========================
+   REGISTER
+   Mobile First
+   =========================== */
+
+.register-container{
+    width:min(100% - 2rem, 420px);
+    margin:clamp(2rem, 6vw, 4rem) auto;
+    padding:clamp(1.25rem, 3vw, 2rem);
+
+    background:#fff;
+    border-radius:12px;
+
+    border-top:6px solid var(--color-primary);
+
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+
+.register-container h2{
+    text-align:center;
+    color:var(--text-body);
+    margin-bottom:clamp(1.25rem,2vw,1.8rem);
+    font-size:clamp(1.4rem,2vw,1.8rem);
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    gap:.4rem;
+    margin-bottom:1rem;
+}
+
+label{
+    font-weight:600;
+    color:var(--text-body);
+}
+
+input{
+    width:100%;
+    padding:.85rem 1rem;
+
+    border:1px solid #d8d8d8;
+    border-radius:8px;
+
+    font-size:1rem;
+
+    transition:
+        border-color .2s,
+        box-shadow .2s;
+}
+
+input:focus{
+    outline:none;
+    border-color:var(--color-primary);
+    box-shadow:0 0 0 3px rgba(243,113,7,.15);
+}
+
+.errorlist{
+    list-style:none;
+    color:var(--color-danger);
+    font-size:.85rem;
+    margin-bottom:.4rem;
+}
+
+.btn-submit{
+    width:100%;
+
+    padding:.9rem 1rem;
+
+    border:none;
+    border-radius:8px;
+
+    background:var(--color-primary);
+    color:#fff;
+
+    font-size:1rem;
+    font-weight:700;
+
+    transition:
+        background .25s,
+        transform .2s;
+}
+
+.btn-submit:hover{
+    background:var(--color-primary-hover);
+}
+
+.btn-submit:active{
+    transform:scale(.98);
+}
+
+/* ===========================
+   Mensagens
+   =========================== */
+
+.messages-container{
+    display:flex;
+    flex-direction:column;
+    gap:.75rem;
+    margin-bottom:1.25rem;
+}
+
+.messages__item{
+    padding:.9rem 1rem;
+    border-radius:8px;
+    border-left:4px solid;
+    font-size:.95rem;
+}
+
+.messages__item--success{
+    background:#edfdf2;
+    border-color:#22c55e;
+    color:#166534;
+}
+
+.messages__item--warning{
+    background:#fff8e6;
+    border-color:#f59e0b;
+    color:#92400e;
+}
+
+.messages__item--error{
+    background:#fef2f2;
+    border-color:#ef4444;
+    color:#991b1b;
+} 
+
     
-
-    .register-container {
-        max-width: 400px;             
-        margin: 50px auto;            
-        padding: 30px;
-        background-color: #ffffff;     
-        border-radius: 10px;            
-        box-shadow: 0 0 15px rgba(0,0,0,0.15); 
-        border-top: 6px solid #ff7a00;  
-        font-family: Arial, sans-serif;
-    }
-
-    .register-container h2 {
-        text-align: center;
-        color: #000000;                 
-        margin-bottom: 25px;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 5px;
-        color: #000000;                 
-        font-weight: bold;
-    }
-
-    input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 14px;
-    }
-
-    input:focus {
-        outline: none;
-        border-color: #ff7a00;         
-        box-shadow: 0 0 5px rgba(255,122,0,0.4);
-    }
-
-    .errorlist {
-        color: red;
-        font-size: 13px;
-        margin-bottom: 5px;
-    }
-
-    .btn-submit {
-        width: 100%;
-        padding: 12px;
-        background-color: #ff7a00;     
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-    .btn-submit:hover {
-        background-color: #e66d00;     
-    }
 </style>
 
 <div class="register-container">
@@ -100,7 +162,18 @@
             <input type="submit" value="Cadastrar" class="btn-submit">
         </div>
 
-    </form>
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="messages__item messages__item--{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            </form>
 
 </div>
 

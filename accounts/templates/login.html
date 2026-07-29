@@ -3,66 +3,145 @@
 {% block content %}
 
 <style>
-    /* =========================
-       CONTAINER DO LOGIN
-       ========================= */
+    /* ===========================
+   LOGIN
+   Mobile First
+   =========================== */
 
-    .login-container {
-        max-width: 350px;
-        margin: 60px auto;
-        padding: 25px;
-        background-color: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 0 12px rgba(0,0,0,0.15);
-        border-top: 5px solid #ff7a00; /* Laranja */
-        font-family: Arial, sans-serif;
-    }
+.login-container{
+    width:min(100% - 2rem, 420px);
+    margin:clamp(2rem, 6vw, 4rem) auto;
+    padding:clamp(1.25rem, 3vw, 2rem);
 
-    .login-container h2 {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #000000;
-    }
+    background:#fff;
+    border-radius:12px;
 
-    table {
-        width: 100%;
-    }
+    border-top:6px solid var(--color-primary);
 
-    td {
-        padding: 8px 0;
-    }
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
 
-    input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 14px;
-    }
+.login-container h2{
+    text-align:center;
+    margin-bottom:clamp(1.25rem,2vw,1.8rem);
 
-    input:focus {
-        outline: none;
-        border-color: #ff7a00;
-        box-shadow: 0 0 4px rgba(255,122,0,0.4);
-    }
+    color:var(--text-body);
+    font-size:clamp(1.4rem,2vw,1.8rem);
+}
 
-    .btn-login {
-        margin-top: 15px;
-        width: 100%;
-        padding: 12px;
-        background-color: #ff7a00;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 15px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
-    }
+table{
+    width:100%;
+    border-collapse:collapse;
+}
 
-    .btn-login:hover {
-        background-color: #e66d00;
-    }
+td{
+    padding:.6rem 0;
+}
+
+label{
+    display:block;
+    margin-bottom:.35rem;
+
+    font-weight:600;
+    color:var(--text-body);
+}
+
+input{
+    width:100%;
+
+    padding:.85rem 1rem;
+
+    border:1px solid #d8d8d8;
+    border-radius:8px;
+
+    font-size:1rem;
+
+    transition:
+        border-color .2s,
+        box-shadow .2s;
+}
+
+input:focus{
+    outline:none;
+    border-color:var(--color-primary);
+    box-shadow:0 0 0 3px rgba(243,113,7,.15);
+}
+
+.btn-login{
+    width:100%;
+    margin-top:1rem;
+
+    padding:.9rem 1rem;
+
+    border:none;
+    border-radius:8px;
+
+    background:var(--color-primary);
+    color:var(--text-inverse-strong);
+
+    font-size:1rem;
+    font-weight:700;
+
+    transition:
+        background .25s,
+        transform .2s;
+}
+
+.btn-login:hover{
+    background:var(--color-primary-hover);
+}
+
+.btn-login:active{
+    transform:scale(.98);
+}
+
+/* ===========================
+   Erros do AuthenticationForm
+   =========================== */
+
+.errorlist{
+    list-style:none;
+    margin-bottom:.4rem;
+
+    color:var(--color-danger);
+    font-size:.85rem;
+}
+
+/* ===========================
+   Mensagens do Django
+   =========================== */
+
+.messages-container{
+    display:flex;
+    flex-direction:column;
+    gap:.75rem;
+    margin-bottom:1.25rem;
+}
+
+.messages__item{
+    padding:.9rem 1rem;
+    border-radius:8px;
+    border-left:4px solid;
+    font-size:.95rem;
+}
+
+.messages__item--success{
+    background:#edfdf2;
+    border-color:#22c55e;
+    color:#166534;
+}
+
+.messages__item--warning{
+    background:#fff8e6;
+    border-color:#f59e0b;
+    color:#92400e;
+}
+
+.messages__item--error{
+    background:#fef2f2;
+    border-color:#ef4444;
+    color:#991b1b;
+}
 </style>
 
 <div class="login-container">
@@ -77,6 +156,17 @@
         </table>
 
         <input type="submit" value="Entrar" class="btn-login">
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="messages__item messages__item--{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post">
     </form>
 
 </div>
