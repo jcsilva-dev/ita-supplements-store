@@ -39,11 +39,14 @@ def image_supplement_pre_save(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=HomeBanner)
 def image_homebanner_post_delete(sender, instance, **kwargs):
-    handle_image_cleanup(instance, sender, "home_banner/desktop_image", action="delete")
+    handle_image_cleanup(instance, sender, "desktop_image", action="delete")
+    handle_image_cleanup(instance, sender, "mobile_image", action="delete")
+
 
 @receiver(pre_save, sender=HomeBanner)
 def image_homebanner_pre_save(sender, instance, **kwargs):
-    handle_image_cleanup(instance, sender, "home_banner/desktop_image", action="update")
+    handle_image_cleanup(instance, sender, "desktop_image", action="update")
+    handle_image_cleanup(instance, sender, "mobile_image", action="update")    
 
 @receiver(post_delete, sender=FeedbackImage)
 def image_feedback_pre_delete(sender, instance, **kwargs):
